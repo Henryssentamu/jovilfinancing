@@ -99,10 +99,271 @@
         </div>
     </div>
 
+    <!-- side bar -->
+    <div class="container d-flex flex-row justify-content-left align-item-center mt-4">
+        <div class="row">
+            <div class="col">
+                <div class="card shadow" >
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#payment"> make a payment</button>
+                    <div class="modal fade" id="payment">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>
+                                        select category of payment
+                                    </div>
+                                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#payment"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <a class="btn btn-primary" href="#">credit</a>
+                                    <a class="btn btn-primary" href="#"> saving</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="card shadow" >
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#clientCenter">Client Center</button>
+                    <div class="modal fade" id="clientCenter">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>
+                                        client profiles
+                                    </div>
+                                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#clientCenter"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <a class="btn btn-primary" href="#">clients</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="card shadow-sm">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#viewclients">
+                        Quick View
+                    </button>
+                    <div class="modal" id="viewclients">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div>select or search client</div>
+                                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#viewclients"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="container">
+                                        <div class="card">
+                                            <form>
+                                                <!-- <div class="form">
+                                                    <label class="form-label"> Search Client</label>
+                                                    <div class="input-group">
+                                                        <input class="form-control" type="text" placeholder="Enter Name" id="searchclient">
+                                                        <button class="btn btn-primary">search</button>
+                                                    </div>
+                                                    
+                                                </div> -->
+                                                <div class="form-group">
+                                                    <label for="clientSelect" class="form-label">list of clients</label>
+                                                    <select class="form-select" id="clientSelect" name="clientSelect">
+                                                        <option value=""> Select client</option>
+                                                        <option value="james" data-client-id="1">james k</option>
+                                                        <option value="joan" data-client-id="2">joan r</option>
+                                                        <option value="ruth" data-client-id="3">ruth s</option>
+                                                    </select>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- client details modal -->
+                    <div class="modal " id="clientProfile">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-headr">
+                                    closs page
+                                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#clientProfile"></button>
+                                </div>
+                                <div class="modal-body" id="clientDetails">
+                                    <!-- client content to be generated by js -->
+    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>  
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            let selectElement = document.getElementById("clientSelect")
+            selectElement.addEventListener("change",function(){
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                const clientName = selectedOption.value
+                var clienttId = selectedOption.getAttribute("data-client-id")
+
+                if(clientName){
+                    if(clienttId){
+                        // here we will send client id to server to fetch client details
+                        // and then update the client prifile section
+                        var modalBody = document.getElementById("clientDetails")
+                        modalBody.innerHTML = `
+                            <div class= "container">
+                                <div class="row row-cols-2 g-3">
+                                    <div class="col">
+                                        <div class="card shadow-sm" >
+                                            <button class="btn text-info " data-bs-target="#clientinfo" data-bs-toggle="modal">
+                                                PERSONAL INFO    
+                                            </button>
+                                            <div class="modal" id="clientinfo">
+                                                <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            Client: ${clientName}
+                                                            <button class=" btn-close" data-bs-dismiss="modal" data-bs-target="#clientinfo"></button>    
+                                                        </div>
+                                                        <div class="modal-body"> 
+                                                            <div> DOB: 12/3/1393</div>
+                                                            <div> GENDER: male</div>
+                                                            <div> CONTACT: 078888888</div>
+                                                            <div> ADDRES: wampewo</div>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                              
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col">
+                                        <div class="card shadow-sm" >
+                                            <button class="btn text-info " data-bs-target="#currentLoan" data-bs-toggle="modal">
+                                                CURRENT LOAN  
+                                            </button>
+                                            <div class="modal" id="currentLoan">
+                                                <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            LOAN TYPE: Bussines
+                                                            <button class=" btn-close" data-bs-dismiss="modal" data-bs-target="#currentLoan"></button>    
+                                                        </div>
+                                                        <div class="modal-body"> 
+                                                            <div> Loan Amount: Ugx 200,000</div>
+                                                            <div> Interest Rate: 20%</div>
+                                                            <div> Total: Ugx 240,000</div>
+                                                            <div> Payment schedule: daily </div>
+                                                            <div> Loan Period: 30 days</div>
+                                                            <div class=" text-success"> Balance: Ugx 59000</div>
+                                                            
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                              
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <div class="card shadow-sm" >
+                                            <button class="btn text-info " data-bs-target="#creditHistory" data-bs-toggle="modal">
+                                                CREDIT HISTORY  
+                                            </button>
+                                            <div class="modal" id="creditHistory">
+                                                <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            CREDIT SCORES: 67%
+                                                            <button class=" btn-close" data-bs-dismiss="modal" data-bs-target="#creditHistory"></button>    
+                                                        </div>
+                                                        <div class="modal-body"> 
+                                                            <div> Current loan: 90% </div>
+                                                            <div> loan 2: 70%</div>
+                                                            <div> loan 1: 89%</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                              
+                                        </div>
+                                    </div>
+
+                                    <div class="col">
+                                        <div class="card shadow-sm" >
+                                            <button class="btn text-info " data-bs-target="#savingInvestments" data-bs-toggle="modal">
+                                                SAVINGS 
+                                            </button>
+                                            <div class="modal" id="savingInvestments">
+                                                <div class="modal-dialog  modal-dialog-centered modal-dialog-scrollable">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            annual interest 3%
+                                                            <button class=" btn-close" data-bs-dismiss="modal" data-bs-target="#savingInvestments"></button>    
+                                                        </div>
+                                                        <div class="modal-body"> 
+                                                            <div class=" text-success"> saving: Ugx 59000</div>
+                                                            
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                
+                                            </div>
+                                              
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                        `;
+
+                        const displayHtml = new bootstrap.Modal(document.getElementById('clientProfile'));
+                        displayHtml.show();
+                    }
+                }
+            })
+
+        })
+    </script> 
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 <!-- <!DOCTYPE html>
 <html lang="en">
