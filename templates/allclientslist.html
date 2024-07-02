@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>clients Onhold</title>
+    <title> all clients list</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <style>
         .table-wraper{
@@ -44,8 +44,10 @@
                         statistics
                     </div>
                     <div class="card-body">
+                        
                         <div> <strong>No. of clients</strong> <span> 23</span> </div>
-                        <!-- <div> <strong>Total portifolio </strong> <span> 5000000</span> </div> -->
+                        <div> <strong> No. of Activate clients: </strong> <span> 50</span> </div>
+                        
                     </div>
                 </div>
             </div>
@@ -55,8 +57,8 @@
                         statistics
                     </div>
                     <div class="card-body">
-                        <div> <strong>Penalties</strong> <span> 230000</span> </div>
-                        <div> <strong>Overdue</strong> <span> 500000</span> </div>
+                        <div> <strong>Males</strong> <span> 23</span> </div>
+                        <div> <strong>Women</strong> <span> 50</span> </div>
                     </div>
                 </div>
             </div>
@@ -77,15 +79,14 @@
                     </div>
                     <div class="card-body">
                         <div class="table-responsive-lg  table-wraper ">
-                            <table class="table table-fixed-header table-striped ">
+                            <table class="table table-fixed-header table-striped">
                                 <thead>
                                     <tr>
                                         <th>No.</th>
                                         <th>Name</th>
                                         <th>Branch</th>
                                         <th>Gender</th>
-                                        <!-- <th>overdue</th>
-                                        <th>Penalties</th>
+                                        <!-- <th>portifolio</th>
                                         <th>Contact</th> -->
                                     </tr>
                                 </thead>
@@ -98,30 +99,27 @@
                                         </td>
                                         <td> Kalerwe-Wandegeya</td>
                                         <td> Male</td>
-                                        <!-- <td>3000</td>
-                                        <td>300</td>
+                                        <!-- <td>300000</td>
                                         <td>0755981066</td> -->
                                     </tr>
                                     <tr>
                                         <td>2</td>
                                         <td>
-                                            <a href="{{url_for('clientProfile')}}">kollo james</a>
+                                            <a href="{{url_for('clientProfile')}}">Joan Namukisa</a>
                                         </td>
-                                        <td> Kalerwe-Wandegeya</td>
-                                        <td> Male</td>
-                                        <!-- <td>3000</td>
-                                        <td>300</td>
+                                        <td>Kampala-natete</td>
+                                        <td> Female</td>
+                                        <!-- <td>100000</td>
                                         <td>0755981066</td> -->
                                     </tr>
                                     <tr>
                                         <td>3</td>
                                         <td>
-                                            <a href="{{url_for('clientProfile')}}">kollo james</a>
+                                            <a href="{{url_for('clientProfile')}}">Luwesi Ema</a>
                                         </td>
                                         <td> Kalerwe-Wandegeya</td>
                                         <td> Male</td>
-                                        <!-- <td>3000</td>
-                                        <td>300</td>
+                                        <!-- <td>200000</td>
                                         <td>0755981066</td> -->
                                     </tr>
                                 </tbody>
