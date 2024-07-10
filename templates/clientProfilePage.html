@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>client profile</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css">
+  <!-- bootsrap -->
+  <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+  
   <style>
     .table-wrapper {
         height: 200px; /* Adjust the height as needed */
@@ -235,7 +236,7 @@
 						Guarantor
 					</div>
 					<div class="card-body">
-						<button class="btn btn-secondary">view Details</button>
+						<a href="{{url_for('guranteer')}}" class="btn btn-secondary">view Details</a>
 					</div>
 				</div>
 			</div>
@@ -244,7 +245,7 @@
 			<div class="col">
 				<div class="card">
 					<div class="card-header  bg-dark  text-white">
-						Savings
+						Loan Securities & Savings
 					</div>
 					<div class="card-body">
 						<button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewsavingDetails" >view Details</button>
@@ -252,12 +253,12 @@
 							<div class="modal-dialog modal-dialog-centered ">
 								<div class="modal-content">
 									<div class="modal-header">
-										select saving category
+										select category
 										<button class="btn-close" data-bs-dismiss="modal" modal-bs-target="#viewsavingDetails"></button>
 									</div>
 									<div class="modal-body">
-										<a href="#" class="btn btn-primary">current</a>
-										<a href="#" class="btn btn-secondary">old</a>
+										<a href="{{url_for('savings')}}" class="btn btn-primary">Savings</a>
+										<a href="{{url_for('loanSecurities')}}" class="btn btn-secondary"> Loan Securities</a>
 									</div>
 								</div>
 							</div>
@@ -269,177 +270,10 @@
 	</div>
 
 
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  
+  
 </body>
 </html>
 
-
-
-
-
-
-
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Microfinance Client Profile</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Arial', sans-serif;
-    }
-    .card {
-      border-radius: 15px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .card-header {
-      background-color: #007bff;
-      color: white;
-      border-radius: 15px 15px 0 0;
-      padding: 1rem;
-    }
-    .card-header h2 {
-      margin: 0;
-    }
-    .profile-picture {
-      width: 150px;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 50%;
-      border: 3px solid #007bff;
-    }
-    .section-title {
-      margin-top: 2rem;
-    }
-    .info-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .info-item i {
-      font-size: 1.5rem;
-      color: #007bff;
-      margin-right: 0.5rem;
-    }
-    .info-item span {
-      font-weight: bold;
-    }
-    .icon-text {
-      display: inline-flex;
-      align-items: center;
-    }
-    .icon-text i {
-      margin-right: 0.3rem;
-    }
-    .subsection {
-      border: 1px solid #e0e0e0;
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      background-color: #ffffff;
-    }
-  </style>
-</head>
-<body>
-  <nav class="navbar  navbar-expand-md navbar-dark bg-dark">
-    <div class="navbar-brand">
-      Name: <span>John Teo</span>
-      
-    </div>
-    <ul class="navbar-nav">
-         <li class="nav-item">
-            credit: <span id="creide-amount">4444</span>
-        </li>
-        <li class="nav-item">
-          Loan Securiy: <span id="loan-security">4444</span>
-      </li>
-    </ul>
-  </nav>
-  <div class="container mt-5">
-    <h1 class="text-center mb-4">Client Profile</h1>
-
-    <!-- Personal Information Section --
-    <div class="card mb-4">
-      <div class="card-header">
-        <h2>Personal Information</h2>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-4 text-center">
-            <img src="profile-picture.jpg" class="profile-picture mb-3" alt="Profile Picture">
-          </div>
-          <div class="col-md-8">
-            <h3>John Doe</h3>
-            <div class="info-item"><i class="bi bi-telephone"></i><span>Contact:</span> (123) 456-7890 | john.doe@example.com</div>
-            <div class="info-item"><i class="bi bi-calendar-date"></i><span>Age:</span> 44</div>
-            <div class="info-item"><i class="bi bi-house"></i><span>Residence:</span> 123 Main St, Springfield, USA</div>
-            <div class="info-item"><i class="bi bi-geo-alt"></i><span>Working Area:</span> Springfield Downtown</div>
-            <div class="info-item"><i class="bi bi-briefcase"></i><span>Occupation:</span> Grocery Store Owner</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Credit Details Section --
-    <div class="container">
-        <div class="row">
-            credit details
-        </div>
-            <!-- Current Loan Details --
-        <div class="row ">
-            <div class="col">
-                <div class="card">
-                    <h3 class="section-title">Current Loan Details</h3>
-                    <div class="info-item"><i class="bi bi-currency-dollar"></i><span>Loan Amount:</span> $5000</div>
-                    <div class="info-item"><i class="bi bi-percent"></i><span>Interest Rate:</span> 5%</div>
-                    <div class="info-item"><i class="bi bi-calendar2-date"></i><span>Disbursement Date:</span> January 1, 2024</div>
-                    <div class="info-item"><i class="bi bi-clock"></i><span>Repayment Schedule:</span> Monthly</div>
-                    <div class="info-item"><i class="bi bi-calendar-check"></i><span>Next Payment Due Date:</span> July 1, 2024</div>
-                  
-                </div>
-            </div>
-            <div class="col">
-                 <!-- Previous Loan Details --
-                 <div class="card">
-                    <h3 class="section-title">Previous Loan Details</h3>
-                    <div class="info-item"><i class="bi bi-clock-history"></i><span>Loan Type:</span> Personal Loan</div>
-                    <div class="info-item"><i class="bi bi-currency-dollar"></i><span>Loan Amount:</span> $2000</div>
-                    <div class="info-item"><i class="bi bi-check-circle"></i><span>Status:</span> Repaid</div>
-                 </div>
-            </div>
-            <div class="col">
-                <!-- Credit Scores --
-                <div class="card">
-                    <h3 class="section-title">Credit Scores</h3>
-                    <div class="info-item"><i class="bi bi-speedometer2"></i><span>Credit Score:</span> 750</div>
-                    <div class="info-item"><i class="bi bi-shield-check"></i><span>Risk Profile:</span> Low Risk</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Savings Section --
-    <div class="card mb-4">
-      <div class="card-header">
-        <h2>Savings</h2>
-      </div>
-      <div class="card-body">
-        <h3 class="section-title">Savings Details</h3>
-        <div class="info-item"><i class="bi bi-piggy-bank"></i><span>Savings Amount:</span> $3000</div>
-        <div class="info-item"><i class="bi bi-currency-dollar"></i><span>Interest on Savings:</span> 3%</div>
-        <div class="info-item"><i class="bi bi-graph-up"></i><span>Projected Amount on Maturity:</span> $3300</div>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.js"></script>
-</body>
-</html> -->

@@ -55,6 +55,18 @@ def clientpaymentDetails():
 def clientOverdueAndPenalties():
     return render_template("clients_overdue_penalties.html")
 
+@app.route("/loanSecurities")
+def loanSecurities():
+    return render_template("loanSecurities.html")
+
+@app.route("/savings")
+def savings():
+    return render_template("savings.html")
+
+@app.route("/guranteer")
+def guranteer():
+    return render_template("guranteerpage.html")
+
 
 
 
