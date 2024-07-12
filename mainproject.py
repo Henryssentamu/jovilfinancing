@@ -18,14 +18,18 @@ def makePayment():
     # not yet created
     return render_template()
 
-@app.route("/recievables")
-def recievables():
-     # not yet created
-    return render_template()
+@app.route("/recievablesCredit")
+def recievablesCredit():
+    return render_template("recievablesCredit.html")
+
+@app.route("/recievablesSavings")
+def recievablesSavings():
+    return render_template("recievablesSavings.html")
+
+
 @app.route("/collectionSheet")
 def collectionSheet():
-     # not yet created
-    return render_template()
+    return render_template("collectionsheet.html")
 
 @app.route("/overdueAndPenalties")
 def overdueAndPenalties():
