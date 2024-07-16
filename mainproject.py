@@ -6,8 +6,13 @@ from enviromentkeys import secret_key
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secret_key
 
+# manager section details bellow
+@app.route("/managrDashboard")
+def managrDashboard():
+    return render_template("managerDashboard.html")
 
 
+# credit officer dashboard section details bellow
 
 @app.route("/crediofficerDashboard")
 def crediofficerDashboard():
@@ -25,6 +30,11 @@ def recievablesCredit():
 @app.route("/recievablesSavings")
 def recievablesSavings():
     return render_template("recievablesSavings.html")
+
+@app.route("/Makepayments")
+def payment():
+    return render_template("payments.html")
+
 
 
 @app.route("/collectionSheet")
@@ -70,6 +80,8 @@ def savings():
 @app.route("/guranteer")
 def guranteer():
     return render_template("guranteerpage.html")
+
+
 
 
 

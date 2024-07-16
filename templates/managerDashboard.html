@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager dashboard</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        .side-bar-fixed{
+            position: fixed;
+            top: 50px;
+            left: 0px;
+            bottom: 0px;
+            width: auto;
+            
+            border-right: 1px solid #e9ecef; /* Border between sidebar and content */
+            overflow-y: auto; /* Allow sidebar to scroll if content is longer */
+            --bs-bg-opacity: 1;
+            background-color: rgb(14 34 56);
+        }
+
+        .subscript {
+            font-size: 16px;
+            margin-top: -10px;
+        }
+     </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 2;">
+        <div class="container">
+            <a href="#" class="navbar-brand">jovil Financing</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#headernav" aria-controls="headernav" aria-label="Expand Navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="headernav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Home</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+    </nav>
+    <div class="container">
+
+        <!-- body container  -->
+        
+        <div class="row side-bar-fixed ">
+            <!-- side bar -->
+            <div class="col p-3 m-3">
+                
+                <div class="row text-white p-3" >manager menu</div>
+                <div class="row">
+                    <ul style="text-align: center;">
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#"> Targets</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#">Branches</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#">Performences</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#">Workers</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary"  href="#">Credit</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#"> Savings</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#"> Expenditures</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#"> Workers</a>
+                        </div>
+                        <div>
+                            <a class="nav-link text-white py-2 btn btn-primary" href="#"> Profits Or Loss</a>
+                        </div>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- rest of the body -->
+
+        <div class="row-8  text-white" style="margin-top: 70px; margin-left: 80px; padding: 5px; height: 100%; width: 100%;">
+            <!-- search and setting section -->
+            <div class="row">
+                <div class="col-6">
+                    <div class="input-group input-group-merge">
+                        <input type="text" placeholder="search" class=" border-0 shadow-sm form-control bg-light-green border-light-green w-250px">
+                        <button type="button" class="btn btn-primary rounded-2 w-30px  p-1 mx-2">Enter</button>
+                    </div>
+                </div>
+                <div class="col" style="margin-left: 350px;">
+                    <div class="card">
+                        <button class="btn btn-info position-relative">
+                            notifications
+                            <span class="badge position-absolute top-0  start-100 translate-middle badge rounded-pill bg-danger"> 4</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="col">
+                    <button class="btn btn-secondary text-green ">
+                        <img src="../static/icons/gear-wide.svg" alt="">
+                        Henry.ss
+                        
+                        
+                    </button>
+                </div>
+                
+            </div>
+            <!-- statistics section -->
+            <div class="row mt-4">
+                <div class="col">
+                    <div class="card shadow-lg p-3 mb-5 bg-body rounded border-0">
+                        <div class="row">
+                            <div class="col" style="margin-left: 25px; align-items: center; justify-content: center;">
+                                <!-- details -->
+                                <div class="row">Portfolio</div>
+                                <div class="row"><strong>30000</strong></div>
+                                <div class="row " style="font-size: small;"  >
+                                    <div class="col-5">Growing from </div>
+                                    <div class="col text-success fw-bold fs-10  mb-n1" style="background-color: #e4f9eebe;;"> 222200 </div>
+                                    <div class="col">by</div>
+                                    <div class="col">20%</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card shadow-lg p-3 bg-body rounded  border-0 mb-5">
+                        <div class="row">
+                            <div class="col" style="margin-left: 25px; align-items: center; justify-content: center;">
+                                <!-- details -->
+                                <div class="row">Principle</div>
+                                <div class="row"><strong>30000</strong></div>
+                                <div class="row" style="font-size: small;">
+                                    <div class="col-5">Growing from </div>
+                                    <div class="col text-success fw-bold fs-10  mb-n1" style="background-color: #e4f9eebe;;"> 222200 </div>
+                                    <div class="col">by</div>
+                                    <div class="col">20%</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card shadow-lg p-3 bg-body rounded border-0 mb-5">
+                        <div class="row">
+                            <div class="col" style="margin-left: 25px; align-items: center; justify-content: center;">
+                                <!-- details -->
+                                <div class="row">Savings</div>
+                                <div class="row"><strong>30000</strong></div>
+                                <div class="row" style="font-size: small;">
+                                    <div class="col-5">Growing from </div>
+                                    <div class="col text-success fw-bold fs-10  mb-n1" style="background-color: #e4f9eebe;;"> 222200 </div>
+                                    <div class="col">by</div>
+                                    <div class="col">20%</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card shadow-lg p-3 mb-5 bg-body rounded border-0">
+                        <div class="row">
+                            <div class="col" style="margin-left: 25px; align-items: center; justify-content: center;">
+                                <!-- details -->
+                                <div class="row">Security</div>
+                                <div class="row"><strong>10000</strong></div>
+                                <div class="row" style="font-size: small;">
+                                    <div class="col-5">Droping  from </div>
+                                    <div class="col text-danger fw-bold fs-10  mb-n1" style="background-color: #f9e9e4be;;"> 422200 </div>
+                                    <div class="col">by</div>
+                                    <div class="col">30%</div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- sub statistics -->
+            <div class="row mt-4">
+                <div class="col" style="margin-left: 20px; justify-content: center; align-items: center;">
+                    <!-- branch -->
+
+                    <div class="row"> branches</div>
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-header">Branch Performences</div>
+                            <div class="card-body">
+                                <div class="table responsive-lg">
+                                    <table class="table  table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>position</th>
+                                                <th>Branch</th>
+                                                <th>%age</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>Wandegeya kalerwe</td>
+                                                <td>90</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col">
+                    <!-- sales -->
+                    <div class="row">Sales</div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="card">
+                                <div class="card-header">Credit</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive-lg">
+                                            <table class="table align-middle  table-edge table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No.Loans</th>
+                                                        <th>New Accounts</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>200</td>
+                                                        <td>98</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="card">
+                                <div class="card-header">Savings</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="table-responsive-lg">
+                                            <table class="table table-hover table-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No. savers</th>
+                                                        <th> New Accounts</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>200</td>
+                                                        <td>98</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- row of clients with biggest portifolio -->
+            <div class="row mt-4 text-black height-100% width-100%">
+                <!-- <div class="col ">
+                    <div class="card " style="min-height: 200px;">
+                        <div class="row " style="margin-left: 15px;">
+                           <div class="col-8">
+                                <div class="row" style="font-size: 11px; margin-left: 70px; padding: 10px;">Total Number of Clients</div>
+                                <div class="row" style="font-size: 60px;">333333333345</div>
+                                <-- <div class="row" style="font-size: 10px; margin: 0px 50px; text-align: center;"> Number growing since february   2024 </div> --
+                                <div class="row" style="margin-left: 500px; margin-top: -40px;"> 334444: credit</div>
+                                <div class="row" style="margin-left: 700px; margin-top: -20px;"> 334444: savings</div>
+                           </div>
+                           
+                        </div>
+                    </div>
+                    </div>
+                </div> -->
+                <div class="col">
+                    <div class="card p-3" style="min-height: 200px;">
+                        <div class="row">
+                            <div class="col-12 text-center" style="font-size: 11px;">Total Number of Accounts</div>
+                            <div class="col-12 text-center fw-bolder" style="font-size: 60px;">
+                                333333333345
+                                <div class="subscript d-flex justify-content-center">
+                                    <div class="mx-2 " style="color: darkgreen;">334444: Credit</div>
+                                    <div class="mx-2 " style="color: rgb(210, 138, 3);">334444: Savings</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+        </div>
+       
+    </div>
+    
+
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+</body>
+</html>

@@ -11,7 +11,7 @@
     
 </head>
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark p-3" style="position: fixed; left: 0px; right: 0px; top: 0px; z-index: 200;">
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark p-3" style="position: fixed; left: 0px; right: 0px; top: 0px; z-index: 2;">
         <div class="container">
             <a href="#" class="navbar-brand">
                 jovilFinancing
@@ -23,7 +23,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#logoutmodal">setting</button>
-                        <div class="modal  fade" id="logoutmodal">
+                        <!-- <div class="modal  fade" id="logoutmodal" style="z-index: 1000;" >
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">You'r about to logout
@@ -34,7 +34,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- <a href="#" class="nav-link"> settings</a> -->
                     </li>
                     <li class="nav-item">
@@ -48,6 +48,19 @@
         </div>
 
     </nav>
+        <!-- logout modal dialog -->
+    <div class="modal  fade" id="logoutmodal" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">You'r about to logout
+                    <button class="btn-close" data-bs-dismiss="modal"  data-bs-target="#logoutmodal"></button>
+                </div>
+                <div class="modal-body">
+                    <a   class="btn btn-danger" href="#">log out</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="container" style="margin-top: 90px;">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -119,8 +132,8 @@
                                     <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#payment"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <a class="btn btn-primary" href="#">credit</a>
-                                    <a class="btn btn-primary" href="#"> saving</a>
+                                    <a class="btn btn-primary" href="{{url_for('payment')}}">credit</a>
+                                    <a class="btn btn-primary" href="{{url_for('payment')}}"> saving</a>
                                 </div>
                             </div>
                         </div>
