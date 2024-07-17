@@ -10,6 +10,21 @@ app.config["SECRET_KEY"] = secret_key
 @app.route("/managrDashboard")
 def managrDashboard():
     return render_template("managerDashboard.html")
+@app.route("/workersPage")
+def workersPage():
+    return render_template("workersPage.html")
+
+@app.route("/employeeRecrutimentForm")
+def employeeRecrutimentForm():
+    return render_template("employeeRecrutimentForm.html")
+
+@app.route("/targets")
+def targets():
+    return render_template("targetsPage.html")
+
+@app.route("/setTargets")
+def setTargets():
+    return render_template("settargest.html")
 
 
 # credit officer dashboard section details bellow

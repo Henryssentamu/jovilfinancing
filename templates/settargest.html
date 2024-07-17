@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Bank Targets</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            padding: 10px 15px;
+        }
+
+        .form-control:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+        }
+
+        .custom-select {
+            border-radius: 10px;
+            border: 1px solid #ced4da;
+            padding: 10px 15px;
+        }
+
+        .custom-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-select {
+            border-radius: 20px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            font-size: 1rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        .form-select:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+        }
+
+        .form-select option {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <!-- Set Targets Form -->
+        <div class="card">
+            <div class="card-header text-center">
+                <h2>Set Bank Targets</h2>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div>
+                        <label for="customSelect" class="form-label">Custom Select Menu</label>
+                        <select class="form-select" id="customSelect" aria-label="Default select example">
+                            <option selected>Open this select menu</option>
+                            <option value="1">One</option>
+                            <option value="2">Two</option>
+                            <option value="3">Three</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="creditTarget">Credit Target</label>
+                        <input type="number" class="form-control" id="creditTarget" placeholder="Enter credit target">
+                    </div>
+                    <div class="form-group">
+                        <label for="creditTarget">Loan number Target</label>
+                        <input type="number" class="form-control" id="creditTarget" placeholder="Enter credit target">
+                    </div>
+                    <div class="form-group">
+                        <label for="savingsTarget">Savings Target</label>
+                        <input type="number" class="form-control" id="savingsTarget" placeholder="Enter savings target">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Set Target</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
