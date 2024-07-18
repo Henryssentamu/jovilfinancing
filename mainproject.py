@@ -26,6 +26,22 @@ def targets():
 def setTargets():
     return render_template("settargest.html")
 
+@app.route("/reportOnTargets")
+def reportOnTargets():
+    return render_template("reports.html")
+
+@app.route("/branches")
+def branches():
+    return render_template("branches.htm")
+
+@app.route("/createBranch")
+def createBranch():
+    return render_template("createBranch.html")
+
+@app.route("/branch")
+def branch():
+    return render_template("Abranch.html")
+
 
 # credit officer dashboard section details bellow
 

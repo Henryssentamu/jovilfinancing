@@ -74,7 +74,7 @@
         </div>
         <ul class="navbar-nav ">
             <li class="nav-item mr-2">
-                <a href="#" class=" btn btn-primary  nav-link"> Reports</a>
+                <a href="{{url_for('reportOnTargets')}}" class=" btn btn-primary  nav-link"> Reports</a>
             </li>
             <li class="nav-item" style="margin: 0px 5px;">
                 <a href="{{url_for('setTargets')}}" class=" btn btn-sm btn-sm btn-success  nav-link"> Set Targets</a>
@@ -92,6 +92,7 @@
                     <div class="p-3 text-center">
                         <h4>Credit Targets</h4>
                         <p class="display-4">Ugx:1,000,000</p>
+                        <p>100,000: <span>monthly </span> </p>
                     </div>
                 </div>
     
@@ -99,12 +100,14 @@
                     <div class="p-3 text-center">
                         <h4>Savings Targets</h4>
                         <p class="display-4">Ugx: 500,000</p>
+                        <p>1000: <span>monthly </span> </p>
                     </div>
                 </div>
                 <div class="col-md">
                     <div class="p-3 text-center">
                         <h4>Number of Loans</h4>
                         <p class="display-4">5000</p>
+                        <p> 50: <span>monthly </span> </p>
                     </div>
                 </div>
                 

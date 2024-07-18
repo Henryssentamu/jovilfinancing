@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Branch</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 3rem;
+        }
+        .form-title {
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('branches')}}" class="navbar-brand">Back</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Branches</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reports</a>
+                    </li>
+                </ul>
+            </div> -->
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-container">
+                    <h2 class="form-title text-center">Create New Branch</h2>
+                    <form>
+                        <div class="form-group">
+                            <label for="branchName">Branch Name</label>
+                            <input type="text" class="form-control" id="branchName" placeholder="Enter branch name">
+                        </div>
+                        <div class="form-group">
+                            <label for="branchLocation">Branch Location</label>
+                            <input type="text" class="form-control" id="branchLocation" placeholder="Enter branch location">
+                        </div>
+                        <div class="form-group">
+                            <label for="branchManager">Branch Manager</label>
+                            <input type="text" class="form-control" id="branchManager" placeholder="Enter branch manager name">
+                        </div>
+                        <div class="form-group">
+                            <label for="branchContact">Branch Contact</label>
+                            <input type="text" class="form-control" id="branchContact" placeholder="Enter branch contact number">
+                        </div>
+                        <div class="form-group">
+                            <label for="branchEmail">Branch Email</label>
+                            <input type="email" class="form-control" id="branchEmail" placeholder="Enter branch email">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Create Branch</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

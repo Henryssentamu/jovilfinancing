@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report aoout targets</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container{
+            width: 30%;
+            height: 35vh;
+            margin: auto;
+        }
+    </style>
+    
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('targets')}}" class="navbar-brand">Back</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row " style="height: 50px;">
+            <div class="col chart-container">
+                <div class="card border-0 shadow-sm">
+                    <canvas id="targetChart"></canvas>
+                </div>
+                
+            </div>
+            <div class="col">
+                Achieved 70% of the annual target.
+            </div>
+        </div>
+    </div>
+    <div class="container" style="margin-top: 290px;">
+        <div class="row">
+            <div class="col">
+                <div class="card border-0">
+                    <div class="table-responsive">
+                        <table class="table ">
+                            <thead>
+                                <tr>
+                                    <th>Branch</th>
+                                    <th>Cradit (Ugx) </th>
+                                    <th>Loan Number</th>
+                                    <th>Performance</th>
+                                    <th>Contribution To General Target</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Wandegeya kalerwe</td>
+                                    <td>4000</td>
+                                    <td>40</td>
+                                    <td>67%</td>
+                                    <td>12%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const cob = document.getElementById("targetChart").getContext("2d");
+        const mychart = new Chart(cob, {
+            type:"bar",
+            data:{
+                labels:["Target", "Results"],
+                datasets:[{
+                    label:"%age",
+                    data:[100,70],
+                    backgroundColor:[
+                        'red',
+                        'green'
+                    ],
+                    borderColor:[
+                        'red',
+                        'green'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options:{
+                scales:{
+                    y:{
+                        beginAtZero:true
+                    }
+                }
+            }
+        })
+    </script>
+    
+</body>
+</html>
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report about Targets</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('targets')}}" class="navbar-brand">Back</a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row mt-5">
+            <div class="col">
+                <canvas id="targetChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const chartObj = document.getElementById("targetChart").getContext('2d');
+        const targetChart = new Chart(chartObj, {
+            type: "bar",
+            data: {
+                labels: ["Target", "Results"],
+                datasets: [{
+                    label: "%age",
+                    data: [100, 80],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> -->

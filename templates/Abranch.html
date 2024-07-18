@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .stat-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-10px);
+        }
+        .list-group-item {
+            border-color: rgba(0, 0, 0, 0.125);
+        }
+        .table thead th {
+            background-color: #343a40;
+            color: #fff;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="#" class="navbar-brand">Branch Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Branches</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Reports</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card p-3">
+                    <h5 class="card-title text-center mb-3">Performance</h5>
+                    <p class="card-text text-center display-4">85%</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card p-3">
+                    <h5 class="card-title text-center mb-3">Targets</h5>
+                    <p class="card-text text-center display-4">75%</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card p-3">
+                    <h5 class="card-title text-center mb-3">Collections</h5>
+                    <p class="card-text text-center display-4">$50,000</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5 class="card-title">Clients to Pay</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client A
+                            <span class="badge bg-primary">$500</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client B
+                            <span class="badge bg-primary">$300</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client C
+                            <span class="badge bg-primary">$700</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card p-3">
+                    <h5 class="card-title">Clients Paid</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client X
+                            <span class="badge bg-success">Paid</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client Y
+                            <span class="badge bg-success">Paid</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Client Z
+                            <span class="badge bg-success">Paid</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name of the Branch</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Main Branch</td>
+                                <td>New York, NY</td>
+                            </tr>
+                            <tr>
+                                <td>West End Branch</td>
+                                <td>Los Angeles, CA</td>
+                            </tr>
+                            <tr>
+                                <td>East Side Branch</td>
+                                <td>Chicago, IL</td>
+                            </tr>
+                            <tr>
+                                <td>South Branch</td>
+                                <td>Houston, TX</td>
+                            </tr>
+                            <tr>
+                                <td>North Branch</td>
+                                <td>Phoenix, AZ</td>
+                            </tr>
+                            <!-- Add more branches as needed -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+</body>
+</html>

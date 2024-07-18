@@ -19,7 +19,7 @@
         }
 
         .card-header {
-            background-color: #007bff;
+            background-color: #323232;
             color: white;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
@@ -29,7 +29,7 @@
             background-color: #007bff;
             border-color: #007bff;
             border-radius: 50px;
-            padding: 10px 20px;
+            padding: 3px 0px;
             font-size: 16px;
             font-weight: 600;
         }
@@ -80,6 +80,11 @@
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('targets')}}" class="navbar-brand">Back</a>
+        </div>
+    </nav>
     <div class="container mt-5">
         <!-- Set Targets Form -->
         <div class="card">
@@ -89,24 +94,24 @@
             <div class="card-body">
                 <form>
                     <div>
-                        <label for="customSelect" class="form-label">Custom Select Menu</label>
-                        <select class="form-select" id="customSelect" aria-label="Default select example">
-                            <option selected>Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
+                        <label for="customSelect" class="form-label  " style="margin: 20px 200px;">Custom Select Menu</label>
+                        <select class="form-select border-0" id="customSelect" aria-label="Default select example">
+                            <option selected>Open select menu</option>
+                            <option value="1">wandegeya kalerwe</option>
+                            <option value="2">nakasero kampale</option>
+                            <option value="3"> nakawa </option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="creditTarget">Credit Target</label>
+                    <div class="form-group mt-5">
+                        <!-- <label for="creditTarget">Credit Target</label> -->
                         <input type="number" class="form-control" id="creditTarget" placeholder="Enter credit target">
                     </div>
                     <div class="form-group">
-                        <label for="creditTarget">Loan number Target</label>
+                        <!-- <label for="creditTarget">Loan number Target</label> -->
                         <input type="number" class="form-control" id="creditTarget" placeholder="Enter credit target">
                     </div>
                     <div class="form-group">
-                        <label for="savingsTarget">Savings Target</label>
+                        <!-- <label for="savingsTarget">Savings Target</label> -->
                         <input type="number" class="form-control" id="savingsTarget" placeholder="Enter savings target">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Set Target</button>

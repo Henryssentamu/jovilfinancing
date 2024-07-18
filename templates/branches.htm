@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Branch Details</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        .stat-card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .table thead th {
+            background-color: #343a40;
+            color: #fff;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('managrDashboard')}}" class="navbar-brand">Back</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-success" href="{{url_for('createBranch')}}"> Create Branch</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class=" btn btn-danger nav-link" href="#"> Merge Branches</a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link" href="#">Reports</a>
+                    </li> -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Branches</h5>
+                        <p class="card-text display-4">15</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Employees</h5>
+                        <p class="card-text display-4">150</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card p-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Accounts</h5>
+                        <p class="card-text display-4">1200</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Branches</th>
+                                <th>Location</th>
+                                <th>Branch Manager</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a class="link" href="{{url_for('branch')}}">Main Branch</a>
+                                </td>
+                                <td>kampale</td>
+                                <td>Matove Yasin</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="{{url_for('branch')}}" class="link">Wandegeya kalerwe</a>
+                                </td>
+                                <td>kalerwe</td>
+                                <td>James Kikawa</td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <a href="{{url_for('branch')}}" class="link">Kawempe Matugga</a>
+                                </td>
+                                <td>Kawempe</td>
+                                <td>Nalugwa Jessca</td>
+                            </tr>
+                            <!-- Add more branches as needed -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
