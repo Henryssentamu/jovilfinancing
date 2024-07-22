@@ -41,6 +41,23 @@ def createBranch():
 @app.route("/branch")
 def branch():
     return render_template("Abranch.html")
+@app.route("/mergeBranches")
+def mergeBranches():
+    return render_template("mergebranches.html")
+@app.route("/credit")
+def credit():
+    return render_template("credit.html")
+
+@app.route("/savingsgeneral")
+def savingsgeneral():
+    return render_template("savingsgeneral.html")
+
+@app.route("/recievableReports")
+def recievableReports():
+    return render_template("recievableReports.html")
+@app.route("/disburshmentReports")
+def disburshmentReports():
+    return render_template("disburshmentReports.html")
 
 
 # credit officer dashboard section details bellow

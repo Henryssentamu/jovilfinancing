@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Merger</title>
+    <!-- Bootstrap CSS -->
+    <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .card {
+            border-radius: 10px;
+        }
+        .card-header {
+            background-color: #0a4f3b;
+            color: #fff;
+            border-radius: 10px 10px 0 0;
+        }
+        .btn-primary {
+            background-color: #166c6d;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a href="{{url_for('branches')}}" class="navbar-brand">Back</a>
+            <div class="navbar-nav">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Home</a>
+                </li>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title ">Merge Branches</h3>
+            </div>
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <label for="masterBranch">Select Master Branch</label>
+                        <select class="form-control" id="masterBranch">
+                            <option value="" disabled selected>Select Master Branch</option>
+                            <option value="branch1">Branch 1</option>
+                            <option value="branch2">Branch 2</option>
+                            <option value="branch3">Branch 3</option>
+                        </select>
+                    </div>
+                    <div class="form-group mt-5">
+                        <label for="otherBranches">Select Other Branches to Merge</label>
+                        <select class="form-control" id="otherBranches" multiple>
+                            <option value="branch1">Branch 1</option>
+                            <option value="branch2">Branch 2</option>
+                            <option value="branch3">Branch 3</option>
+                            <option value="branch4">Branch 4</option>
+                            <option value="branch5">Branch 5</option>
+                        </select>
+                        <small class="form-text text-muted">Hold down the Ctrl (windows) or Command (Mac) button to select multiple options.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Merge Branches</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

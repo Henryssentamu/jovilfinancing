@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Branch Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -31,51 +31,82 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" style=" position: fixed; top: 0px; left: 0px; right: 0px; z-index: 2;">
         <div class="container">
-            <a href="#" class="navbar-brand">Branch Dashboard</a>
+            <a href="{{url_for('branches')}}" class="navbar-brand">Back</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Home</a>
+                <ul class="navbar-nav ms-auto text-white ">
+                    <li class="nav-item m-2">
+                        <div class="text-display-2  "> Portfolio</div>
+                        <div class="fs-4 text-danger">300000008877</div>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Branches</a>
+                    <li class="nav-item m-2">
+                        <div class="text-display-2 "> Saving Accounts</div>
+                        <div class="fs-4">30029938474747</div>
+                        
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Reports</a>
+                    <li class="nav-item m-2">
+                        <div class="text-display-2 ">  Credit Accounts</div>
+                        <div class="fs-4 text-info">3003837474440</div>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5">
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card stat-card p-3">
-                    <h5 class="card-title text-center mb-3">Performance</h5>
-                    <p class="card-text text-center display-4">85%</p>
+    <div class="container-fluid " style="margin-top: 150px;">
+        <div class="row">
+            <div class="col">
+                <div class="card stat-card ">
+                    <div class="card-tittle text-center">Performance</div>
+                    <div class="card-text text-center display-3">85%</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card stat-card p-3">
-                    <h5 class="card-title text-center mb-3">Targets</h5>
-                    <p class="card-text text-center display-4">75%</p>
+
+            <div class="col">
+                <div class="card stat-card">
+                    <div class="card-tittle text-center">Targets</div>
+                    <div class="card-text text-center display-3">85%</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card stat-card p-3">
-                    <h5 class="card-title text-center mb-3">Collections</h5>
-                    <p class="card-text text-center display-4">$50,000</p>
+
+            <div class="col">
+                <div class="card stat-card">
+                    <div class="card-tittle text-center">Collections</div>
+                    <div class="card-text text-center display-3">856666</div>
                 </div>
             </div>
         </div>
 
-        <div class="row mb-4">
+        <div class="row mt-5">
+            <p>all of this well be for branch </p>
+            <div class="col">
+                <div class="card ">
+                    <a href="#" class="btn btn-primary"> Client Center </a>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card ">
+                    <a href="#" class="btn btn-primary"> Acount Recivables</a>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card ">
+                    <a href="#" class="btn btn-primary"> Collection Sheet </a>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card ">
+                    <a href="#" class="btn btn-primary"> Overdue & Penalties </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row  mt-4">
             <div class="col-md-6">
                 <div class="card p-3">
                     <h5 class="card-title">Clients to Pay</h5>
@@ -116,46 +147,51 @@
             </div>
         </div>
 
-        <div class="row">
+
+        <div class="row mt-5">
             <div class="col">
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Name of the Branch</th>
-                                <th>Location</th>
+                                <th>Officers </th>
+                                <th>Contacts</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>Main Branch</td>
-                                <td>New York, NY</td>
+                                <td>
+                                    <a href="{{url_for('crediofficerDashboard')}}" class="link">Peter mowonge</a>
+                                </td>
+                                <td>0756333333</td>
                             </tr>
                             <tr>
-                                <td>West End Branch</td>
-                                <td>Los Angeles, CA</td>
+                                <td> 
+                                    <a href="{{url_for('crediofficerDashboard')}}" class="link">Brain niragire</a>
+                                </td>
+                                <td> 07886666666</td>
                             </tr>
-                            <tr>
-                                <td>East Side Branch</td>
-                                <td>Chicago, IL</td>
-                            </tr>
-                            <tr>
-                                <td>South Branch</td>
-                                <td>Houston, TX</td>
-                            </tr>
-                            <tr>
-                                <td>North Branch</td>
-                                <td>Phoenix, AZ</td>
-                            </tr>
-                            <!-- Add more branches as needed -->
+                            
+                            
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+
+
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+    <!-- <div class="container mt-5">
+        
+
+        
+
+        
+    </div> -->
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
