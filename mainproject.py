@@ -59,12 +59,20 @@ def recievableReports():
 def disburshmentReports():
     return render_template("disburshmentReports.html")
 
+@app.route("/attatchEmployeeTobranch")
+def attatchEmployeeTobranch():
+    return render_template("attatchEmployeeTobranch.html")
+
 
 # credit officer dashboard section details bellow
 
 @app.route("/crediofficerDashboard")
 def crediofficerDashboard():
     return render_template("creditOfficerDashboard.html")
+
+@app.route("/registerClient")
+def registerClient():
+    return render_template("registerClient.html")
 
 @app.route("/makePayment")
 def makePayment():
@@ -83,7 +91,9 @@ def recievablesSavings():
 def payment():
     return render_template("payments.html")
 
-
+@app.route("/loanApplication")
+def loanApplication():
+    return render_template("loanApplication.html")
 
 @app.route("/collectionSheet")
 def collectionSheet():

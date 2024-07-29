@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attach Employees to Branch</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .hero {
+            padding: 50px 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .form-section {
+            padding: 30px;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .selected-employees {
+            padding: 30px;
+            background-color: #f1f1f1;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-dark text-white py-3" style="position: fixed; top: 0px; right: 0px; left: 0px; z-index: 2;">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1>Nisa Financing</h1>
+            <!-- <nav>
+                <a href="#" class="text-white mx-2">Home</a>
+                <a href="#" class="text-white mx-2">Branches</a>
+                <a href="#" class="text-white mx-2">Employees</a>
+                <a href="#" class="text-white mx-2">Contact Us</a>
+            </nav> -->
+            <div>
+                <a href="{{url_for('branches')}}" class="btn btn-outline-light mx-1">cancel</a>
+                <!-- <a href="#" class="btn btn-outline-light mx-1">Signup</a> -->
+            </div>
+        </div>
+    </header>
+
+    <div class="hero" style="margin-top: 55px;">
+        <div class="container">
+            <h2>Attach Employees to Branch</h2>
+            <p>Select a branch and employees to assign them to the branch.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Assignment Form</h2>
+            <form id="assignmentForm">
+                <!-- Branch Selection -->
+                <div class="form-group">
+                    <label for="branchSelect">Select Branch</label>
+                    <select id="branchSelect" name="branchSelect" class="form-control" required>
+                        <option value="">Choose...</option>
+                        <option value="branch1">Branch 1</option>
+                        <option value="branch2">Branch 2</option>
+                        <option value="branch3">Branch 3</option>
+                        <!-- Add more branches as needed -->
+                    </select>
+                </div>
+
+                <!-- Employee Selection -->
+                <div class="form-group">
+                    <label for="employeeSelect">Select Employees</label>
+                    <select id="employeeSelect" name="employeeSelect[]" class="form-control" multiple required>
+                        <option value="employee1">Employee 1</option>
+                        <option value="employee2">Employee 2</option>
+                        <option value="employee3">Employee 3</option>
+                        <!-- Add more employees as needed -->
+                    </select>
+                    <small class="form-text text-muted">Hold down the Ctrl (Windows) or Command (Mac) button to select multiple employees.</small>
+                </div>
+
+                <!-- Submit -->
+                <button type="button" class="btn btn-primary submit-btn btn-block" onclick="addSelectedEmployees()">Assign Employees</button>
+            </form>
+        </div>
+
+        <!-- Selected Employees Section -->
+        <div class="selected-employees">
+            <h2>Selected Employees</h2>
+            <ul id="selectedEmployeesList" class="list-group">
+                <!-- Selected employees will be added here -->
+            </ul>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-3 mt-5">
+        <div class="container text-center">
+            <p>Contact Information: Phone, Email, Address</p>
+            <!-- <p>Follow us on: 
+                <a href="#" class="text-white mx-2">Facebook</a>
+                <a href="#" class="text-white mx-2">Twitter</a>
+                <a href="#" class="text-white mx-2">LinkedIn</a>
+            </p> -->
+            <p>&copy; 2024 Bank Name. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function addSelectedEmployees() {
+            const employeeSelect = document.getElementById('employeeSelect');
+            const selectedEmployeesList = document.getElementById('selectedEmployeesList');
+            selectedEmployeesList.innerHTML = ''; // Clear previous selections
+
+            for (let option of employeeSelect.options) {
+                if (option.selected) {
+                    let li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.textContent = option.text;
+                    selectedEmployeesList.appendChild(li);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
