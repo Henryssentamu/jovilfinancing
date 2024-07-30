@@ -48,9 +48,35 @@ def mergeBranches():
 def credit():
     return render_template("credit.html")
 
+@app.route("/creditCollection")
+def creditCollection():
+    return render_template("creditCollections.html")
+
+@app.route("/creditbalance")
+def creditbalance():
+    return render_template("creditBalances.html")
+
+@app.route("/collectionCreditOverdue")
+def collectionCreditOverdue():
+    return render_template("collectionCreditOverdue.html")
+
+@app.route("/collectionCreditpenalties")
+def collectionCreditpenalties():
+    return render_template("collectionCreditPenalities.html")
+
+
 @app.route("/savingsgeneral")
 def savingsgeneral():
     return render_template("savingsgeneral.html")
+
+@app.route("/savingCollections")
+def savingCollections():
+    return render_template("savingCollections.html")
+
+@app.route("/savingAtMaturity")
+def savingAtMaturity():
+    return render_template("savingAcountsAtMaturity.html")
+
 
 @app.route("/recievableReports")
 def recievableReports():
@@ -62,6 +88,10 @@ def disburshmentReports():
 @app.route("/attatchEmployeeTobranch")
 def attatchEmployeeTobranch():
     return render_template("attatchEmployeeTobranch.html")
+
+@app.route("/employeeProfile")
+def employeeProfile():
+    return render_template("employeeProfile.html")
 
 
 # credit officer dashboard section details bellow
