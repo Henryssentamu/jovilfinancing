@@ -4,6 +4,9 @@ class ConnectToMySql:
     def __init__(self) -> None:
         self.connection = None
         self.cursor = None
+        self.connect()
+
+    def connect(self):
         try:
             self.connection  = sql.connect(
                 host= "localhost",
@@ -16,6 +19,10 @@ class ConnectToMySql:
                 raise Exception("Failed to establish connection to MySQL.")
         except sql.Error as err:
             raise Exception(f"Error while connecting to MySQL: {err}")
+        
+    def reconnect_if_needed(self):
+        if not self.connection.is_connected():
+            self.connect()
             
        
     def close_connection(self):
@@ -25,7 +32,7 @@ class ConnectToMySql:
             self.connection.close()
     
 
-class Acount(ConnectToMySql):
+class RegisterClient(ConnectToMySql):
     def __init__(self, dataObject):
         super().__init__()
         self.data = dataObject
@@ -36,21 +43,23 @@ class Acount(ConnectToMySql):
         try:
             if self.cursor:
                 self.cursor.execute("""
-                    CREATE DATABASE IF NOT EXISTS Acount
+                    CREATE DATABASE IF NOT EXISTS AccountsVault
                 """)
             else:
                 raise Exception("Cursor is not available.")
         except Exception as e:
             raise Exception(f"Error in create_Database: {e}")
 
-    def create_account(self):
+    def create_tables(self):
         if self.cursor:
             try:
-                self.cursor.execute("USE Acount")
+                # selecting database to querry 
+                self.cursor.execute("USE AccountsVault")
+
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS AccountOwner(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(200) PRIMARY KEY,
+                        AccountNumber VARCHAR(500) PRIMARY KEY,
                         FirstName VARCHAR(500),
                         Sirname VARCHAR(500)              
                     )
@@ -58,49 +67,60 @@ class Acount(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS ContactDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AcountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500),
                         PhoneNumber VARCHAR(200),
-                        FOREIGN KEY (AcountNumber) REFERENCES AccountOwner(AccountNumber) ON DELETE SET NULL              
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber) ON DELETE SET NULL              
                     )
                 """)
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS socialDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AcountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500),
                         DateOfBirth  VARCHAR(100),
                         Gender VARCHAR(50),
                         Religion VARCHAR(200),
                         NinNumber VARCHAR(500),
-                        FOREIGN KEY (AcountNumber) REFERENCES AccountOwner(AccountNumber)  ON DELETE SET NULL     
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)  ON DELETE SET NULL     
                     )
                 """)
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS AddressDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AcountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500),
                         PermanentAddress_village TEXT,
                         City_Devission TEXT,
                         District TEXT,  
-                        FOREIGN KEY (AcountNumber) REFERENCES AccountOwner(AccountNumber) ON DELETE SET NULL            
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber) ON DELETE SET NULL            
                     )
                 """)
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS NextOfKinDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AcountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500),
                         NinNumber VARCHAR(500),
                         FullName VARCHAR(500),
-                        FOREIGN KEY (AcountNumber) REFERENCES AccountOwner(AccountNumber)  ON DELETE SET NULL                                
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)  ON DELETE SET NULL                                
                     )
                 """)
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS NextOfKinContactDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AcountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500),
                         PhoneNumber VARCHAR(100),
                         Location VARCHAR(200),
-                        FOREIGN KEY (AcountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL              
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL              
                     )
+                """)
+
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS pictures(
+                        Date DATATIME DEFAULT CURRENT_TIMESTAMP,
+                        AccountNumber VARCHAR(500),
+                        OwnerPic LONGBLOB NOT NULL,
+                        NextKinPic LONGBLOB,
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL
+                        
+                    )   
                 """)
                 self.connection.commit()
             except Exception as e:
@@ -110,16 +130,113 @@ class Acount(ConnectToMySql):
         else:
             raise Exception("Cursor is not available to create tables.")
         
-    def update_phoneNumber(self,accountNumber,phoneNumber):
+    def insert_into_tables(self):
+        self.AccountNumber = self.data["AccountNumber"]
+        self.FirstName = self.data["FirstName"]
+        self.Sirname = self.data["Sirname"]
+        self.PhoneNumber = self.data["PhoneNumber"]
+        self.DateOfBirth = self.data["DateOfBirth"]
+        self.Gender = self.data["Gender"]
+        self.Religion = self.data["Religion"]
+        self.Ninnumber = self.data["NinNumber"]
+        self.PermanentAddress_village = self.data["PermanentAddress_village"]
+        self.City_Devission = self.data["City_Devission"]
+        self.District = self.data["District"]
+        self.OwnerPic = self.data["OwnerPic"]
+
+        """ next of kin details """
+        self.nextKin_details = self.data["NextKinDetails"]
+        self.nextKinNinNumber = self.nextKin_details["NinNumber"]
+        self.nextkinFullName = self.nextKin_details["FullName"]
+        self.nextKinPhoneNumber = self.nextKin_details["PhoneNumber"]
+        self.nextKinLocation  = self.nextKin_details["Location"]
+        self.NextKinPic = self.nextKin_details["NextKinPic"]
+
+        # reconnecting to database 
+        self.reconnect_if_needed()
+
         if self.cursor:
             try:
-                self.cursor.execute("USE Acount")
+                self.cursor.execute("USE AccountsVault")
+
+                self.cursor.execute("""
+                    INSERT INTO AccountOwner(
+                        AccountNumber,
+                        FirstName,
+                        Sirname
+                        ) VALUES(%s,%s,%s)
+                """,(self.AccountNumber,self.FirstName,self.Sirname))
+
+                self.cursor.execute("""
+                    INSERT INTO ContactDetails(
+                        AccountNumber,
+                        PhoneNumber
+                        ) VALUES (%s, %s)
+                """,(self.AccountNumber,self.PhoneNumber))
+                self.cursor.execute("""
+                    INSERT INTO socialDetails(
+                        AccountNumber,
+                        DateOfBirth,
+                        Gender,
+                        Religion,
+                        NinNumber
+                    ) VALUES(%s,%s,%s,%s,%s)
+                """,(self.AccountNumber,self.DateOfBirth, self.Gender,self.Religion,self.Ninnumber))
+                self.cursor.execute("""
+                    INSERT INTO AddressDetails(
+                        AccountNumber,
+                        PermanentAddress_village,
+                        City_Devission,
+                        District                
+                    ) VALUES(%s,%s,%s,%s)
+                """,(self.AccountNumber,self.PermanentAddress_village,self.City_Devission,self.District))
+                self.cursor.execute("""
+                    INSERT INTO NextOfKinDetails(
+                        AccountNumber,
+                        NinNumber,
+                        FullName                
+                    ) VALUES (%s,%s,%s)
+                """,(self.AccountNumber,self.nextKinNinNumber,self.nextkinFullName ))
+                self.cursor.execute("""
+                    INSERT INTO NextOfKinContactDetails(
+                        AccountNumber,
+                        PhoneNumber,
+                        Location                    
+                    ) VALUES(%s,%s,%s)
+                """,(self.AccountNumber,self.nextKinPhoneNumber,self.nextKinLocation))
+
+                self.cursor.execute("""
+                    INSERT INTO pictures(
+                        AccountNumber,
+                        OwnerPic,
+                        NextKinPic               
+                    ) VALUES(%s,%s,%s)
+                """,(self.AccountNumber,self.OwnerPic,self.NextKinPic ))
+                self.connection.commit()
+            except Exception as e:
+                raise Exception(f"error while inserting into specified table: {e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor is not available to insert into tables")
+
+        
+    def update_phoneNumber(self):
+
+        self.accountNumber = self.data["accountNumber"]
+        self.phoneNumber = self.data["phoneNumber"]
+
+        # reconnect to database 
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
                 update_query = """
                         UPDATE ContactDetails
                         SET PhoneNumber = %s
-                        WHERE AcountNumber = %s
+                        WHERE AccountNumber = %s
                     """
-                self.execute(update_query, (phoneNumber,accountNumber))
+                self.cursor.execute(update_query, (self.phoneNumber ,self.accountNumber))
                 self.connection.commit()
             except Exception as e:
                 raise Exception(f"error while updating phone numer:{e}")
@@ -128,22 +245,26 @@ class Acount(ConnectToMySql):
         else:
             raise Exception("cursor not availabe to update phone number:")
         
-    def update_AddressDetails(self,accountNumber,locationDetails):
-        PermanentAddress = locationDetails["PermanentAddress "]
-        CityDevission = locationDetails["city"]
-        District = locationDetails["District"]
+    def update_AddressDetails(self):
+
+        self.accountNumber = self.data["accountNumber"]
+        self.PermanentAddress = self.data["PermanentAddress"]
+        self.CityDevission = self.data["CityDevission"]
+        self.District = self.data["District"]
+
+        # reconnect to database 
+        self.reconnect_if_needed()
+
         if self.cursor:
             try:
-                self.cursor.execute("USE Acount")
+                self.cursor.execute("USE AccountsVault")
                 update_query = """
                         UPDATE AddressDetails
-                        SET PermanentAddress_village = %s
-                        SET City_Devission = %s
-                        SET District = %s
-                        WHERE AcountNumber = %s
+                        SET PermanentAddress_village = %s,City_Devission = %s,District = %s
+                        WHERE AccountNumber = %s
 
                     """
-                self.execute(update_query, (PermanentAddress,CityDevission, District, accountNumber))
+                self.cursor.execute(update_query, (self.PermanentAddress,self.CityDevission, self.District, self.accountNumber))
                 self.connection.commit()
             except Exception as e:
                 raise Exception(f"error while updating address details:{e}")
@@ -152,44 +273,51 @@ class Acount(ConnectToMySql):
         else:
             raise Exception("cursor not availabe to update phone number:")
         
-    def update_nextOfKin(self, accountNumber, nextOfKinDetailsObject):
-        fullname = nextOfKinDetailsObject["FullName"]
-        Ninnumber =  nextOfKinDetailsObject["NinNumber"]
-        PhoneNumber = nextOfKinDetailsObject["PhoneNumber"]
-        Location = nextOfKinDetailsObject["PhoneNumber"]
+    def update_nextOfKin(self):
+        self.fullname  = self.data["fullname"]
+        self.Ninnumber = self.data["Ninnumber"]
+        self.PhoneNumber = self.data[" PhoneNumber"]
+        self.Location = self.data["Location"]
+        self.accountNumber = self.data["accountNumber"]
+
+        # reconnect to database 
+        self.reconnect_if_needed()
 
         if self.cursor:
             try:
-                self.cursor.execute(" USE Acount")
+                self.cursor.execute(" USE AccountsVault")
                 name_querry = """
                     UPDATE NextOfKinDetails
-                    SET FullName  = %s
-                    SET NinNumber = %s
+                    SET FullName  = %s, NinNumber = %s
                     WHERE
-                        AcountNumber = %s
+                        AccountNumber = %s
                 """
 
                 contact_querry = """
                     UPDATE NextOfKinContactDetails
-                    SET  PhoneNumber = %s
-                    SET Location = %s
+                    SET  PhoneNumber = %s,Location = %s
                     WHERE
-                        AcountNumber = %s
+                        AccountNumber = %s
 
                 """
-                self.cursor.execute(name_querry,(fullname,Ninnumber, accountNumber))
-                self.cursor.execute(contact_querry,(PhoneNumber,Location))
+                self.cursor.execute(name_querry,(self.fullname,self.Ninnumber, self.accountNumber))
+                self.cursor.execute(contact_querry,(self.PhoneNumber,self.Location,self.accountNumber))
                 self.connection.commit()
             except Exception as e:
                 raise Exception(f" error while updating next of kin details : {e}")
         else:
             raise Exception("cursor not availabe to update next of kin")
-    def delete_account(self, accountNumber):
+    def delete_account(self):
+
+        self.accountNumber = self.data["accountNumber"]
+
+        # reconnect to database 
+        self.reconnect_if_needed()
         if self.cursor:
             try:
-                self.execute("USE  Acount ")
-                delet_querry = " DELETE FROM AccountOwner  WHERE AcountNumber =%s"
-                self.cursor.execute(delet_querry,(accountNumber,))
+                self.cursor.execute("USE AccountsVault")
+                delet_querry = " DELETE FROM AccountOwner  WHERE AccountNumber =%s"
+                self.cursor.execute(delet_querry,(self.accountNumber,))
                 self.connection.commit()
             except Exception as e:
                 raise Exception(f"error while deleting account:{e}")
@@ -203,11 +331,34 @@ class Acount(ConnectToMySql):
 
 
 obj = {
-    "name":"henry"
+    "AccountNumber":"cm0001",
+    "FirstName": "henry",
+    "Sirname": "Ssentamu",
+    "PhoneNumber": "0755982978",
+    "DateOfBirth": "02/12/1919",
+    "Gender": "male",
+    "Religion":"christain",
+    "NinNumber": "cm010239393030cl",
+    "PermanentAddress_village": "Ntooke ",
+    "City_Devission": "kayunga",
+    "District": "Kayunga city",
+    "OwnerPic":"65t57yuuuuu6756tr66t",
+    "NextKinDetails": {
+        "NinNumber":"se1010202021xc",
+        "FullName": "kikawa james",
+        "PhoneNumber": "07880209282",
+        "Location":"kayunga",
+        "NextKinPic":"4567frd568reedfg9865cfty"
+
+
+    }
+
+
 }
 
-ac = Acount(dataObject=obj)
+ac = RegisterClient(dataObject=obj)
 ac.create_Database()
-ac.create_account()
+ac.create_tables()
+ac.insert_into_tables()
 
 
