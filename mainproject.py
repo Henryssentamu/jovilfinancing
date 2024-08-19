@@ -1,6 +1,12 @@
 
-from flask import Flask, render_template
+from ast import Pass
+from crypt import methods
+from flask import Flask, jsonify, render_template, request
 from enviromentkeys import secret_key
+import mysql.connector as sql
+
+from DatabaseClasses import ConnectToMySql, RegisterClient, ExistingAccounts
+from generateAccountNumber import GenerateAccountNumber
 
 
 app = Flask(__name__)
@@ -34,8 +40,15 @@ def reportOnTargets():
 def branches():
     return render_template("branches.htm")
 
-@app.route("/createBranch")
+@app.route("/createBranch", methods =["GET", "POST"])
 def createBranch():
+    if request.method == "POST":
+        requesttype = request.json.get("type")
+        # print(f"here is the fa: {requesttype}")
+        if requesttype  and requesttype == "branchCreation":
+            data = request.json.get("data")
+            print(data)
+        return jsonify({"response":"success"})
     return render_template("createBranch.html")
 
 @app.route("/branch")
@@ -100,9 +113,87 @@ def employeeProfile():
 def crediofficerDashboard():
     return render_template("creditOfficerDashboard.html")
 
-@app.route("/registerClient")
+@app.route("/registerClient",methods =["GET","POST"])
 def registerClient():
+    if request.method == "POST":
+        # get registered accounts
+        try:
+            obj = ExistingAccounts()
+            existing_accounts = obj.fetchAccounts()
+        except Exception as e:
+            raise Exception(f"error while getting accounts: {e}")
+        # generate accounts
+        try:
+            account = GenerateAccountNumber(existingAccounts=existing_accounts )
+            account_number = account.generateNumber()
+        except Exception as e:
+            raise Exception(f"error while calling generate account number:{e}")
+        try:                     
+            if request.content_type.startswith('multipart/form-data'):
+                
+                # Retrieve text form fields
+                firstName = request.form.get("firstName")
+                sirName = request.form.get("sirName")
+                dateOfBirth = request.form.get("dateOfBirth")
+                religion = request.form.get("religion")
+                gender = request.form.get("gender")
+                ninNumber = request.form.get("ninNumber")
+                phonenumber = request.form.get("phonenumber")
+                address = request.form.get("address")
+                city = request.form.get("city")
+                state = request.form.get("state")
+                nextKinFullNames = request.form.get("nextofKinName")
+                nextOfKinPhone = request.form.get("nextOfKinPhone")
+                nextOfKinNin = request.form.get("nextOfKinNin")
+                nextOfKinLocation = request.form.get("nextOfKinLocation")
+                ownerPic = request.files.get("ownerPic")
+                ownerPic_binary = ownerPic.read()
+
+                registrationObj = {
+                    "AccountNumber":account_number,
+                    "FirstName":firstName,
+                    "Sirname":sirName,
+                    "PhoneNumber":phonenumber,
+                    "DateOfBirth":dateOfBirth,
+                    "Gender":gender,
+                    "Religion":religion,
+                    "NinNumber":ninNumber,
+                    "PermanentAddress_village":address,
+                    "City_Devission":city,
+                    "District":state,
+                    "OwnerPic":ownerPic_binary,
+
+                    "NextKinDetails": {
+                    "NinNumber":nextOfKinNin ,
+                    "FullName": nextKinFullNames,
+                    "PhoneNumber": nextOfKinPhone,
+                    "Location":nextOfKinLocation},
+
+                    "BranchDetails":{
+                        "BranchId":"bi123",
+                        "OfficerId":"Ei123"
+                    }
+                }
+                
+
+                # store registered client
+                ac = RegisterClient(dataObject = registrationObj)
+                ac.create_Database()
+                ac.create_tables()
+                ac.insert_into_tables()
+
+                
+                
+                return jsonify({"response": "success"})
+            else:
+                return jsonify({"response":"un surported formate"})    
+        except Exception as e:
+            raise  Exception("error in register post request:{e}")
+        
+    
     return render_template("registerClient.html")
+
+
 
 @app.route("/makePayment")
 def makePayment():

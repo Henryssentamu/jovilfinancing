@@ -1,5 +1,7 @@
 import mysql.connector as sql
 
+from mainproject import branch
+
 class ConnectToMySql:
     def __init__(self) -> None:
         self.connection = None
@@ -114,13 +116,22 @@ class RegisterClient(ConnectToMySql):
 
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS pictures(
-                        Date DATATIME DEFAULT CURRENT_TIMESTAMP,
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
                         AccountNumber VARCHAR(500),
                         OwnerPic LONGBLOB NOT NULL,
-                        NextKinPic LONGBLOB,
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL
                         
                     )   
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS branchDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        AccountNumber VARCHAR(500),
+                        BranchId VARCHAR(500),
+                        OfficerId VARCHAR(500),
+                        FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL
+                                                
+                    )
                 """)
                 self.connection.commit()
             except Exception as e:
@@ -150,7 +161,13 @@ class RegisterClient(ConnectToMySql):
         self.nextkinFullName = self.nextKin_details["FullName"]
         self.nextKinPhoneNumber = self.nextKin_details["PhoneNumber"]
         self.nextKinLocation  = self.nextKin_details["Location"]
-        self.NextKinPic = self.nextKin_details["NextKinPic"]
+        
+
+        """ Branch details """
+        self.branchDetails = self.data["BranchDetails"]
+        self.BranchId = self.branchDetails["BranchId"]
+        self.OfficerId = self.branchDetails["OfficerId"]
+
 
         # reconnecting to database 
         self.reconnect_if_needed()
@@ -208,10 +225,16 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     INSERT INTO pictures(
                         AccountNumber,
-                        OwnerPic,
-                        NextKinPic               
-                    ) VALUES(%s,%s,%s)
-                """,(self.AccountNumber,self.OwnerPic,self.NextKinPic ))
+                        OwnerPic              
+                    ) VALUES(%s,%s)
+                """,(self.AccountNumber,self.OwnerPic ))
+                self.cursor.execute("""
+                    INSERT INTO branchDetails(
+                        AccountNumber,
+                        BranchId,
+                        OfficerId                   
+                    )VALUES(%s,%s,%s)
+                """,(self.AccountNumber, self.BranchId, self.OfficerId))
                 self.connection.commit()
             except Exception as e:
                 raise Exception(f"error while inserting into specified table: {e}")
@@ -326,39 +349,126 @@ class RegisterClient(ConnectToMySql):
         else:
             raise Exception("cursor not available to delete account number")
 
-    
 
 
 
-obj = {
-    "AccountNumber":"cm0001",
-    "FirstName": "henry",
-    "Sirname": "Ssentamu",
-    "PhoneNumber": "0755982978",
-    "DateOfBirth": "02/12/1919",
-    "Gender": "male",
-    "Religion":"christain",
-    "NinNumber": "cm010239393030cl",
-    "PermanentAddress_village": "Ntooke ",
-    "City_Devission": "kayunga",
-    "District": "Kayunga city",
-    "OwnerPic":"65t57yuuuuu6756tr66t",
-    "NextKinDetails": {
-        "NinNumber":"se1010202021xc",
-        "FullName": "kikawa james",
-        "PhoneNumber": "07880209282",
-        "Location":"kayunga",
-        "NextKinPic":"4567frd568reedfg9865cfty"
 
+class ExistingAccounts(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+        if not self.cursor:
+            raise Exception("Database cursor is not initialized. Check the database connection.")
 
-    }
+    def fetchAccounts(self):
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT AccountNumber FROM AccountOwner
+                """)
+                accounts = self.cursor.fetchall()
+                self.close_connection()
+            except Exception as e:
+                raise Exception(f"error while fetching existing accounts: {e}")
+            return { accountObj[0] for accountObj in accounts}
+        
 
+class Branches(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+        if not self.cursor:
+            raise Exception("Database cursor is not initialized. Check the database connection.")
+    def createDatabase(self):
+        if self.cursor:
+            try:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS NisaBranches")
+            except Exception as e:
+                raise Exception(f"error while creating branches database: {e}")
+            try:
+                self.cursor.execute("USE NisaBranches")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS Branches(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        BranchId VARCHAR(300) PRIMARY KEY,
+                        BranchName VARCHAR(500)                
+                    )
+                """)
 
-}
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS BranchDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        BranchId VARCHAR(300),
+                        BranchManager VARCHAR(500),
+                        Location VARCHAR(500),
+                        FOREIGN KEY (BranchId) REFERENCES Branches(BranchId) ON DELETE SET NULL               
+                    )
+                """)
+            except Exception as e:
+                raise Exception("error while creating tables in beanch database:{e}")
+        else:
+            raise Exception("cursor not avialable")
+    def insert_into_tables(self, branchObject):
+        self.BranchId = branchObject["branchId"]
+        self.BranchName = branchObject["branchName"]
+        self.BranchManager = branchObject["BranchManager"]
+        self.Location = branchObject["Location"]
 
-ac = RegisterClient(dataObject=obj)
-ac.create_Database()
-ac.create_tables()
-ac.insert_into_tables()
+        # reconnect cursor
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE NisaBranches")
+                self.cursor.execute("""
+                    INSERT INTO Branches(
+                        BranchId,
+                        BranchName              
+                    ) VALUES(%s,%s)
+                """,(self.BranchId, self.BranchName))
+                self.cursor.execute("""
+                    INSERT INTO BranchDetails(
+                        BranchId,
+                        BranchManager,
+                        Location                
+                    ) VALUES(%s,%s,%s)
+                """,(self.BranchId, self.BranchManager, self.Location))
+            except Exception as e:
+                raise Exception(f" error while inserting into NiceBranches tables:{e}")
+            
+    def update_branchManager(self, employeeId, branchId):
+        self.employeeId = employeeId
+        self.branchId = branchId
 
+        # reconnect cursor
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE NisaBranches")
+                self.cursor.execute("""
+                    UPDATE BranchDetails
+                    SET BranchManager = %s
+                    WHERE
+                        BranchId == %s   
+                """,(self.employeeId,self.branchId))
+            except Exception as e:
+                raise Exception(f"error while updating branch manager:{e}")
+            
+
+    def DeleteBranch(self,branchId):
+        self.branchId = branchId
+        # reconnect cursor
+        self.reconnect_if_needed()
+
+        if self.cursor:
+            try:
+                self.cursor.execute("USE NisaBranches")
+                self.cursor.execute("""
+                    DELETE FROM Branches
+                    WHERE
+                        BranchId == %s
+                """,(self.branchId,))
+            except Exception as e:
+                raise Exception(f"error while deleting branch from Nisa branches database:{e}")
+
+        
+            
 

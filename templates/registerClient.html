@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Client Registration</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -57,11 +57,11 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="fullName">First Name</label>
-                        <input type="text" class="form-control" id="fullName" name="fullName" required>
+                        <input type="text" class="form-control" id="firstName" name="fullName" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="fullName">Sir Name</label>
-                        <input type="text" class="form-control" id="fullName" name="fullName" required>
+                        <input type="text" class="form-control" id="surName" name="fullName" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="dob">Date of Birth</label>
@@ -72,11 +72,11 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label > Religion</label>
-                        <input type="text" class="form-control" required>
+                        <input type="text" id="religion" class="form-control" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label > Gender </label>
-                        <input type="text" class="form-control" required>
+                        <input type="text"  id="gender" class="form-control" required>
                     </div>
                 </div>
                 <div class="form-row">
@@ -106,55 +106,39 @@
                     </div>
                 </div>
 
-                <!-- Account Preferences -->
-                <!-- <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="accountType">Account Type</label>
-                        <select id="accountType" name="accountType" class="form-control" required>
-                            <option value="savings">Savings Account</option>
-                            <option value="checking">Credit Account</option>
-                            
-                        </select>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="initialDeposit">Initial Deposit Amount</label>
-                        <input type="number" class="form-control" id="initialDeposit" name="initialDeposit" required>
-                    </div>
-                </div> -->
-
                 <!-- Security Information -->
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="nextofKin">Next of kin (Full Name)</label>
-                        <input type="text" class="form-control" id="nextofKin" name="nextofKin" required>
+                        <input type="text" class="form-control" id="nextofKinName" name="nextofKin" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="nextofKin">Next of Kin Contact </label>
-                        <input type="text" class="form-control" id="nextofKin" name="nextofKin" placeholder="Phone" required>
+                        <input type="text" class="form-control" id="nextofKinPhone" name="nextofKin" placeholder="Phone" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="ssn">Next of Kin NIN Number / Social Security Number (SSN)</label>
-                        <input type="text" class="form-control" id="ssn" name="ssn" required>
+                        <input type="text" class="form-control" id="nextOfKinNin" name="ssn" required>
                     </div>
 
                     <div class="form-group col-md-6">
                         <label for="ssn"> Location</label>
-                        <input type="text" class="form-control" id="ssn" name="ssn" required>
+                        <input type="text" class="form-control" id="nextOfKinLocation" name="ssn" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="img"> Upload Client's Image</label>
-                        <input type="file" class="form-controk btn-outline-light"  accept="image/*" required>
+                        <input type="file" id="ownerPic" class="form-controk btn-outline-light"  accept="image/*" required>
                     </div>
-                    <div class="form-group col-md-6">
+                    <!-- <div class="form-group col-md-6">
                         <label for="img"> Upload next of kin's Image</label>
-                        <input type="file" class="form-controk btn-outline-light">
-                    </div>
+                        <input type="file" id="nextOfKinPic" class="form-controk btn-outline-light">
+                    </div> -->
                 </div>
 
                 <!-- Terms and Conditions -->
@@ -164,7 +148,7 @@
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" class="btn btn-primary submit-btn btn-block">Register</button>
+                <button type="submit" class="btn btn-primary submit-btn btn-block" id="submitt">Register</button>
             </form>
         </div>
     </div>
@@ -181,8 +165,7 @@
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/registerClients.js"></script>
 </body>
 </html>
