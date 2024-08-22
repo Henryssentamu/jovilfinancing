@@ -7,7 +7,7 @@ function sendbranchDetails(){
             const branchManager = document.getElementById("branchManager").value;
             const data = {
                 "type":"branchCreation",
-                "data":{"branchName":branchName, "Loction":branchLocation, "branchManager": branchManager}
+                "data":{"branchName":branchName, "Location":branchLocation, "branchManager": branchManager}
             };
 
             fetch("createBranch",{

@@ -1,12 +1,11 @@
 
-from ast import Pass
-from crypt import methods
 from flask import Flask, jsonify, render_template, request
 from enviromentkeys import secret_key
 import mysql.connector as sql
 
-from DatabaseClasses import ConnectToMySql, RegisterClient, ExistingAccounts
+from DatabaseClasses import Branches, ConnectToMySql, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
 from generateAccountNumber import GenerateAccountNumber
+from generateIds import GenerateIds
 
 
 app = Flask(__name__)
@@ -20,8 +19,91 @@ def managrDashboard():
 def workersPage():
     return render_template("workersPage.html")
 
-@app.route("/employeeRecrutimentForm")
+@app.route("/employeeRecrutimentForm", methods =["GET", "POST"])
 def employeeRecrutimentForm():
+    if request.method == "POST":
+        try:
+            if request.content_type.startswith("multipart/form-data"):
+                firstName = request.form.get("firstName")
+                lastName = request.form.get("lastName")
+                age = request.form.get("age")
+                phoneNumber = request.form.get("phoneNumber")
+                email = request.form.get("email")
+                current_address = request.form.get("current_address")
+                district = request.form.get("district")
+                city = request.form.get("city")
+                village = request.form.get("village")
+                Branch = request.form.get("Branch")
+                dept = request.form.get("dept")
+                employeeType = request.form.get("employeeType")
+                roleAsigned = request.form.get("roleAsigned")
+                salary = request.form.get("salary")
+                documents = request.files.get("documents")
+                # binalizing the documents
+                document = documents.read()
+
+                try:
+                    # existing accounts
+                    ids = ExistingIds()
+                    employeeIds = ids.fetchEmployeeIds()
+                except Exception as e:
+                    raise Exception(f"error while calling Existing Employee ids  in employee recrutiment route:{e}")
+
+                try:
+                    # generate employeeId
+                    idobj = GenerateIds()
+                    EmployeeId = idobj.employeeId(existingEmployeeIDs= employeeIds)
+
+                except Exception as e:
+                    raise Exception(f"error in calling generateId class under employee recrutiment  route:{e}")
+                try:
+                    employeeRegistrationDetails = {
+                        "id":EmployeeId,
+                        "firstName":firstName,
+                        "lastName":lastName,
+                        "age":int(age),
+                        "phoneNumber":phoneNumber,
+                        "email":email,
+                        "current_address":current_address,
+                        "district":district,
+                        "city":city,
+                        "village":village,
+                        "Branch":Branch,
+                        "dept":dept,
+                        "employeeType":employeeType,
+                        "roleAsigned":roleAsigned,
+                        "salary":int(salary),
+                        "documents":document
+                        
+                    }
+                    # insert details into employee database
+                    try:
+                        employeeObject = EmployeeDatabase()
+                        employeeObject.insert_into_tables(employeeDetails=employeeRegistrationDetails)
+                    except Exception as e:
+                        raise Exception(f"error while calling insert into table methd of employee database in employee recrutiment route:{e}")
+
+                except Exception as e:
+                    raise Exception(f"error while calling employee database in employee form route:{e}")
+                
+                return jsonify({"response":"success"})
+
+            else:
+                pass
+
+        except Exception as e:
+            raise Exception(f"multi part post request error:{e} ")
+    else:
+        requesttype = request.args.get("type")
+        if requesttype == "branchDetails":
+            try:
+                brachObj = Branches()
+                branchDetails = brachObj.fetch_branch_details()
+                return jsonify(branchDetails)
+            except Exception as e:
+                raise Exception(f"error while calling fetch branch details in the employee recrutiment form route:{e}")
+
+
     return render_template("employeeRecrutimentForm.html")
 
 @app.route("/targets")
@@ -44,10 +126,30 @@ def branches():
 def createBranch():
     if request.method == "POST":
         requesttype = request.json.get("type")
-        # print(f"here is the fa: {requesttype}")
         if requesttype  and requesttype == "branchCreation":
-            data = request.json.get("data")
-            print(data)
+            Branch_data = request.json.get("data")
+            try:
+                # getting existing ids
+                existingIdz = ExistingIds()
+                existId = existingIdz.fetchBranchIds()
+            except Exception as e:
+                raise Exception(f"error while calling existing ids class in create brach route:{e}")
+            try:
+                # generating branch Id
+                idObject = GenerateIds()
+                branchId = idObject.branchId(existingBranchIDs=existId)
+                Branch_data["branchId"] = branchId
+
+            except Exception as e:
+                raise Exception(f" error while calling generate branch id in create branch route: {e}")
+            try:
+                # inserting into branch database
+                obj = Branches()
+                obj.insert_into_tables(branchObject=Branch_data)
+                # print(Branch_data)
+            except Exception as e:
+                raise Exception(f"error while inserting into branch database:{e}")
+            
         return jsonify({"response":"success"})
     return render_template("createBranch.html")
 

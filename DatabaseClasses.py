@@ -1,6 +1,5 @@
 import mysql.connector as sql
 
-from mainproject import branch
 
 class ConnectToMySql:
     def __init__(self) -> None:
@@ -69,7 +68,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS ContactDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         PhoneNumber VARCHAR(200),
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber) ON DELETE SET NULL              
                     )
@@ -77,7 +76,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS socialDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         DateOfBirth  VARCHAR(100),
                         Gender VARCHAR(50),
                         Religion VARCHAR(200),
@@ -88,7 +87,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS AddressDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         PermanentAddress_village TEXT,
                         City_Devission TEXT,
                         District TEXT,  
@@ -98,7 +97,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS NextOfKinDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         NinNumber VARCHAR(500),
                         FullName VARCHAR(500),
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)  ON DELETE SET NULL                                
@@ -107,7 +106,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS NextOfKinContactDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         PhoneNumber VARCHAR(100),
                         Location VARCHAR(200),
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL              
@@ -117,7 +116,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS pictures(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         OwnerPic LONGBLOB NOT NULL,
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL
                         
@@ -126,7 +125,7 @@ class RegisterClient(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS branchDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        AccountNumber VARCHAR(500),
+                        AccountNumber VARCHAR(500) NULL,
                         BranchId VARCHAR(500),
                         OfficerId VARCHAR(500),
                         FOREIGN KEY (AccountNumber) REFERENCES AccountOwner(AccountNumber)   ON DELETE SET NULL
@@ -373,6 +372,47 @@ class ExistingAccounts(ConnectToMySql):
             return { accountObj[0] for accountObj in accounts}
         
 
+        
+class ExistingIds(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+        if not self.cursor:
+            raise Exception("Database cursor is not initialized. Check the database connection.")
+        
+    def fetchBranchIds(self):
+        if self.cursor:
+            try:
+                self.cursor.execute(" USE NisaBranches")
+                self.cursor.execute("""
+                    SELECT BranchId  FROM Branches
+                """)
+                idList  = self.cursor.fetchall()
+                self.close_connection()
+                return {id[0] for id in idList }
+            except Exception as e:
+                raise Exception(f"error while fetching branch ids:{e}")
+        else:
+            raise Exception("cursor not initialized in the ExistingIds class")
+        
+    def fetchEmployeeIds(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute(" USE employeeDatabase")
+                self.cursor.execute("""
+                    SELECT EmployeeId FROM employeeDetails
+                """)
+                idList  = self.cursor.fetchall()
+                self.close_connection()
+                return {id[0] for id in idList }
+            except Exception as e:
+                raise Exception(f"error while fetching branch ids:{e}")
+        else:
+            raise Exception("cursor not initialized in the ExistingIds class")
+
+
+        
+
 class Branches(ConnectToMySql):
     def __init__(self) -> None:
         super().__init__()
@@ -397,7 +437,7 @@ class Branches(ConnectToMySql):
                 self.cursor.execute("""
                     CREATE TABLE IF NOT EXISTS BranchDetails(
                         Date DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        BranchId VARCHAR(300),
+                        BranchId VARCHAR(300) NULL,
                         BranchManager VARCHAR(500),
                         Location VARCHAR(500),
                         FOREIGN KEY (BranchId) REFERENCES Branches(BranchId) ON DELETE SET NULL               
@@ -408,9 +448,14 @@ class Branches(ConnectToMySql):
         else:
             raise Exception("cursor not avialable")
     def insert_into_tables(self, branchObject):
+        """
+            _This methode inserts new branch details in the branch database_ 
+            Args:
+                branchObject (_dic_): _with the following keys,  branchName,BranchManager,ie employeeId_
+        """
         self.BranchId = branchObject["branchId"]
         self.BranchName = branchObject["branchName"]
-        self.BranchManager = branchObject["BranchManager"]
+        self.BranchManager = branchObject["branchManager"]
         self.Location = branchObject["Location"]
 
         # reconnect cursor
@@ -431,10 +476,20 @@ class Branches(ConnectToMySql):
                         Location                
                     ) VALUES(%s,%s,%s)
                 """,(self.BranchId, self.BranchManager, self.Location))
+                self.connection.commit()
             except Exception as e:
                 raise Exception(f" error while inserting into NiceBranches tables:{e}")
+            finally:
+                self.close_connection()
             
     def update_branchManager(self, employeeId, branchId):
+        """
+            _This methode update branch manager_
+            Arg:
+                _employeeId: (str), branchId: (str)_
+            Return:
+                _None_
+        """
         self.employeeId = employeeId
         self.branchId = branchId
 
@@ -449,11 +504,23 @@ class Branches(ConnectToMySql):
                     WHERE
                         BranchId == %s   
                 """,(self.employeeId,self.branchId))
+                self.connection.commit()
             except Exception as e:
                 raise Exception(f"error while updating branch manager:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initialized while updating branchManager")
             
 
     def DeleteBranch(self,branchId):
+        """
+            _this methode deletes a branch_
+            Arg:
+                _branchId (str)_
+            Return:
+                _None_
+        """
         self.branchId = branchId
         # reconnect cursor
         self.reconnect_if_needed()
@@ -468,7 +535,278 @@ class Branches(ConnectToMySql):
                 """,(self.branchId,))
             except Exception as e:
                 raise Exception(f"error while deleting branch from Nisa branches database:{e}")
+            
+    def fetch_branch_details(self):
+        """_This methode fetches branch details_
 
+        Returns:
+            Branch Details: _object of branch details_
+            
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                try:
+                    self.cursor.execute("USE NisaBranches")
+                    self.cursor.execute("""
+                        SELECT
+                            B.BranchId ,
+                            B.BranchName,
+                            D.BranchManager,
+                            D.Location
+                                        
+                        FROM
+                            Branches AS B
+                        JOIN
+                            BranchDetails AS D ON B.BranchId = D.BranchId
+                    """)
+                    data = self.cursor.fetchall()
+                    data = data[0]
+                    return {"branchId":data[0], "branchName": data[1],"branchManager":data[2],"officeLocation":data[3]}
+                except Exception as e:
+                    raise Exception(f"error while connecting to NisaBranches database as fetching branch details: {e}")
+                
+                finally:
+                    self.close_connection()
+            else:
+                raise Exception("cursor is not initialized while fetching branch details")
+        except Exception as e:
+            raise Exception(f"error in fetching branch details: {e}")
+
+
+class EmployeeDatabase(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+        self.workStatus = "Active"
+    def create_database(self):
+        if self.cursor:
+            try:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS employeeDatabase")
+            except Exception as e:
+                raise Exception(f"error while creating employee database:{e}")
+            try:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS employeeDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) PRIMARY KEY,
+                        Firstname VARCHAR(500),
+                        LastName VARCHAR(500),
+                        Age INT                                  
+                    )  
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS contactDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) NULL,
+                        PhoneNumber VARCHAR(500),
+                        Email VARCHAR(500),   
+                        FOREIGN KEY(EmployeeId)  REFERENCES   employeeDetails(EmployeeId) ON DELETE SET NULL                                
+                    )
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS ResidencyDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) NULL,
+                        CurrentAddress VARCHAR(500),
+                        District VARCHAR(500),
+                        City VARCHAR(500),
+                        Village VARCHAR(500),
+                        FOREIGN KEY(EmployeeId)  REFERENCES   employeeDetails(EmployeeId) ON DELETE SET NULL                   
+                    )
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS WorkDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) NULL,
+                        WorkStatus VARCHAR(100),
+                        Role TEXT,
+                        Branch VARCHAR(500),
+                        Dept VARCHAR(500),
+                        EmploymentType VARCHAR(500),
+                        Salary INT,
+                        FOREIGN KEY(EmployeeId)  REFERENCES   employeeDetails(EmployeeId) ON DELETE SET NULL                 
+                    )
+                """)
+
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS Documments(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) NULL,
+                        Documents LONGBLOB,
+                        FOREIGN KEY(EmployeeId)  REFERENCES  employeeDetails(EmployeeId) ON DELETE SET NULL            
+                    )
+                """)
+            except Exception as e:
+                raise Exception(F"error while creating tables in employeeDatabase :{e} ")
+
+        else:
+            raise Exception("cursor not initiated for create employee database")
         
+
+    def insert_into_tables(self,employeeDetails):
+        self.employeeId = employeeDetails["id"]
+        self.firstName = employeeDetails["firstName"]
+        self.lastName = employeeDetails["lastName"]
+        self.age = employeeDetails["age"]
+        self.phoneNumber = employeeDetails["phoneNumber"]
+        self.email = employeeDetails["email"]
+        self.current_address = employeeDetails["current_address"]
+        self. district = employeeDetails["district"]
+        self.city = employeeDetails["city"]
+        self.village = employeeDetails["village"]
+        self.Branch = employeeDetails["Branch"]
+        self.dept = employeeDetails["dept"]
+        self.employeeType = employeeDetails["employeeType"]
+        self.roleAsigned = employeeDetails["roleAsigned"]
+        self.salary = employeeDetails["salary"]
+        self.documents = employeeDetails["documents"]
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                try:
+                    self.cursor.execute("USE employeeDatabase")
+                    self.cursor.execute("""
+                        INSERT INTO employeeDetails(
+                            EmployeeId,
+                            Firstname,
+                            LastName,
+                            Age               
+                        )VALUES (%s,%s,%s,%s)  
+                    """,(self.employeeId,self.firstName,self.firstName,self.age))
+                    self.cursor.execute("""
+                        INSERT INTO contactDetails(
+                            EmployeeId,
+                            PhoneNumber,
+                            Email                
+                        )VALUES(%s,%s,%s)
+                    """,(self.employeeId, self.phoneNumber,self.email))
+                    self.cursor.execute("""
+                        INSERT INTO ResidencyDetails(
+                            EmployeeId,
+                            CurrentAddress,
+                            District,
+                            City,
+                            Village               
+                        )VALUES(%s,%s,%s,%s,%s)
+                    """,(self.employeeId,self.current_address,self.district,self.city,self.village))
+                    self.cursor.execute("""
+                        INSERT INTO WorkDetails(
+                            EmployeeId,
+                            WorkStatus,
+                            Role,
+                            Branch,
+                            Dept,
+                            EmploymentType,
+                            Salary                
+                        )VALUES(%s,%s,%s,%s,%s,%s,%s)
+                    """,(self.employeeId,self.workStatus,self.roleAsigned,self.Branch,self.dept,self.employeeType,self.salary))
+                    self.cursor.execute("""
+                        INSERT INTO Documments(
+                            EmployeeId,
+                            Documents              
+                        )VALUES(%s,%s)
+                    """,(self.employeeId,self.documents))
+                    self.connection.commit()
+                except Exception as e:
+                    raise Exception(f"error while inserting into employeeDatabase tables:{e}")
+                finally:
+                    self.close_connection()
+            else:
+                raise Exception("cursor not connected in insert into tables under employee database")
+        except Exception as e:
+            raise Exception(f"error while reconnecting the cursor in the insert into tables under employee db:{e}")
+        
+    def updateEmployeeDept(self,detailsObject):
+        """_this methode update employee dept_
+            Arg:
+                _detailsObject: employeeId (str), dept assigned to (str), newRole (str)_
+            Return:
+                _Nothing_
+        """
+        employeeId = detailsObject["employeeId"]
+        deptId = detailsObject["deptId"]
+        role = detailsObject["NewRole"]
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    UPDATE WorkDetails
+                    SET Dept = %s, Role = %s
+                    WHERE
+                        EmployeeId == %s    
+                """,(deptId,role,employeeId))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized while updating employee deptment")
+        except Exception as e:
+            raise Exception(f"error while updating employee dept: {e}")
+        finally:
+            self.close_connection()
+
+    def updateEmployeeBranch(self,detailsObject):
+        """_this methode update employee dept_
+            Arg:
+                _detailsObject: employeeId (str), Branch Id assigned to (str)_
+            Return:
+                _Nothing_
+        """
+        employeeId = detailsObject["employeeId"]
+        branchId = detailsObject["branchId"]
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    UPDATE WorkDetails
+                    SET Branch = %s
+                    WHERE
+                        EmployeeId == %s    
+                """,(branchId,employeeId))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized while updating employee deptment")
+        except Exception as e:
+            raise Exception(f"error while updating employee dept: {e}")
+        finally:
+            self.close_connection()
+
+    def updateEmployeeSalary(self,detailsObject):
+        """_this methode update employee dept_
+            Arg:
+                _detailsObject: employeeId (str), Salary amount to (int)_
+            Return:
+                _Nothing_
+        """
+        employeeId = detailsObject["employeeId"]
+        salaryAmount = detailsObject["salary"]
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    UPDATE WorkDetails
+                    SET Salary = %s
+                    WHERE
+                        EmployeeId == %s    
+                """,(salaryAmount,employeeId))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized while updating employee deptment")
+        except Exception as e:
+            raise Exception(f"error while updating employee dept: {e}")
+        finally:
+            self.close_connection()
+
+       
+# employee = EmployeeDatabase()
+# employee.create_database() 
+
+# branchObj = Branches()
+# branchObj.createDatabase()
             
 
