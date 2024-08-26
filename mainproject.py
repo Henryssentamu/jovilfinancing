@@ -1,9 +1,10 @@
 
+from crypt import methods
 from flask import Flask, jsonify, render_template, request
 from enviromentkeys import secret_key
 import mysql.connector as sql
 
-from DatabaseClasses import Branches, ConnectToMySql, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
+from DatabaseClasses import Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
 from generateAccountNumber import GenerateAccountNumber
 from generateIds import GenerateIds
 
@@ -39,8 +40,11 @@ def employeeRecrutimentForm():
                 roleAsigned = request.form.get("roleAsigned")
                 salary = request.form.get("salary")
                 documents = request.files.get("documents")
+                branchId = request.form.get("branchId")
+                deptId = request.form.get("deptId")
                 # binalizing the documents
                 document = documents.read()
+                
 
                 try:
                     # existing accounts
@@ -70,10 +74,12 @@ def employeeRecrutimentForm():
                         "village":village,
                         "Branch":Branch,
                         "dept":dept,
+                        "deptId":deptId,
                         "employeeType":employeeType,
                         "roleAsigned":roleAsigned,
                         "salary":int(salary),
-                        "documents":document
+                        "documents":document,
+                        "branchId":branchId
                         
                     }
                     # insert details into employee database
@@ -102,6 +108,14 @@ def employeeRecrutimentForm():
                 return jsonify(branchDetails)
             except Exception as e:
                 raise Exception(f"error while calling fetch branch details in the employee recrutiment form route:{e}")
+        elif requesttype == "getDeptdetails":
+            try:
+                deptdetails = Deptments()
+                deptdata = deptdetails.fetch_existingDeptment()
+                return jsonify(deptdata)
+            except Exception as e:
+                raise Exception(f"error while loading deptment detail class in create dept route:{e}")
+            
 
 
     return render_template("employeeRecrutimentForm.html")
@@ -152,6 +166,39 @@ def createBranch():
             
         return jsonify({"response":"success"})
     return render_template("createBranch.html")
+
+
+@app.route("/createDeptments", methods =["GET", "POST"])
+def createDeptments():
+    if request.method == "POST":
+        requestType = request.json.get("type")
+        if requestType == "deptCreation":
+            data = request.json.get("data")
+            try:
+                # getting existing dept id
+                existingDeptObj = Deptments()
+                ids = existingDeptObj.existingDeptIdz()
+                print(ids)
+            except Exception as e:
+                raise Exception(f"error while calling existing deptm ent class in create deptment route:{e}")
+            try:
+                # generate dept id
+                idObj = GenerateIds()
+                deptIdz = idObj.deptmentId(existingDeptIds=ids)
+                data["DeptId"] = deptIdz
+            except Exception as e:
+                raise Exception(f"error while generating dept id in create dept route:{e}")
+            try:
+                # insert into dept database
+                DeptObj = Deptments()
+                DeptObj.insert_into_tables(deptObject=data)
+            except Exception as e:
+                raise Exception(f"error while calling insert into dept database in create deptment:{e}")
+            return jsonify({"response":"succuse"})
+    else:
+        pass
+        
+    return render_template("createDeptments.html")
 
 @app.route("/branch")
 def branch():

@@ -11,7 +11,7 @@ function getinputs(){
     formatedata.append("city",document.getElementById("city").value);
     formatedata.append("village",document.getElementById("zone").value);
     formatedata.append("Branch", document.getElementById("Branch").value);
-    formatedata.append("dept",document.getElementById("department").value);
+    formatedata.append("dept",document.getElementById("deptOptions").value);
     formatedata.append("employeeType",document.getElementById("employeeType").value);
     formatedata.append("roleAsigned",document.getElementById("roleAsigned").value);
     formatedata.append("salary",document.getElementById("salary").value);
@@ -20,14 +20,32 @@ function getinputs(){
     return formatedata
 }
 
+function getSelectedBranch(){
+    // Get the select element
+    const selectElement = document.getElementById('Branch');
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    const branchId = selectedOption.dataset.branchId;
+    return branchId
+
+}
+
+function getSelectedDept(){
+    const selectedElement = document.getElementById("deptOptions")
+    const selectedoption = selectedElement.options[selectedElement.selectedIndex];
+    const deptId = selectedoption.dataset.deptId
+    return deptId
+}
 
 function sendTosever(){
     document.getElementById("submit")
         .addEventListener("click", async (event) =>{
             event.preventDefault()
-            const data = getinputs()
-
-            await fetch("/employeeRecrutimentForm",{
+            const data = await getinputs()
+            const selectedBranch = await getSelectedBranch()
+            const selectedDept =  await getSelectedDept()
+            data.append("branchId",selectedBranch)
+            data.append("deptId", selectedDept)
+            fetch("/employeeRecrutimentForm",{
                 method:"POST",
                 body: data
             })

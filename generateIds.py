@@ -5,6 +5,7 @@ class GenerateIds:
     def __init__(self) -> None:
         self.branchPrefix = "NB"
         self.EmployeePrefix = "NE"
+        self.DeptPrefix = "ND"
         self.IdLength = 5
 
     def branchId(self,existingBranchIDs):
@@ -33,3 +34,16 @@ class GenerateIds:
             return id
         else:
             return self.employeeId(self,existingEmployeeIDs)
+    def deptmentId(self,existingDeptIds):
+        """_this methode is called whenever a new dept is created_
+            Args:
+                existing dept Ids (_set_): _set of existing dept Ids_
+        """
+        self.existingDeptIds = existingDeptIds
+        number = str(secrets.randbelow(10**self.IdLength)).zfill(self.IdLength)
+        id = f"{self.DeptPrefix}{number}"
+        if id not in self.existingDeptIds:
+            return id
+        else:
+            return self.deptmentId(existingDeptIds)
+

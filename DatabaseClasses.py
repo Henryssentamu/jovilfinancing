@@ -1,3 +1,4 @@
+from ast import Return
 import mysql.connector as sql
 
 
@@ -560,9 +561,8 @@ class Branches(ConnectToMySql):
                         JOIN
                             BranchDetails AS D ON B.BranchId = D.BranchId
                     """)
-                    data = self.cursor.fetchall()
-                    data = data[0]
-                    return {"branchId":data[0], "branchName": data[1],"branchManager":data[2],"officeLocation":data[3]}
+                    branch_data = self.cursor.fetchall()
+                    return [{"branchId":data[0], "branchName": data[1],"branchManager":data[2],"officeLocation":data[3]} for data in branch_data ]
                 except Exception as e:
                     raise Exception(f"error while connecting to NisaBranches database as fetching branch details: {e}")
                 
@@ -572,6 +572,135 @@ class Branches(ConnectToMySql):
                 raise Exception("cursor is not initialized while fetching branch details")
         except Exception as e:
             raise Exception(f"error in fetching branch details: {e}")
+        
+
+
+
+
+
+
+class Deptments(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+        if not self.cursor:
+            raise Exception("Database cursor is not initialized. Check the database connection.")
+    def createDatabase(self):
+        if self.cursor:
+            try:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS NisaDeptments")
+            except Exception as e:
+                raise Exception(f"error while creating deptments database: {e}")
+            try:
+                self.cursor.execute("USE NisaDeptments")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS Deptments(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        DeptId VARCHAR(500) PRIMARY KEY,
+                        DeptName VARCHAR(500)                
+                    )
+                """)
+
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS DeptDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        DeptId VARCHAR(500) NULL,
+                        DeptHead VARCHAR(500),
+                        FOREIGN KEY (DeptId) REFERENCES Deptments(DeptId) ON DELETE SET NULL               
+                    )
+                """)
+            except Exception as e:
+                raise Exception(f"error while creating tables in deptment database:{e}")
+        else:
+            raise Exception("cursor not avialable in  deptment database")
+    def insert_into_tables(self,deptObject):
+        """_This methods inserts  dept details into database_
+
+        Args:
+            deptObject (_dic_): _deptId, headOfDept_
+        """
+        self.DeptId = deptObject["DeptId"]
+        self.DeptName = deptObject["deptName"]
+        self.DeptHead = deptObject["headOfDept"]
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE NisaDeptments")
+                self.cursor.execute("""
+                    INSERT INTO Deptments(
+                        DeptId,
+                        DeptName                
+                    )VALUES(%s,%s)
+                """,(self.DeptId, self.DeptName))
+                self.cursor.execute("""
+                    INSERT INTO DeptDetails(
+                        DeptId,
+                        DeptHead              
+                    )VALUES(%s,%s)
+                """,(self.DeptId, self.DeptHead))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized in inserting into dept database")
+        except Exception as e:
+            raise Exception(f"error in inserting into dept database:{e}")
+        finally:
+            self.close_connection()
+    def fetch_existingDeptment(self):
+        """_This methods fetches existing deptment details_
+
+        Arg:
+            none_
+        Return:
+            DeptDetails(set)
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE NisaDeptments")
+                self.cursor.execute("""
+                    SELECT
+                        d.DeptId,
+                        d.DeptName,
+                        B.DeptHead 
+                    FROM
+                        Deptments AS d
+                    JOIN
+                        DeptDetails AS B ON B.DeptId = d.DeptId 
+                """)
+                data = self.cursor.fetchall()
+                return [{"deptId":obj[0],"deptName":obj[1], "headOfDept":obj[2]} for obj in data]
+        except Exception as e:
+            raise Exception(f"error while fetching deptment details:{e}")
+        finally:
+            self.close_connection()
+
+    def existingDeptIdz(self):
+        """_This methods fetches existing deptment idz_
+
+        Arg:
+            none_
+        Return:
+            DeptId(set)_
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE NisaDeptments")
+                self.cursor.execute("""
+                    SELECT
+                        DeptId
+                    FROM
+                        Deptments
+                """)
+                data = self.cursor.fetchall()
+                return { obj[0] for obj in data}
+        except Exception as e:
+            raise Exception(f"error while fetching deptment details:{e}")
+        finally:
+            self.close_connection()
+
+
+
 
 
 class EmployeeDatabase(ConnectToMySql):
@@ -621,8 +750,10 @@ class EmployeeDatabase(ConnectToMySql):
                         EmployeeId VARCHAR(500) NULL,
                         WorkStatus VARCHAR(100),
                         Role TEXT,
-                        Branch VARCHAR(500),
+                        BranchId VARCHAR(500),
+                        BranchName VARCHAR(500),
                         Dept VARCHAR(500),
+                        DeptId VARCHAR(500),
                         EmploymentType VARCHAR(500),
                         Salary INT,
                         FOREIGN KEY(EmployeeId)  REFERENCES   employeeDetails(EmployeeId) ON DELETE SET NULL                 
@@ -657,10 +788,12 @@ class EmployeeDatabase(ConnectToMySql):
         self.village = employeeDetails["village"]
         self.Branch = employeeDetails["Branch"]
         self.dept = employeeDetails["dept"]
+        self.deptId = employeeDetails["deptId"]
         self.employeeType = employeeDetails["employeeType"]
         self.roleAsigned = employeeDetails["roleAsigned"]
         self.salary = employeeDetails["salary"]
         self.documents = employeeDetails["documents"]
+        self.branchId = employeeDetails["branchId"]
         try:
             self.reconnect_if_needed()
             if self.cursor:
@@ -695,12 +828,14 @@ class EmployeeDatabase(ConnectToMySql):
                             EmployeeId,
                             WorkStatus,
                             Role,
-                            Branch,
+                            BranchId,
+                            BranchName,
                             Dept,
+                            DeptId,
                             EmploymentType,
                             Salary                
-                        )VALUES(%s,%s,%s,%s,%s,%s,%s)
-                    """,(self.employeeId,self.workStatus,self.roleAsigned,self.Branch,self.dept,self.employeeType,self.salary))
+                        )VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                    """,(self.employeeId,self.workStatus,self.roleAsigned,self.branchId,self.Branch,self.dept,self.deptId, self.employeeType,self.salary))
                     self.cursor.execute("""
                         INSERT INTO Documments(
                             EmployeeId,
@@ -803,10 +938,12 @@ class EmployeeDatabase(ConnectToMySql):
             self.close_connection()
 
        
-# employee = EmployeeDatabase()
-# employee.create_database() 
+employee = EmployeeDatabase()
+employee.create_database() 
 
 # branchObj = Branches()
 # branchObj.createDatabase()
-            
+
+# dept = Deptments()
+# dept.createDatabase()
 
