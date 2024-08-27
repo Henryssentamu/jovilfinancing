@@ -94,8 +94,21 @@ def employeeRecrutimentForm():
                 
                 return jsonify({"response":"success"})
 
-            else:
-                pass
+            elif request.content_type.startswith("application/json"):
+                requesttype = request.json.get("type")
+                if requesttype == "employeebranchUpdte":
+                    data = request.json.get("data")
+                    try:
+                        employeeObj = EmployeeDatabase()
+                        employeeObj.updateEmployeeBranch(detailsObject=data)
+                    except Exception as e:
+                        raise Exception(f"error while updating employee branch details:{e}")
+                    return jsonify({"response":"successful"})
+                elif requesttype == "employeeDeptmentUpdte":
+                    data = request.json.get("data")
+                    employeeObjct = EmployeeDatabase()
+                    employeeObjct.updateEmployeeDept(detailsObject=data)
+                    return jsonify({"response":"success"})
 
         except Exception as e:
             raise Exception(f"multi part post request error:{e} ")
@@ -132,8 +145,15 @@ def setTargets():
 def reportOnTargets():
     return render_template("reports.html")
 
-@app.route("/branches")
+@app.route("/branches", methods=["GET","POST"])
 def branches():
+    if request.method == "GET":
+        requestType = request.args.get("type")
+        if requestType == "branchDetails":
+            branchObj = Branches()
+            data = branchObj.fetch_branch_details()
+            # print(data)
+            return jsonify(data)
     return render_template("branches.htm")
 
 @app.route("/createBranch", methods =["GET", "POST"])
@@ -167,6 +187,10 @@ def createBranch():
         return jsonify({"response":"success"})
     return render_template("createBranch.html")
 
+@app.route("/updateEmployeeDept")
+def updateEmployeeDept():
+    return render_template("updateEmployeeDept.html")
+
 
 @app.route("/createDeptments", methods =["GET", "POST"])
 def createDeptments():
@@ -178,7 +202,6 @@ def createDeptments():
                 # getting existing dept id
                 existingDeptObj = Deptments()
                 ids = existingDeptObj.existingDeptIdz()
-                print(ids)
             except Exception as e:
                 raise Exception(f"error while calling existing deptm ent class in create deptment route:{e}")
             try:

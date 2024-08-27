@@ -869,9 +869,9 @@ class EmployeeDatabase(ConnectToMySql):
                 self.cursor.execute("USE employeeDatabase")
                 self.cursor.execute("""
                     UPDATE WorkDetails
-                    SET Dept = %s, Role = %s
+                    SET DeptId = %s, Role = %s
                     WHERE
-                        EmployeeId == %s    
+                        EmployeeId = %s    
                 """,(deptId,role,employeeId))
                 self.connection.commit()
             else:
@@ -897,9 +897,9 @@ class EmployeeDatabase(ConnectToMySql):
                 self.cursor.execute("USE employeeDatabase")
                 self.cursor.execute("""
                     UPDATE WorkDetails
-                    SET Branch = %s
+                    SET BranchId = %s
                     WHERE
-                        EmployeeId == %s    
+                        EmployeeId = %s    
                 """,(branchId,employeeId))
                 self.connection.commit()
             else:
@@ -938,8 +938,8 @@ class EmployeeDatabase(ConnectToMySql):
             self.close_connection()
 
        
-employee = EmployeeDatabase()
-employee.create_database() 
+# employee = EmployeeDatabase()
+# employee.create_database() 
 
 # branchObj = Branches()
 # branchObj.createDatabase()

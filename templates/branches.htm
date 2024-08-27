@@ -37,7 +37,7 @@
                         <a class="nav-link btn btn-success" href="{{url_for('createBranch')}}"> Create Branch</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-success" href="{{url_for('attatchEmployeeTobranch')}}"> Attatch employee To Branch</a>
+                        <a class="nav-link btn btn-success" href="{{url_for('attatchEmployeeTobranch')}}">Update Employee's Branch</a>
                     </li>
                     <li class="nav-item">
                         <a class=" btn btn-danger nav-link" href="{{url_for('mergeBranches')}}"> Merge Branches</a>
@@ -60,7 +60,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <!-- <div class="col-md-4 mb-4">
                 <div class="card stat-card p-3">
                     <div class="card-body">
                         <h5 class="card-title">Total Employees</h5>
@@ -75,7 +75,7 @@
                         <p class="card-text display-4">1200</p>
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div class="row mt-5">
@@ -86,33 +86,10 @@
                             <tr>
                                 <th>Branches</th>
                                 <th>Location</th>
-                                <th>Branch Manager</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <a class="link" href="{{url_for('branch')}}">Main Branch</a>
-                                </td>
-                                <td>kampale</td>
-                                <td>Matove Yasin</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="{{url_for('branch')}}" class="link">Wandegeya kalerwe</a>
-                                </td>
-                                <td>kalerwe</td>
-                                <td>James Kikawa</td>
-                            </tr>
-
-                            <tr>
-                                <td>
-                                    <a href="{{url_for('branch')}}" class="link">Kawempe Matugga</a>
-                                </td>
-                                <td>Kawempe</td>
-                                <td>Nalugwa Jessca</td>
-                            </tr>
-                            <!-- Add more branches as needed -->
+                        <tbody id="branchTableDetails">
+                            
                         </tbody>
                     </table>
                 </div>
@@ -121,5 +98,6 @@
     </div>
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/loadBranchDetailsOnBranchesPage.js"></script>
 </body>
 </html>
