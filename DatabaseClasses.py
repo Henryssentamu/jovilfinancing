@@ -573,6 +573,28 @@ class Branches(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error in fetching branch details: {e}")
         
+    def numberOfBranches(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE NisaBranches")
+                self.cursor.execute("""
+                    SELECT 
+                        COUNT(*) AS numberOfBranches
+                    FROM
+                        Branches
+                """)
+                data = self.cursor.fetchone()
+                if data is None:
+                    raise Exception("No data returned from the query.")
+            except Exception as e:
+                raise Exception(f"error while fetching number of branches:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initialized while fetching number of branches")
+        return {"branches":data[0] if data else 0}
+        
 
 
 
@@ -936,6 +958,63 @@ class EmployeeDatabase(ConnectToMySql):
             raise Exception(f"error while updating employee dept: {e}")
         finally:
             self.close_connection()
+    def fetchEmployeeDetails(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        E.EmployeeId,
+                        E.Firstname,
+                        E.LastName,
+                        E.Age,
+                        C.PhoneNumber,
+                        C.Email,
+                        R.CurrentAddress,
+                        R.District,
+                        R.City,
+                        R.Village,
+                        W.WorkStatus,
+                        W.Role,
+                        W.BranchId,
+                        W.BranchName,
+                        W.Dept,
+                        W.DeptId,
+                        W.EmploymentType,
+                        W.Salary 
+                    FROM
+                        employeeDetails AS E
+                    JOIN contactDetails AS C ON C.EmployeeId = E.EmployeeId
+                    JOIN ResidencyDetails AS R ON R.EmployeeId = E.EmployeeId
+                    JOIN WorkDetails AS W ON W.EmployeeId = E.EmployeeId
+                                    
+                """)
+                dataObj = self.cursor.fetchall()
+                return [{
+                    "EmployeeId":data[0],
+                    "Firstname":data[1],
+                    "LastName":data[2],
+                    "Age":data[3],
+                    "PhoneNumber":data[4],
+                    "Email":data[5],
+                    "CurrentAddress":data[6],
+                    "District":data[7],
+                    "City":data[8],
+                    "Village":data[9],
+                    "WorkStatus":data[10],
+                    "Role":data[11],
+                    "BranchId":data[12],
+                    "BranchName":data[13],
+                    "Dept":data[14],
+                    "DeptId":data[15],
+                    "EmploymentType":data[16],
+                    "Salary":data[17]
+                    } for data in dataObj]
+            else:
+                raise Exception("cursor not initialized in fetching employee details")
+        except Exception as e:
+            raise Exception(f"error while fetching employee details:{e}")
 
        
 # employee = EmployeeDatabase()

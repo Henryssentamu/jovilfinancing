@@ -135,25 +135,8 @@
                                 <th>Email</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <a href="{{url_for('employeeProfile')}}" class=" btn btn-sm  nav-link">Ssentamu Henry</a>
-                                </td>
-                                <td>R&D</td>
-                                <td>Main</td>
-                                <td>0788105533</td>
-                                <td>ssentamuhenry63@gmail.com</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="{{url_for('employeeProfile')}}" class=" btn btn-sm  nav-link">Kenyi Peter</a>
-                                </td>
-                                <td>Credit</td>
-                                <td>Wandegeya kalerwe</td>
-                                <td>0788105533</td>
-                                <td>Kenyipeter@gmail.com</td>
-                            </tr>
+                        <tbody id="employeeDetails">
+                            
                         </tbody>
                     </table>
                 </div>
@@ -166,6 +149,8 @@
 
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/loadEmployeeDetailsOnWorkPage.js"></script>
+    <script src="../static/jsFiles/sendEmployeeIdToserver.js"></script>
     
 </body>
 </html>

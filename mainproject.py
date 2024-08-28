@@ -16,8 +16,20 @@ app.config["SECRET_KEY"] = secret_key
 @app.route("/managrDashboard")
 def managrDashboard():
     return render_template("managerDashboard.html")
-@app.route("/workersPage")
+@app.route("/workersPage", methods= ["GET", "POST"])
 def workersPage():
+    if request.method == "GET":
+        try:
+            requestType = request.args.get("type")
+            if requestType == "employeeDetails":
+                employeeObject = EmployeeDatabase()
+                data = employeeObject.fetchEmployeeDetails()
+                return jsonify(data)
+        except Exception as e:
+            raise Exception(f"error in get request under workspage route:{e}")
+        
+
+
     return render_template("workersPage.html")
 
 @app.route("/employeeRecrutimentForm", methods =["GET", "POST"])
@@ -147,14 +159,20 @@ def reportOnTargets():
 
 @app.route("/branches", methods=["GET","POST"])
 def branches():
+    """this api sends fetch and sends data to be displayed on branches route"""
     if request.method == "GET":
         requestType = request.args.get("type")
         if requestType == "branchDetails":
             branchObj = Branches()
             data = branchObj.fetch_branch_details()
-            # print(data)
             return jsonify(data)
+        elif requestType == "numberOfBranches":
+            branchObj = Branches()
+            numberOfBranches = branchObj.numberOfBranches()
+            return jsonify(numberOfBranches)
     return render_template("branches.htm")
+
+
 
 @app.route("/createBranch", methods =["GET", "POST"])
 def createBranch():
@@ -274,8 +292,14 @@ def disburshmentReports():
 def attatchEmployeeTobranch():
     return render_template("attatchEmployeeTobranch.html")
 
-@app.route("/employeeProfile")
+@app.route("/employeeProfile", methods=["GET", "POST"])
 def employeeProfile():
+    if request.method == "POST":
+        requestType = request.json.get("type")
+        if requestType == "employeeId":
+            employeeId = request.json.get("data")
+            print(employeeId)
+            return jsonify({"response":"success"})
     return render_template("employeeProfile.html")
 
 
