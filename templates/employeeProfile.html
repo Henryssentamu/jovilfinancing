@@ -68,117 +68,30 @@
         </div>
     </nav>
    
-    <div class="container " style="margin-top: 55px;">
-        <div class="profile-header">
-            <img src="employee-photo.jpg" alt="Employee Photo" class="img-thumbnail" width="150" height="150">
-            <div>
-                <h1>John Doe</h1>
-                <p>Position: Senior Manager</p>
-                <p>Employee ID: 12345</p>
-            </div>
-        </div>
-        <div class="section">
-            <h2>Employment Information</h2>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Department</th>
-                                <td>Finance</td>
-                            </tr>
-                            <tr>
-                                <th>Job Role</th>
-                                <td>Risk Management</td>
-                            </tr>
-                            <tr>
-                                <th>Date of Joining</th>
-                                <td>January 10, 2015</td>
-                            </tr>
-                            <tr>
-                                <th>Work Location</th>
-                                <td>New York Office</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <h2>Contact Information</h2>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Phone Number</th>
-                                <td>(123) 456-7890</td>
-                            </tr>
-                            <tr>
-                                <th>Email Address</th>
-                                <td>john.doe@bank.com</td>
-                            </tr>
-                            <tr>
-                                <th>Office Address</th>
-                                <td>123 Bank Street, New York, NY 10001</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <h2>Performance and Feedback</h2>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Recent Performance Review</th>
-                                <td>Excellent</td>
-                            </tr>
-                            <tr>
-                                <th>Rating</th>
-                                <td>4.8/5</td>
-                            </tr>
-                            <tr>
-                                <th>Feedback from Supervisors</th>
-                                <td>Consistently exceeds expectations in all areas.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="section">
-            <h2>Skills and Training</h2>
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Skills</th>
-                                <td>Financial Analysis, Risk Management, Leadership</td>
-                            </tr>
-                            <tr>
-                                <th>Certifications</th>
-                                <td>CFA, CPA</td>
-                            </tr>
-                            <tr>
-                                <th>Training Programs Completed</th>
-                                <td>Advanced Risk Management, Leadership Development Program</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="container " id="employeeDetails" style="margin-top: 55px;">
+        
+    </div>
+    <div class="container">
         <div class="action-buttons mb-4">
             <button class="btn btn-primary">Edit Profile</button>
-            <button class="btn btn-secondary">Send Message</button>
+            <button id="viewDocument" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#employeeDocument">View Accademic Documents</button>
+            <div  class="modal fade" id="employeeDocument">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div>Employee Accademic Document</div>
+                            <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#employeeDocument"></button>
+                        </div>
+                        <div   id="accademicBody" class="modal-body">  
+                        </div>
+                    </div>
+                </div>
+            </div>
             <button class="btn btn-success">Download PDF</button>
         </div>
     </div>
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/employeeProfile.js"></script>
+    <script src="../static/jsFiles/viewAccademicDocument.js"></script>
 </body>
 </html>

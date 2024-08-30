@@ -2,6 +2,7 @@ function getEmployeeId(){
     let employeeId = ""
     document.addEventListener("click", ( event)=> {
         if(event.target && event.target.matches('a.nav-link')){
+            event.preventDefault()
             const element = event.target;
             employeeId = element.getAttribute('data-employee-id');
             const data = {"type":"employeeId", "data":employeeId};
@@ -20,6 +21,7 @@ function getEmployeeId(){
                 return response.json()
             })
             .then(data =>{
+                window.location.href = element.href
         
             } )
             .catch(error =>{
@@ -29,4 +31,6 @@ function getEmployeeId(){
     })
     
 }
+
+getEmployeeId()
 

@@ -1,9 +1,8 @@
 
-from crypt import methods
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file, session
 from enviromentkeys import secret_key
 import mysql.connector as sql
-
+import io
 from DatabaseClasses import Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
 from generateAccountNumber import GenerateAccountNumber
 from generateIds import GenerateIds
@@ -51,11 +50,14 @@ def employeeRecrutimentForm():
                 employeeType = request.form.get("employeeType")
                 roleAsigned = request.form.get("roleAsigned")
                 salary = request.form.get("salary")
+                profilePicture = request.files.get("profilePicture")
                 documents = request.files.get("documents")
                 branchId = request.form.get("branchId")
                 deptId = request.form.get("deptId")
                 # binalizing the documents
+                
                 document = documents.read()
+                pic = profilePicture.read()
                 
 
                 try:
@@ -91,7 +93,8 @@ def employeeRecrutimentForm():
                         "roleAsigned":roleAsigned,
                         "salary":int(salary),
                         "documents":document,
-                        "branchId":branchId
+                        "branchId":branchId,
+                        "profilePicture":pic
                         
                     }
                     # insert details into employee database
@@ -298,8 +301,45 @@ def employeeProfile():
         requestType = request.json.get("type")
         if requestType == "employeeId":
             employeeId = request.json.get("data")
-            print(employeeId)
+            session["employeeDetailsToLoad"] = employeeId
             return jsonify({"response":"success"})
+    elif request.method == "GET":
+        requestType = request.args.get("type")
+        if requestType == "employeeDetails":
+            try:
+                employeeId = session.get("employeeDetailsToLoad")
+                employeeObject = EmployeeDatabase()
+                details = employeeObject.fetchSpecificEmployeeDetails(employeeId=employeeId)
+                return jsonify(details)
+            except Exception as e:
+                raise Exception(f"error while calling specified employee methode :{e}")
+        elif requestType == "employeePic":
+            try:
+                employeeId = session.get("employeeDetailsToLoad")
+                employeeobject = EmployeeDatabase()
+                picInBinary = employeeobject.fetchSpecificEmployeeMataDataPictures(employeeId=employeeId)
+                return send_file(
+                    io.BytesIO(picInBinary),
+                    mimetype="image/jpeg",
+                    as_attachment=False
+                )
+
+                # print(filepic)
+            except Exception as e:
+                raise Exception(f" error while calling employee pic method: {e}")
+        elif requestType == "accademicDocument":
+            try:
+                employeeId = session.get("employeeDetailsToLoad")
+                employeeobject = EmployeeDatabase()
+                document = employeeobject.fetchSpecificEmployeeMataDataDocument(employeeId=employeeId)
+                return send_file(
+                    io.BytesIO(document),
+                    mimetype="application/pdf",
+                    as_attachment=False
+                )
+            except Exception as e:
+                raise Exception(f"error while calling fetchSpecificEmployeeMataDataDocument method:{e}")
+
     return render_template("employeeProfile.html")
 
 

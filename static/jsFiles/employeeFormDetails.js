@@ -15,6 +15,7 @@ function getinputs(){
     formatedata.append("employeeType",document.getElementById("employeeType").value);
     formatedata.append("roleAsigned",document.getElementById("roleAsigned").value);
     formatedata.append("salary",document.getElementById("salary").value);
+    formatedata.append("profilePicture",document.getElementById("profilePicture").files[0]);
     formatedata.append("documents",document.getElementById("academicPapers").files[0])
 
     return formatedata
@@ -59,6 +60,7 @@ function sendTosever(){
                 .then(data =>{
                     if (data["response"] === "success"){
                         alert(data["response"])
+                        location.reload()
                     }
 
                 })

@@ -790,6 +790,15 @@ class EmployeeDatabase(ConnectToMySql):
                         FOREIGN KEY(EmployeeId)  REFERENCES  employeeDetails(EmployeeId) ON DELETE SET NULL            
                     )
                 """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS ProfilePictures(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) NULL,
+                        profilePicture LONGBLOB,
+                        FOREIGN KEY(EmployeeId)  REFERENCES  employeeDetails(EmployeeId) ON DELETE SET NULL                
+                    )
+
+                """)
             except Exception as e:
                 raise Exception(F"error while creating tables in employeeDatabase :{e} ")
 
@@ -815,6 +824,7 @@ class EmployeeDatabase(ConnectToMySql):
         self.roleAsigned = employeeDetails["roleAsigned"]
         self.salary = employeeDetails["salary"]
         self.documents = employeeDetails["documents"]
+        self.profilePicture = employeeDetails["profilePicture"]
         self.branchId = employeeDetails["branchId"]
         try:
             self.reconnect_if_needed()
@@ -828,7 +838,7 @@ class EmployeeDatabase(ConnectToMySql):
                             LastName,
                             Age               
                         )VALUES (%s,%s,%s,%s)  
-                    """,(self.employeeId,self.firstName,self.firstName,self.age))
+                    """,(self.employeeId,self.firstName,self.lastName,self.age))
                     self.cursor.execute("""
                         INSERT INTO contactDetails(
                             EmployeeId,
@@ -864,6 +874,13 @@ class EmployeeDatabase(ConnectToMySql):
                             Documents              
                         )VALUES(%s,%s)
                     """,(self.employeeId,self.documents))
+
+                    self.cursor.execute("""
+                        INSERT INTO ProfilePictures(
+                            EmployeeId,
+                            profilePicture                 
+                        ) VALUES(%s,%s)      
+                    """,(self.employeeId, self.profilePicture))
                     self.connection.commit()
                 except Exception as e:
                     raise Exception(f"error while inserting into employeeDatabase tables:{e}")
@@ -1015,6 +1032,114 @@ class EmployeeDatabase(ConnectToMySql):
                 raise Exception("cursor not initialized in fetching employee details")
         except Exception as e:
             raise Exception(f"error while fetching employee details:{e}")
+        
+
+    def fetchSpecificEmployeeDetails(self,employeeId):
+        self.employeeId = employeeId
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        E.EmployeeId,
+                        E.Firstname,
+                        E.LastName,
+                        E.Age,
+                        C.PhoneNumber,
+                        C.Email,
+                        R.CurrentAddress,
+                        R.District,
+                        R.City,
+                        R.Village,
+                        W.WorkStatus,
+                        W.Role,
+                        W.BranchId,
+                        W.BranchName,
+                        W.Dept,
+                        W.DeptId,
+                        W.EmploymentType,
+                        W.Salary 
+                    FROM
+                        employeeDetails AS E
+                    JOIN contactDetails AS C ON C.EmployeeId = E.EmployeeId
+                    JOIN ResidencyDetails AS R ON R.EmployeeId = E.EmployeeId
+                    JOIN WorkDetails AS W ON W.EmployeeId = E.EmployeeId
+                    WHERE E.EmployeeId = %s
+                """,(self.employeeId,))
+                dataObj = self.cursor.fetchall()
+                return [{
+                    "EmployeeId":data[0],
+                    "Firstname":data[1],
+                    "LastName":data[2],
+                    "Age":data[3],
+                    "PhoneNumber":data[4],
+                    "Email":data[5],
+                    "CurrentAddress":data[6],
+                    "District":data[7],
+                    "City":data[8],
+                    "Village":data[9],
+                    "WorkStatus":data[10],
+                    "Role":data[11],
+                    "BranchId":data[12],
+                    "BranchName":data[13],
+                    "Dept":data[14],
+                    "DeptId":data[15],
+                    "EmploymentType":data[16],
+                    "Salary":data[17]
+                    } for data in dataObj]
+            else:
+                raise Exception("cursor not initialized in fetching employee details")
+        except Exception as e:
+            raise Exception(f"error while fetching employee details:{e}")
+        finally:
+            self.close_connection()
+        
+
+    def fetchSpecificEmployeeMataDataDocument(self,employeeId):
+        self.employeeId = employeeId
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        Documents
+                    FROM
+                        Documments
+                    WHERE EmployeeId = %s
+                """,(self.employeeId,))
+                documents = self.cursor.fetchone()[0]
+                return  documents 
+            else:
+                raise Exception("cursor not initialized in fetching employee document")
+        except Exception as e:
+            raise Exception(f"error while fetching employee document:{e}")
+        finally:
+            self.close_connection()
+        
+    def fetchSpecificEmployeeMataDataPictures(self,employeeId):
+        self.employeeId = employeeId
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE employeeDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        profilePicture
+                    FROM
+                        ProfilePictures
+                    WHERE EmployeeId = %s
+                """,(self.employeeId,))
+                picture = self.cursor.fetchone()[0]
+                return  picture 
+            else:
+                raise Exception("cursor not initialized in fetching employee picture")
+        except Exception as e:
+            raise Exception(f"error while fetching employee picture:{e}")
+        finally:
+            self.close_connection()
+
 
        
 # employee = EmployeeDatabase()
