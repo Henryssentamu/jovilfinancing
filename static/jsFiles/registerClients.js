@@ -14,11 +14,12 @@ function getRegistrationDetails(){
     formdata.append("address", document.getElementById("address").value)
     formdata.append("city", document.getElementById("city").value)
     formdata.append("state", document.getElementById("state").value)
-    formdata.append("nextOfKinFullName", document.getElementById("nextofKinName").value)
+    formdata.append("nextOfKinFirstName", document.getElementById("nextofKinfirstName").value)
+    formdata.append("nextOfKinSirName", document.getElementById("nextofKinsirName").value)
     formdata.append("nextOfKinPhone", document.getElementById("nextofKinPhone").value)
-    formdata.append( "nextOfKinNin", document.getElementById("nextOfKinNin").value)
     formdata.append("nextOfKinLocation", document.getElementById("nextOfKinLocation").value)
-    formdata.append("ownerPic", document.getElementById("ownerPic").files[0]); // File input
+    formdata.append("ownerPic", document.getElementById("ownerPic").files[0]);
+    formdata.append("idpic", document.getElementById("Idpic").files[0])
     
    
     return formdata
@@ -41,6 +42,7 @@ function sendInputToServer() {
         })
         .then(data =>{
             alert(data)
+            location.reload()
             
         })
         .catch(error =>{

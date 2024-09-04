@@ -44,8 +44,8 @@
 
     <div class="hero" style="margin-top: 35px;">
         <div class="container">
-            <h2>Client Registration</h2>
-            <p>Create your account to access our banking services.</p>
+            <h2>Account Creations</h2>
+            <p>Create Client's account to access our banking services.</p>
         </div>
     </div>
 
@@ -109,8 +109,12 @@
                 <!-- Security Information -->
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label for="nextofKin">Next of kin (Full Name)</label>
-                        <input type="text" class="form-control" id="nextofKinName" name="nextofKin" required>
+                        <label for="nextofKin">Next of kin (First Name)</label>
+                        <input type="text" class="form-control" id="nextofKinfirstName" name="nextofKin" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="nextofKin">Next of kin (Sir Name)</label>
+                        <input type="text" class="form-control" id="nextofKinsirName" name="nextofKin" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="nextofKin">Next of Kin Contact </label>
@@ -119,10 +123,10 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <!-- <div class="form-group col-md-6">
                         <label for="ssn">Next of Kin NIN Number / Social Security Number (SSN)</label>
                         <input type="text" class="form-control" id="nextOfKinNin" name="ssn" required>
-                    </div>
+                    </div> -->
 
                     <div class="form-group col-md-6">
                         <label for="ssn"> Location</label>
@@ -135,10 +139,10 @@
                         <label for="img"> Upload Client's Image</label>
                         <input type="file" id="ownerPic" class="form-controk btn-outline-light"  accept="image/*" required>
                     </div>
-                    <!-- <div class="form-group col-md-6">
-                        <label for="img"> Upload next of kin's Image</label>
-                        <input type="file" id="nextOfKinPic" class="form-controk btn-outline-light">
-                    </div> -->
+                    <div class="form-group col-md-6">
+                        <label for="img"> Upload National ID photos</label>
+                        <input type="file" id="Idpic" class="form-controk btn-outline-light" accept="image/*" required>
+                    </div>
                 </div>
 
                 <!-- Terms and Conditions -->

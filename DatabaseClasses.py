@@ -364,7 +364,7 @@ class ExistingAccounts(ConnectToMySql):
             try:
                 self.cursor.execute("USE AccountsVault")
                 self.cursor.execute("""
-                    SELECT AccountNumber FROM AccountOwner
+                    SELECT AccountNumber FROM BankAccount
                 """)
                 accounts = self.cursor.fetchall()
                 self.close_connection()
@@ -1141,6 +1141,206 @@ class EmployeeDatabase(ConnectToMySql):
             self.close_connection()
 
 
+
+class BankingDataBase(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+    def createAccountTable(self):
+        try:
+            if self.cursor:
+                try:
+                    self.cursor.execute("CREATE DATABASE IF NOT EXISTS AccountsVault")
+                except Exception as e:
+                    raise Exception(f"error while creating banking database:{e}")
+                try:
+                    self.cursor.execute("USE AccountsVault")
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS BankAccount(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500) PRIMARY KEY,
+                            FirstName VARCHAR(300),
+                            SirName VARCHAR(300)                         
+                        )
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS AccountSocialDetails(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            NINNumber VARCHAR(500) PRIMARY KEY, 
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE                       
+                        )
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS AccountPersonalDetails(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            DateOfBirth VARCHAR(200),
+                            Religion VARCHAR(200),
+                            Gender VARCHAR(200),
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE
+                        )
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS ContactDetails(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            CurrentAddress VARCHAR(300),
+                            CityDivision VARCHAR(300),
+                            District VARCHAR(300),
+                            PhoneNumber VARCHAR(100),
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE  
+                        )    
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS NextOfKinDetails(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            FirstName VARCHAR(300),
+                            SirName VARCHAR(300),
+                            PhoneNumber VARCHAR(300),
+                            Location VARCHAR(300),
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE                               
+                        )
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS accountOwnerNationalId(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            NationalId TEXT,
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE                
+                        )
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS accountOwnerPicture(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            Photo TEXT,
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE                
+                        )
+                    """)
+                    self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS branchDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        AccountNumber VARCHAR(500),
+                        BranchId VARCHAR(500),
+                        OfficerId VARCHAR(500),
+                        FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE                        
+                    )
+                """)
+                except Exception as e:
+                    raise Exception(f"error while creating tables in banking account database:{e}")
+            else:
+                raise Exception("cursor not initialized for create banking account")
+        except Exception as e:
+            raise Exception(f"error in create banking account:{e}")
+        finally:
+            self.close_connection()
+
+
+    def insert_into_accountTable(self,accountObject):
+        self.AccountNumber = accountObject["AccountNumber"]
+        self.FirstName = accountObject["FirstName"]
+        self.SirName = accountObject["Sirname"]
+        self.NINNumber = accountObject["NinNumber"]
+        self.DateOfBirth = accountObject["DateOfBirth"]
+        self.Religion = accountObject["Religion"]
+        self.Gender = accountObject["Gender"]
+        self.CurrentAddress = accountObject["CurrentAddress"]
+        self.CityDivision = accountObject["CityDivision"]
+        self.District = accountObject["District"]
+        self.PhoneNumber = accountObject["PhoneNumber"]
+       
+        # next of kin details
+        self.nextOfKinDetails = accountObject["NextKinDetails"]
+        self.nextOfKinFirstName = self.nextOfKinDetails["nextOfKinFirstName"]
+        self.nextOfKinSirName = self.nextOfKinDetails["nextOfKinSirName"]
+        self.nextOfKinPhone = self.nextOfKinDetails["PhoneNumber"]
+        self.nextOfKinLocation = self.nextOfKinDetails["Location"]
+        # pictures 
+        self.accountOwnerNationalIdPath = accountObject["NationalIdPic"]
+        self.Photo = accountObject["OwnerPic"]
+
+        # branch details
+        self.BranchDetails = accountObject["BranchDetails"]
+        self.BranchId = self.BranchDetails["BranchId"]
+        self.OfficerId = self.BranchDetails["OfficerId"]
+        try:
+            self.reconnect_if_needed()
+        except Exception as e:
+            raise Exception(f"error while reconnecting cursor in inserting into account tables:{e}")
+
+        try:
+            if self.cursor:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    INSERT INTO BankAccount(
+                        AccountNumber,
+                        FirstName,
+                        SirName                
+                ) VALUES(%s,%s,%s)
+                """,(self.AccountNumber, self.FirstName, self.SirName))
+                self.cursor.execute("""
+                    INSERT INTO AccountSocialDetails(
+                        AccountNumber,
+                        NINNumber                    
+                    ) VALUES(%s,%s)
+                """,(self.AccountNumber, self.NINNumber))
+                self.cursor.execute("""
+                    INSERT INTO AccountPersonalDetails(
+                        AccountNumber,
+                        DateOfBirth,
+                        Religion,
+                        Gender             
+                    ) VALUES (%s,%s,%s,%s)
+                """,(self.AccountNumber, self.DateOfBirth,self.Religion,self.Gender))
+                self.cursor.execute("""
+                    INSERT INTO ContactDetails(
+                        AccountNumber,
+                        CurrentAddress,
+                        CityDivision,
+                        District,
+                        PhoneNumber                
+                    ) VALUES(%s,%s,%s,%s,%s)
+                """,(self.AccountNumber,self.CurrentAddress,self.CityDivision, self.District,self.PhoneNumber))
+                self.cursor.execute("""
+                    INSERT INTO NextOfKinDetails(
+                        AccountNumber,
+                        FirstName,
+                        SirName,
+                        PhoneNumber,
+                        Location               
+                    ) VALUES (%s,%s,%s,%s,%s)
+                """,(self.AccountNumber, self.nextOfKinFirstName,self.nextOfKinSirName,self.nextOfKinPhone,self.nextOfKinLocation))
+                self.cursor.execute("""
+                    INSERT INTO accountOwnerNationalId(
+                        AccountNumber,
+                        NationalId                
+                    ) VALUES (%s,%s)
+                """,(self.AccountNumber, self.accountOwnerNationalIdPath))
+
+                self.cursor.execute("""
+                    INSERT INTO accountOwnerPicture(
+                        AccountNumber,
+                        Photo                
+                    ) VALUES (%s,%s)
+                """,(self.AccountNumber, self.Photo))
+                self.cursor.execute("""
+                    INSERT INTO branchDetails(
+                        AccountNumber,
+                        BranchId,
+                        OfficerId
+                    ) VALUES(%s,%s,%s)
+                """,(self.AccountNumber,self.BranchId, self.OfficerId))
+                self.connection.commit()
+            else:
+                raise Exception("error while inserting into account database")
+        except Exception as e:
+            raise Exception(f"error in inserting into account tables:{e}")
+        finally:
+            self.close_connection()
+
+
+
        
 # employee = EmployeeDatabase()
 # employee.create_database() 
@@ -1151,3 +1351,6 @@ class EmployeeDatabase(ConnectToMySql):
 # dept = Deptments()
 # dept.createDatabase()
 
+
+banking  = BankingDataBase()
+banking.createAccountTable()

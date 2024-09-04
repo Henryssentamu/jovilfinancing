@@ -3,13 +3,27 @@ from flask import Flask, jsonify, render_template, request, send_file, session
 from enviromentkeys import secret_key
 import mysql.connector as sql
 import io
-from DatabaseClasses import Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
+import os
+from DatabaseClasses import BankingDataBase, Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
 from generateAccountNumber import GenerateAccountNumber
 from generateIds import GenerateIds
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secret_key
+
+"""image secton, ensuring that client image folder is set proparly """
+
+UPLOAD_CLIENT_PICTURES = os.path.join("static","clientpictures")
+app.config["UPLOAD_CLIENT_PICTURES"] = UPLOAD_CLIENT_PICTURES
+if  not os.path.exists(UPLOAD_CLIENT_PICTURES):
+    os.makedirs(UPLOAD_CLIENT_PICTURES)
+
+"""client national id pictures"""
+UPLOAD_CLIENT_NATIONALid_PICTURES = os.path.join("static","clientNationalIdPictures")
+app.config["UPLOAD_CLIENT_NATIONALid_PICTURES"] = UPLOAD_CLIENT_NATIONALid_PICTURES
+if not os.path.exists(UPLOAD_CLIENT_NATIONALid_PICTURES):
+    os.makedirs(UPLOAD_CLIENT_NATIONALid_PICTURES)
 
 # manager section details bellow
 @app.route("/managrDashboard")
@@ -366,7 +380,6 @@ def registerClient():
             raise Exception(f"error while calling generate account number:{e}")
         try:                     
             if request.content_type.startswith('multipart/form-data'):
-                
                 # Retrieve text form fields
                 firstName = request.form.get("firstName")
                 sirName = request.form.get("sirName")
@@ -378,14 +391,30 @@ def registerClient():
                 address = request.form.get("address")
                 city = request.form.get("city")
                 state = request.form.get("state")
-                nextKinFullNames = request.form.get("nextofKinName")
+                
+                # next of kin details
+                nextOfKinFirstName = request.form.get("nextOfKinFirstName")
+                nextOfKinSirName = request.form.get("nextOfKinSirName")
                 nextOfKinPhone = request.form.get("nextOfKinPhone")
-                nextOfKinNin = request.form.get("nextOfKinNin")
                 nextOfKinLocation = request.form.get("nextOfKinLocation")
+                # pictures
                 ownerPic = request.files.get("ownerPic")
-                ownerPic_binary = ownerPic.read()
+                NationalIdpic = request.files.get("idpic")
+                if ownerPic:
+                    extension = os.path.splitext(ownerPic.filename)[1]
+                    filename = f"{account_number}{extension}"
+                    filePath = os.path.join(app.config["UPLOAD_CLIENT_PICTURES"],filename)
+                    ownerPic.save(filePath)
+                    ownerpic_relative_file_path = os.path.join("clientpictures",filename)
+                if NationalIdpic:
+                    id_extension = os.path.splitext(NationalIdpic.filename)[1]
+                    idFilename = f"{account_number}{id_extension}"
+                    idfilePath = os.path.join(app.config["UPLOAD_CLIENT_NATIONALid_PICTURES"], idFilename)
+                    NationalIdpic.save(idfilePath)
+                    ownernatioanlID_relative_file_path = os.path.join("clientNationalIdPictures", idFilename)
 
-                registrationObj = {
+
+                AccountDetailsObj = {
                     "AccountNumber":account_number,
                     "FirstName":firstName,
                     "Sirname":sirName,
@@ -394,14 +423,15 @@ def registerClient():
                     "Gender":gender,
                     "Religion":religion,
                     "NinNumber":ninNumber,
-                    "PermanentAddress_village":address,
-                    "City_Devission":city,
+                    "CurrentAddress":address,
+                    "CityDivision":city,
                     "District":state,
-                    "OwnerPic":ownerPic_binary,
+                    "OwnerPic":ownerpic_relative_file_path,
+                    "NationalIdPic":ownernatioanlID_relative_file_path,
 
                     "NextKinDetails": {
-                    "NinNumber":nextOfKinNin ,
-                    "FullName": nextKinFullNames,
+                    "nextOfKinFirstName":nextOfKinFirstName,
+                    "nextOfKinSirName": nextOfKinSirName,
                     "PhoneNumber": nextOfKinPhone,
                     "Location":nextOfKinLocation},
 
@@ -412,11 +442,8 @@ def registerClient():
                 }
                 
 
-                # store registered client
-                ac = RegisterClient(dataObject = registrationObj)
-                ac.create_Database()
-                ac.create_tables()
-                ac.insert_into_tables()
+                registerAccount = BankingDataBase()
+                registerAccount.insert_into_accountTable(accountObject=AccountDetailsObj)
 
                 
                 
@@ -424,7 +451,7 @@ def registerClient():
             else:
                 return jsonify({"response":"un surported formate"})    
         except Exception as e:
-            raise  Exception("error in register post request:{e}")
+            raise  Exception(f"error in register post request:{e}")
         
     
     return render_template("registerClient.html")
