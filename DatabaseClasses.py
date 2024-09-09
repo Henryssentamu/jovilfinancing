@@ -410,6 +410,21 @@ class ExistingIds(ConnectToMySql):
                 raise Exception(f"error while fetching branch ids:{e}")
         else:
             raise Exception("cursor not initialized in the ExistingIds class")
+    def fetchLoanIds(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT LoanId FROM LoanDetails
+                """)
+                data = self.cursor.fetchall()
+                self.close_connection()
+                return {idz[0] for idz in data }
+            except Exception as e:
+                raise Exception(f"error while fetching existing loanid: {e}")
+        else:
+            raise Exception("cursor not initailized while fetching loan idz")
 
 
         
@@ -1340,6 +1355,458 @@ class BankingDataBase(ConnectToMySql):
             self.close_connection()
 
 
+    def fetchAllClientAccountDetails(self):
+        """_This method fetches all clients details_
+            _Args:
+                _ None_
+            Returen:
+                _client details (list)_
+        """
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        B.AccountNumber,
+                        B.FirstName,
+                        B.SirName,
+                        S.NINNumber,
+                        P.DateOfBirth,
+                        P.Religion,
+                        P.Gender,
+                        C.CurrentAddress,
+                        C.CityDivision,
+                        C.District,
+                        C.PhoneNumber,
+                        N.FirstName,
+                        N.SirName,
+                        N.PhoneNumber,
+                        N.Location,
+                        T.Photo ownerpic,
+                        D.BranchId,
+                        D.OfficerId
+                    FROM
+                        BankAccount AS B
+                    JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
+                    JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
+                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
+                    JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
+                    JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber 
+                """)
+                data = self.cursor.fetchall()
+                return [
+                            {
+                                "AccountNumber":obj[0],
+                                "FirstName":obj[1],
+                                "SirName":obj[2],
+                                "NINNumber":obj[3],
+                                "DateOfBirth":obj[4],
+                                "Religion":obj[5],
+                                "Gender":obj[6],
+                                "CurrentAddress":obj[7],
+                                "CityDivision":obj[8],
+                                "District":obj[9],
+                                "PhoneNumber":obj[10],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[11],
+                                    "SirName":obj[12],
+                                    "PhoneNumber":obj[13],
+                                    "Location":obj[14]
+                                },
+                                "AccountOwnerPic":obj[15],
+                                "branchDetails":{
+                                    "BranchId":obj[16],
+                                    "officerId":obj[17]
+                                }
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client's details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients details")
+        
+
+    def fetchAllClientAccountDetailsForSpecificBranch(self, branchId):
+        """_This method fetches all clients details for specific branch_
+            _Args:
+                _branchId (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.BranchId = branchId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        B.AccountNumber,
+                        B.FirstName,
+                        B.SirName,
+                        S.NINNumber,
+                        P.DateOfBirth,
+                        P.Religion,
+                        P.Gender,
+                        C.CurrentAddress,
+                        C.CityDivision,
+                        C.District,
+                        C.PhoneNumber,
+                        N.FirstName,
+                        N.SirName,
+                        N.PhoneNumber,
+                        N.Location,
+                        T.Photo ownerpic,
+                        D.BranchId,
+                        D.OfficerId
+                    FROM
+                        BankAccount AS B
+                    JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
+                    JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
+                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
+                    JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
+                    JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
+                    WHERE
+                        D.BranchId =%s
+                        
+                """,(self.BranchId,))
+                data = self.cursor.fetchall()
+                return [
+                            {
+                                "AccountNumber":obj[0],
+                                "FirstName":obj[1],
+                                "SirName":obj[2],
+                                "NINNumber":obj[3],
+                                "DateOfBirth":obj[4],
+                                "Religion":obj[5],
+                                "Gender":obj[6],
+                                "CurrentAddress":obj[7],
+                                "CityDivision":obj[8],
+                                "District":obj[9],
+                                "PhoneNumber":obj[10],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[11],
+                                    "SirName":obj[12],
+                                    "PhoneNumber":obj[13],
+                                    "Location":obj[14]
+                                },
+                                "AccountOwnerPic":obj[15],
+                                "branchDetails":{
+                                    "BranchId":obj[16],
+                                    "officerId":obj[17]
+                                }
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client's details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients details")
+
+
+
+
+    def fetchAllClientAccountDetailsForSpecificEmployee(self, employeeId):
+        """_This method fetches all clients details for specific branch_
+            _Args:
+                _branchId (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.employeeID = employeeId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        B.AccountNumber,
+                        B.FirstName,
+                        B.SirName,
+                        S.NINNumber,
+                        P.DateOfBirth,
+                        P.Religion,
+                        P.Gender,
+                        C.CurrentAddress,
+                        C.CityDivision,
+                        C.District,
+                        C.PhoneNumber,
+                        N.FirstName,
+                        N.SirName,
+                        N.PhoneNumber,
+                        N.Location,
+                        T.Photo ownerpic,
+                        D.BranchId,
+                        D.OfficerId
+                    FROM
+                        BankAccount AS B
+                    JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
+                    JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
+                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
+                    JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
+                    JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
+                    WHERE
+                        D.OfficerId =%s
+                        
+                """,(self.employeeID,))
+                data = self.cursor.fetchall()
+                return [
+                            {
+                                "AccountNumber":obj[0],
+                                "FirstName":obj[1],
+                                "SirName":obj[2],
+                                "NINNumber":obj[3],
+                                "DateOfBirth":obj[4],
+                                "Religion":obj[5],
+                                "Gender":obj[6],
+                                "CurrentAddress":obj[7],
+                                "CityDivision":obj[8],
+                                "District":obj[9],
+                                "PhoneNumber":obj[10],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[11],
+                                    "SirName":obj[12],
+                                    "PhoneNumber":obj[13],
+                                    "Location":obj[14]
+                                },
+                                "AccountOwnerPic":obj[15],
+                                "branchDetails":{
+                                    "BranchId":obj[16],
+                                    "officerId":obj[17]
+                                }
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client's details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients details")
+
+
+
+
+
+
+    
+    def update_ClientphoneNumber(self, newnumberObject):
+        """
+            _summary: this method is called when update client's number
+            Arg:
+                _newnumberObject:(dic),accountNumber and phoneNumber
+            Return: none  
+        """
+
+        self.accountNumber = newnumberObject["accountNumber"]
+        self.phoneNumber = newnumberObject["phoneNumber"]
+
+        # reconnect to database 
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                update_query = """
+                        UPDATE ContactDetails
+                        SET PhoneNumber = %s
+                        WHERE AccountNumber = %s
+                    """
+                self.cursor.execute(update_query, (self.phoneNumber ,self.accountNumber))
+                self.connection.commit()
+            except Exception as e:
+                raise Exception(f"error while updating phone numer:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not availabe to update phone number:")
+    
+    def create_loanApplicationTAbles(self):
+        try:
+            if self.cursor:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS LoanApplications")
+                self.cursor.execute("USE LoanApplications")
+                
+
+                # Create LoanDetails table
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS LoanDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500) PRIMARY KEY,
+                        ClientID VARCHAR(500) NOT NULL,
+                        BranchId VARCHAR(500),
+                        OfficerId VARCHAR(500),
+                        LoanAmount VARCHAR(300),
+                        InterestRateInPercentage VARCHAR(50),
+                        LoanPeriodInDays VARCHAR(50),
+                        Status VARCHAR(100)
+                    )
+                """)
+
+                # Create AddressDetails table with foreign key referencing LoanDetails
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS AddressDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500),
+                        ClientCurrentaddress VARCHAR(500),
+                        DivisionCity VARCHAR(500),
+                        District VARCHAR(500),
+                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId)
+                    )
+                """)
+
+                # Create WorkDetails table with foreign key referencing LoanDetails
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS WorkDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500),
+                        Occupation VARCHAR(500), 
+                        WorkArea VARCHAR(500),
+                        BusinessLocation VARCHAR(500),  
+                        Contact VARCHAR(500),
+                        BusinessImages VARCHAR(1000),
+                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId)
+                    )
+                """)
+            else:
+                raise Exception("cursor not intialized in create loanapplication tables methods")
+        except Exception as e:
+            raise Exception(f"error in create loan application table methods:{e}")
+        finally:
+            self.close_connection()
+    def insert_into_loanApplicationTAbles(self, loanApplicationDetails):
+        self.loanStatus ="notAproved"
+        self.loanID = loanApplicationDetails["loanID"]
+        self.clientId = loanApplicationDetails["clientId"]
+        self.loanAmount = loanApplicationDetails["loanAmount"]
+        self.interestRate = loanApplicationDetails["interestRate"]
+        self.loanPeriod = loanApplicationDetails["loanPeriod"]
+        self.clientCurrentaddress = loanApplicationDetails["clientCurrentaddress"]
+        self.devisioncity = loanApplicationDetails["devisioncity"]
+        self.state = loanApplicationDetails["state"]
+        self.Occuption = loanApplicationDetails["Occuption"]
+        self.workArea = loanApplicationDetails["workArea"]
+        self.businessLoaction = loanApplicationDetails["businessLoaction"]
+        self.contact = loanApplicationDetails["contact"]
+        self.businessPictureRelativePath = loanApplicationDetails["businessPictureRelativePath"]
+        # BranchDetails
+        BranchDetails = loanApplicationDetails["BranchDetails"]
+        self.BranchId = BranchDetails["BranchId"]
+        self.OfficerId = BranchDetails["OfficerId"]
+
+
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO LoanDetails(
+                        LoanId,
+                        ClientID ,
+                        BranchId ,
+                        OfficerId,
+                        LoanAmount,
+                        InterestRateInPercentage,
+                        LoanPeriodInDays,
+                        Status,                    
+                    )VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
+
+                """,(self.loanID, self.clientId,self.BranchId,self.OfficerId,self.loanAmount,self.interestRate,self.loanPeriod, self.loanStatus))
+                self.cursor.execute("""
+                    INSERT INTO AddressDetails(
+                        LoanId,
+                        ClientCurrentaddress,
+                        DivisionCity,
+                        District               
+                    ) VALUES(%s,%s,%s,%s)
+                """,(self.loanID, self.clientCurrentaddress,self.devisioncity,self.state))
+                self.cursor.execute("""
+                    INSERT INTO WorkDetails(
+                        LoanId,
+                        Occupation, 
+                        WorkArea,
+                        BusinessLocation,  
+                        Contact,
+                        BusinessImages                
+                    )VALUES(%s,%s,%s,%s,%s,%s)
+                """,(self.loanID, self.Occuption,self.workArea,self.businessLoaction,self.contact,self.businessPictureRelativePath))
+                self.connection.commit()
+                
+            else:
+                raise Exception("cursor not initialiesed while inserting into loanApplication tables")
+        except Exception as e:
+            raise Exception(f"error in insert into loan application tables method:{e}")
+        finally:
+            self.close_connection()
+    def fetchLoanApplicationDetails(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        L.Date,
+                        L.LoanId,
+                        L.ClientID ,
+                        L.BranchId ,
+                        L.OfficerId,
+                        L.LoanAmount,
+                        L.InterestRateInPercentage,
+                        L.LoanPeriodInDays,
+                        R.ClientCurrentaddress,
+                        R.DivisionCity,
+                        R.District,
+                        B.Occupation, 
+                        B.WorkArea,
+                        B.BusinessLocation,  
+                        B.Contact,
+                        B.BusinessImages,
+                        Db.FirstName,
+                        Db.SirName
+                        
+                    FROM
+                        LoanApplications.LoanDetails AS L
+                    JOIN LoanApplications.AddressDetails AS R ON R.LoanId = L.LoanId
+                    JOIN LoanApplications.WorkDetails AS B ON B.LoanId = L.LoanId
+                    JOIN AccountsVault.BankAccount AS Db on Db.AccountNumber = L.ClientID
+                """)
+                data = self.cursor.fetchall()
+                return [{
+                    "Date":client[0].strftime('%Y-%m-%d %H:%M:%S'),
+                    "LoanId":client[1],
+                    "ClientId":client[2],
+                    "BranchId":client[3],
+                    "OfficerId":client[4],
+                    "LoanAmount":client[5],
+                    "intereRate":client[6],
+                    "LoanPeriodInDays":client[7],
+                    "ClientCurrentaddress":client[8],
+                    "DivisionCity":client[9],
+                    "District":client[10],
+                    "Occupation":client[11],
+                    "WorkArea":client[12],
+                    "BusinessLocation":client[13],
+                    "Contact":client[14],
+                    "BusinessImages":client[15],
+                    "FirstName":client[16],
+                    "SirName":client[17]
+
+                } for client in data]
+            else:
+                raise Exception("cursor not initialized in fetching loan application details")
+        except Exception as e:
+            raise Exception(f"error in fetch loan application details:{e}")
+
+
+        
+
+    
+
+
+
 
        
 # employee = EmployeeDatabase()
@@ -1352,5 +1819,6 @@ class BankingDataBase(ConnectToMySql):
 # dept.createDatabase()
 
 
-banking  = BankingDataBase()
-banking.createAccountTable()
+# banking  = BankingDataBase()
+# banking.createAccountTable()
+# banking.create_loanApplicationTAbles()

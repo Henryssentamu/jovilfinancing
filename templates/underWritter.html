@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Underwriter's Page</title>
+    <!-- Bootstrap CSS -->
+    <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container">
+            <a href="#" class="navbar-brand">NisaFinancing</a>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="{{url_for('managrDashboard')}}" class="nav-link">Back</a>
+                </li>
+                
+            </ul>
+
+        </div>
+    </nav>
+    <div id="body-content" class="container my-5">
+        <h2 class="text-center mb-4">Loan Applications</h2>
+        <!-- Loan Details Card details loaded by js -->
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript Logic -->
+    <script src="../static/jsFiles/loadloanDetailsOnunderWritterspage.js">
+        // function approveLoan(clientId) {
+        //     // Example function to handle loan approval
+        //     const loanAmount = document.getElementById(`loanAmount${clientId}`).value;
+        //     const interestRate = document.getElementById(`interestRate${clientId}`).value;
+        //     const paymentPeriod = document.getElementById(`paymentPeriod${clientId}`).value;
+
+        //     alert(`Loan approved for Client ${clientId}:
+        //         Loan Amount: $${loanAmount}
+        //         Interest Rate: ${interestRate}%
+        //         Payment Period: ${paymentPeriod} months
+        //     `);
+        // }
+        
+    </script>
+</body>
+</html>

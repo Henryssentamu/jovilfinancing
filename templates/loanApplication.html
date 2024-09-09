@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Loan Application</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+   
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,11 +31,6 @@
     <header class="bg-dark text-white py-3" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 2; margin-bottom: 20px;">
         <div class="container d-flex justify-content-between align-items-center">
             <h1>NISA FINANCING </h1>
-            <!-- <nav>
-                <a href="#" class="text-white mx-2">Home</a>
-                <a href="#" class="text-white mx-2">Loans</a>
-                <a href="#" class="text-white mx-2">Contact Us</a>
-            </nav> -->
             <div>
                 <a href="{{url_for('crediofficerDashboard')}}" class="btn btn-outline-light mx-1">cuncel application </a>
                 
@@ -45,8 +41,7 @@
     <div class="hero" style=" margin-top: 50px;">
         <div class="container">
             <h2>Apply for a Loan</h2>
-            <p>Provide client details for  quick and easy loan application process.</p>
-            <!-- <a href="#loanForm" class="btn btn-primary">Get Started</a> -->
+            <p>Provide client's Current details for  quick and easy loan application process.</p>
         </div>
     </div>
 
@@ -55,60 +50,96 @@
             <h2>Loan Application Form</h2>
             <form>
                 <!-- Personal Information -->
-                <div class="form-row">
-                    
-                    <div class="form-group col-md-6">
-                        <label for="ssn"> Client's A/c Number</label>
-                        <input type="text" class="form-control" id="ssn" name="ssn" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label for="loanAmount">Loan Amount</label>
-                        <input type="number" class="form-control" id="loanAmount" name="loanAmount" required>
-                    </div>
-                </div>
+    
+                    <div class="col">
+                        <div class="form-row">
+                        
+                            <div class="form-group col-md-6">
+                                <label for="ssn"> Client's A/c Number</label>
+                                <input type="text" class="form-control" id="clientNumber" name="ssn" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="row">
+                                    <label for="loanAmount">Loan Amount</label>
+                                    <div class="col">
+                                        <input type="number" class="form-control" id="loanAmount" name="loanAmount" required>
+                                    </div>
+                                    <div class="col">
+                                        <div style="position: relative;">
+                                            <input id="loanPeriod" type="number" name="period"  class="form-control" value="30" style="padding-right: 30px;">
+                                            <span style="position: absolute; right: 0px; top: 50%; transform: translateY(-50%); font-size: 14px;">days</span>
+                                        </div>
+                                    </div>
+                                    
+                                </div> 
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="col mt-3 mb-3">
+                                      <div style="position: relative;">
+                                        <input id="interestRate" type="number" class="form-control" name="percentage" inputmode="decimal" value="20" style="padding-right: 30px;">
+                                        <span style="position: absolute; right: 0px; top: 50%; transform: translateY(-50%); font-size: 14px;">interest rate (%)</span>
+                                    </div>
+                                      
+                                </div>
+                            </div>
+                        </div>
+                        
+        
+                        <!-- Address Information -->
+                        <div class="form-row">
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="address">Current Address (village) </label>
+                                <input type="text" class="form-control" id="clientCurrentaddress" name="address" required>
+                            </div>
+                            <div class="form-group col-md-3 mb-3">
+                                <label for="city">Devision/City</label>
+                                <input type="text" class="form-control" id="devisioncity" name="city" required>
+                            </div>
+                            <div class="form-group col-md-3 mb-3">
+                                <label for="state">District</label>
+                                <input type="text" class="form-control" id="state" name="state" required>
+                            </div>
+                        </div>
+                     </div>
+    
+                     <div class="col">
+                        <div class="form-row">
+                            <!-- <h2>Work place Details</h2> -->
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="address"> Occuption </label>
+                                <input type="text" class="form-control" id="Occuption" name="Occuption" required>
+                            </div>
+                            <div class="form-group col-md-3 mb-3">
+                                <label for="city"> work Area (ie shop no.)</label>
+                                <input type="text" class="form-control" id="workArea" name="city" required>
+                            </div>
+                            <div class="form-group col-md-3 mb-3">
+                                <label for="state"> Businnes location </label>
+                                <input type="text" class="form-control" id="businessLoaction" name="state" required>
+                            </div>
+                        </div>
+        
+                        <!-- Submit -->
+                        <div class="form-row">
+                            
+                            <div class="form-group col-md-6 mb-3">
+                                <label for="contact">Contact Information</label>
+                                <input type="text" class="form-control" id="contact" name="contact" placeholder="Phone, Email" required>
+                            </div>
+        
+                            <div class="form-group col-md-6 mb-2">
+                                <label for="contact">Business Pictures</label>
+                                <input type="file" class="form-control " id="businessPic" name="contact" placeholder="upload business picture" accept="image/*" required>
+                            </div>
+                            
+                        </div>
+                     </div>
+                     <button type="submit"  id="submitt" class="btn btn-primary submit-btn btn-block mt-5">Submit Application</button>
+
+                 
+                 
+
                 
-
-                <!-- Address Information -->
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="address">Current Address (village) </label>
-                        <input type="text" class="form-control" id="address" name="address" required>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="city">Devision</label>
-                        <input type="text" class="form-control" id="city" name="city" required>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="state">District</label>
-                        <input type="text" class="form-control" id="state" name="state" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <!-- <h2>Work place Details</h2> -->
-                    <div class="form-group col-md-6">
-                        <label for="address"> Occuption </label>
-                        <input type="text" class="form-control" id="address" name="address" required>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="city"> work Area</label>
-                        <input type="text" class="form-control" id="city" name="city" required>
-                    </div>
-                    <div class="form-group col-md-3">
-                        <label for="state"> location </label>
-                        <input type="text" class="form-control" id="state" name="state" required>
-                    </div>
-                </div>
-
-                <!-- Submit -->
-                <div class="form-row">
-                    
-                    <div class="form-group col-md-6">
-                        <label for="contact">Contact Information</label>
-                        <input type="text" class="form-control" id="contact" name="contact" placeholder="Phone, Email" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary submit-btn btn-block">Submit Application</button>
-                </div>
                 
             </form>
         </div>
@@ -117,17 +148,11 @@
     <footer class="bg-dark text-white py-3 mt-5">
         <div class="container text-center">
             <p>Ensure you provide upto date client details </p>
-            <!-- <p>Follow us on: 
-                <a href="#" class="text-white mx-2">Facebook</a>
-                <a href="#" class="text-white mx-2">Twitter</a>
-                <a href="#" class="text-white mx-2">LinkedIn</a>
-            </p> -->
             <p>&copy; 2024 Nisa Financing . All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/sendloanApplicationDetails.js" ></script>
 </body>
 </html>

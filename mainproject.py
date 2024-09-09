@@ -1,4 +1,5 @@
 
+from crypt import methods
 from flask import Flask, jsonify, render_template, request, send_file, session
 from enviromentkeys import secret_key
 import mysql.connector as sql
@@ -24,6 +25,12 @@ UPLOAD_CLIENT_NATIONALid_PICTURES = os.path.join("static","clientNationalIdPictu
 app.config["UPLOAD_CLIENT_NATIONALid_PICTURES"] = UPLOAD_CLIENT_NATIONALid_PICTURES
 if not os.path.exists(UPLOAD_CLIENT_NATIONALid_PICTURES):
     os.makedirs(UPLOAD_CLIENT_NATIONALid_PICTURES)
+
+"""client business pictures"""
+UPLOAD_CLIENT_BUSINESS_PICTURES = os.path.join("static", "clientBusinessPictures")
+app.config["UPLOAD_CLIENT_BUSINESS_PICTURES"] = UPLOAD_CLIENT_BUSINESS_PICTURES
+if not os.path.exists(UPLOAD_CLIENT_BUSINESS_PICTURES):
+    os.makedirs(UPLOAD_CLIENT_BUSINESS_PICTURES)
 
 # manager section details bellow
 @app.route("/managrDashboard")
@@ -297,6 +304,18 @@ def savingCollections():
 def savingAtMaturity():
     return render_template("savingAcountsAtMaturity.html")
 
+@app.route("/underWritter", methods=["GET","POST"])
+def underWritter():
+    if request.method == "GET":
+        requesttype = request.args.get("type")
+        if requesttype == "loandetails":
+            bankObj = BankingDataBase()
+            data = bankObj.fetchLoanApplicationDetails()
+            print(data)
+            return jsonify(data)
+    
+    return render_template("underWritter.html")
+
 
 @app.route("/recievableReports")
 def recievableReports():
@@ -475,8 +494,81 @@ def recievablesSavings():
 def payment():
     return render_template("payments.html")
 
-@app.route("/loanApplication")
+@app.route("/loanApplication", methods=["GET", "POST"])
 def loanApplication():
+    if request.method == "POST":
+        if request.content_type.startswith("multipart/form-data"):
+            # get loan application details
+            try:
+                clientId = request.form.get("clientId")
+                loanAmount = request.form.get("loanAmount")
+                interesRate = request.form.get("interestRate")
+                loanPeriod = request.form.get("loanPeriod")
+                clientCurrentaddress = request.form.get("clientCurrentaddress")
+                devisioncity = request.form.get("devisioncity")
+                state = request.form.get("state")
+                Occuption = request.form.get("Occuption")
+                workArea = request.form.get("workArea")
+                businessLoaction = request.form.get("businessLoaction")
+                contact = request.form.get("contact")
+                businessPic = request.files.get("businessPic")
+
+                if businessPic:
+                    pic_fullName = os.path.splitext(businessPic.filename)
+                    imagename = pic_fullName[0]
+                    extension = pic_fullName[1]
+                    pictureName = f"{clientId}{imagename}{extension}"
+                    businessPicPath = os.path.join(app.config["UPLOAD_CLIENT_BUSINESS_PICTURES"],pictureName)
+                    businessPic.save(businessPicPath)
+
+                    businessPictureRelativePath = os.path.join("clientBusinessPictures",pictureName)
+
+                # accessing existing 
+                try:
+
+                    loanIdObject = ExistingIds()
+                    existingLoanIds = loanIdObject.fetchLoanIds()
+                    
+                except Exception as e:
+                    raise Exception(f"error while calling existing loan ids in loan application route:{e}")
+
+                try:
+                    idObj = GenerateIds()
+                    loanId = idObj.loanId(existingLoanIds=existingLoanIds)
+                except Exception as e:
+                    raise Exception(f"error while calling generate loanId method in loanapplication route:{e}")
+
+                
+                # data object
+                loanApplicationObject ={
+                    "loanID":loanId,
+                    "clientId":clientId,
+                    "loanAmount":loanAmount,
+                    "interestRate":interesRate,
+                    "loanPeriod":loanPeriod,
+                    "clientCurrentaddress":clientCurrentaddress,
+                    "devisioncity":devisioncity,
+                    "state":state,
+                    "Occuption":Occuption,
+                    "workArea":workArea,
+                    "businessLoaction":businessLoaction,
+                    "contact":contact,
+                    "businessPictureRelativePath":businessPictureRelativePath,
+                    "BranchDetails":{
+                        "BranchId":"bi123",
+                        "OfficerId":"Ei123"
+                    }
+                }
+                loan = BankingDataBase()
+                loan.insert_into_loanApplicationTAbles(loanApplicationDetails=loanApplicationObject)
+                return jsonify({"response":"loan application recieved"})
+            except Exception as e:
+                raise Exception(f"error while recieving loan application details in loanapplication route:{e}")
+        else:
+            pass
+    else:
+        pass   
+
     return render_template("loanApplication.html")
 
 @app.route("/collectionSheet")
@@ -487,8 +579,20 @@ def collectionSheet():
 def overdueAndPenalties():
     return render_template("overdue_penalty.html")
 
-@app.route("/allClientList")
+@app.route("/allClientList", methods=["GET","POST"])
 def allClientList():
+    if request.method == "GET":
+        requesttype = request.args.get("type")
+        if requesttype == "allclientslist":
+            try:
+                clientObject = BankingDataBase()
+                data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId='Ei123')
+                return jsonify(data)
+            except Exception as e:
+                raise Exception(f"error while calling fetchEmployeeDetails method in allclient route:{e}")
+
+
+
     return render_template("allclientslist.html")
 
 @app.route("/ActiveClients")
@@ -499,8 +603,17 @@ def ActiveClients():
 def onHoldClients():
     return render_template("onhold.html")
 
-@app.route("/clientProfile")
+@app.route("/clientProfile",methods=["GET","POST"])
 def clientProfile():
+    if request.method == "POST":
+        requesttype = request.json.get("type")
+        if requesttype == "clientID":
+            id = request.json.get("data")
+            return jsonify({"response":"clientId"})
+    elif request.method == "GET":
+        requesttype = request.args.get("type")
+        if requesttype == "clientDetails":
+            pass
     return render_template("clientProfilePage.html")
 
 @app.route("/clientpaymentDetails")

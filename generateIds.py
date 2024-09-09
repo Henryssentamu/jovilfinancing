@@ -6,6 +6,7 @@ class GenerateIds:
         self.branchPrefix = "NB"
         self.EmployeePrefix = "NE"
         self.DeptPrefix = "ND"
+        self.loanIDprefix = "NL"
         self.IdLength = 5
 
     def branchId(self,existingBranchIDs):
@@ -46,4 +47,17 @@ class GenerateIds:
             return id
         else:
             return self.deptmentId(existingDeptIds)
+    def loanId(self,existingLoanIds):
+        """_this method is called whenever a new loan application is need_
+            Args:
+                existing loanIdz(_set_):_set of existing loan idz
+        """
+        self.existloanIds = existingLoanIds
+        number = str(secrets.randbelow(10**self.IdLength)).zfill(self.IdLength)
+        id = f"{self.loanIDprefix}{number}"
+        if id not in self.existloanIds:
+            return id
+        else:
+            return self.loanId(existingLoanIds)
+
 
