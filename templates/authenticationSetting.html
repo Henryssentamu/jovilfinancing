@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Authentication Credentials</title>
+    <!-- Bootstrap CSS -->
+    <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="container">
+            <a href="#" class="navbar-brand">NisaFinancing</a>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a href="{{url_for('employeeProfile')}}" class="nav-link">Back</a>
+                </li>
+                
+            </ul>
+
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h4>Set Authentication Credentials</h4>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <!-- Username -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Employee Id</label>
+                                <input type="text" class="form-control" id="employeeId" placeholder="Enter your Id">
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" placeholder="A strong  password is recomended ">
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm password">
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit" id="submit" class="btn btn-primary">Set Credentials</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional for interactive components) -->
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function getInput(){
+            var EmployeeId = document.getElementById("employeeId").value;
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirmPassword").value;
+            if(password != confirmPassword){
+                alert("password didnt match")
+                location.reload()
+            }
+            return {"EmployeeId":EmployeeId,"password":password}
+        }
+        function sendPasswordDetails(){
+            document.getElementById("submit")
+                .addEventListener("click", async()=>{
+                    var details = await getInput()
+                    fetch("/authenticationSetting",{
+                        method:"POST",
+                        headers:{
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify(details)
+                    })
+                    .then(response =>{
+                        if(!response.ok){
+                            throw new Error("error while sendind employee password")
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        console.log(data)
+                        alert(data)
+
+                    })
+                    .catch(error =>{
+                        console.log(error)
+                        alert(error)
+                    })
+
+                })
+        }
+
+        sendPasswordDetails()
+        
+    </script>
+</body>
+</html>

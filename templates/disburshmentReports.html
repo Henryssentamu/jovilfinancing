@@ -52,178 +52,31 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Disburshments Report</h3>
+                <h3 class="card-title">Disburshments</h3>
             </div>
             <div class="card-body">
                 <table class="table table-bordered">
                     <thead class="thead-light">
                         <tr>
-                            <th>Disburshment Date</th>
+                            <th>Approved Date</th>
+                            <th>Client Names</th>
                             <th>Branch</th>
-                            <th>Expection </th>
                             <th>Amount Disburshed </th>
+                            <th>Confirm </th>
                             
                             
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>20000000</td>
-                            <td>200000</td>
-                            
-                            
-                            
-                        </tr>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>kampale business Center</td>
-                            <td>20000000</td>
-                            <td>200000</td>
-                            
-                        </tr>
+                    <tbody id="details">
+                        
                     </tbody>
                 </table>
             </div>
         </div>
-
-        <!-- <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Saving Collections</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Collection Date</th>
-                            <th>Branch</th>
-                            <th>Expection </th>
-                            <th>Amount collected</th>
-                            <th>Overdue</th>
-                            
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>20000000</td>
-                            <td>200000</td>
-                            <td>10000003</td>
-                            
-                            
-                        </tr>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>kampale business Center</td>
-                            <td>20000000</td>
-                            <td>200000</td>
-                            <td>10000003</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
-
-        <!-- <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Credit Portfolio</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Account Number</th>
-                            <th>Customer Name</th>
-                            <th>Loan Amount</th>
-                            <th>Outstanding Balance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>$10000</td>
-                            <td>$5000</td>
-                        </tr>
-                        <tr>
-                            <td>987654321</td>
-                            <td>Jane Smith</td>
-                            <td>$8000</td>
-                            <td>$3000</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Overdue Accounts</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Account Number</th>
-                            <th>Customer Name</th>
-                            <th>Overdue Amount</th>
-                            <th>Due Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>$2000</td>
-                            <td>2024-06-30</td>
-                        </tr>
-                        <tr>
-                            <td>987654321</td>
-                            <td>Jane Smith</td>
-                            <td>$1000</td>
-                            <td>2024-06-15</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Penalties</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Account Number</th>
-                            <th>Customer Name</th>
-                            <th>Penalty Amount</th>
-                            <th>Penalty Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>$50</td>
-                            <td>2024-07-01</td>
-                        </tr>
-                        <tr>
-                            <td>987654321</td>
-                            <td>Jane Smith</td>
-                            <td>$30</td>
-                            <td>2024-06-20</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->
     </div>
 
     <!-- Bootstrap JS and dependencies -->
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/jsFiles/fetchApprovedLoanDetails.js"></script>
 </body>
 </html>

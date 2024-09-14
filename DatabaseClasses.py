@@ -1,4 +1,4 @@
-from ast import Return
+
 import mysql.connector as sql
 
 
@@ -934,7 +934,7 @@ class EmployeeDatabase(ConnectToMySql):
             raise Exception(f"error while updating employee dept: {e}")
         finally:
             self.close_connection()
-
+    
     def updateEmployeeBranch(self,detailsObject):
         """_this methode update employee dept_
             Arg:
@@ -1623,6 +1623,7 @@ class BankingDataBase(ConnectToMySql):
             raise Exception("cursor not availabe to update phone number:")
     
     def create_loanApplicationTAbles(self):
+        self.reconnect_if_needed()
         try:
             if self.cursor:
                 self.cursor.execute("CREATE DATABASE IF NOT EXISTS LoanApplications")
@@ -1676,7 +1677,7 @@ class BankingDataBase(ConnectToMySql):
         finally:
             self.close_connection()
     def insert_into_loanApplicationTAbles(self, loanApplicationDetails):
-        self.loanStatus ="notAproved"
+        self.loanStatus ="notApproved"
         self.loanID = loanApplicationDetails["loanID"]
         self.clientId = loanApplicationDetails["clientId"]
         self.loanAmount = loanApplicationDetails["loanAmount"]
@@ -1710,7 +1711,7 @@ class BankingDataBase(ConnectToMySql):
                         LoanAmount,
                         InterestRateInPercentage,
                         LoanPeriodInDays,
-                        Status,                    
+                        Status                   
                     )VALUES(%s,%s,%s,%s,%s,%s,%s,%s)
 
                 """,(self.loanID, self.clientId,self.BranchId,self.OfficerId,self.loanAmount,self.interestRate,self.loanPeriod, self.loanStatus))
@@ -1740,7 +1741,153 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error in insert into loan application tables method:{e}")
         finally:
             self.close_connection()
+
+
+    def updateLoanApplicationApprovalStatus(self, loanApprovalDetails):
+        self.approval = "approved"
+        self.amount = loanApprovalDetails["approvedAmount"]
+        self.interestRate = loanApprovalDetails["interestRate"]
+        self.period = loanApprovalDetails["paymentPeriod"]
+        self.loanId = loanApprovalDetails["loanId"]
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    UPDATE LoanDetails
+                    SET
+                        LoanAmount =%s,
+                        InterestRateInPercentage =%s,
+                        LoanPeriodInDays =%s,
+                        Status =%s
+                    WHERE LoanId = %s
+                """, (self.amount, self.interestRate,self.period,self.approval,self.loanId))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised in loan approval status methode")
+        except Exception as e:
+            raise Exception(f"error while updating loan approval status:{e}")
+        finally:
+
+            self.close_connection()
+
+
+
+    def CreateapprovedLoans_tables(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS approvedLoans(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500) PRIMARY KEY,
+                        ClientID VARCHAR(500) NOT NULL,
+                        BranchId VARCHAR(500),
+                        OfficerId VARCHAR(500),
+                        LoanAmountAppliedFor VARCHAR(300),
+                        LoanAmountApproved VARCHAR(300),
+                        InterestRateInPercentage VARCHAR(50),
+                        LoanPeriodInDays VARCHAR(50)               
+                    )
+                """)
+            else:
+                raise Exception("cursor not initialized while creating approved loan tables")
+        except Exception as e:
+            raise Exception(f"error while creating approved loan tables:{e}")
+
+
+    def loanApplicationApprovelTrigger(self):
+        """
+            _this method is called in underwriter's route where loan approval is done_
+            Args:
+                _approvedLoanDetails(_dic):approved loan details
+            Return:
+                _none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                 # Drop the trigger if it exists to avoid duplicate errors
+                self.cursor.execute("DROP TRIGGER IF EXISTS loanApproved")
+                self.cursor.execute("""
+                    CREATE TRIGGER loanApproved
+                    AFTER UPDATE ON LoanDetails
+                    FOR EACH ROW
+                    BEGIN
+                        IF NEW.Status = 'approved' THEN
+                            INSERT INTO approvedLoans(
+                                LoanId,
+                                ClientID,
+                                BranchId,
+                                OfficerId,
+                                LoanAmountAppliedFor,
+                                LoanAmountApproved,
+                                InterestRateInPercentage,
+                                LoanPeriodInDays                
+                            ) VALUES(
+                                OLD.LoanId,
+                                OLD.ClientID,
+                                OLD.BranchId,
+                                OLD.OfficerId,
+                                OLD.LoanAmount,
+                                NEW.LoanAmount,
+                                NEW.InterestRateInPercentage,
+                                NEW.LoanPeriodInDays
+                            );
+                        END IF;
+                    END
+                """)
+                
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised in the trigger loan approvel status")
+        except Exception as e:
+            raise Exception(f"error while trigger loan approvel status:{e}")
+        
+    def Create_disbursement_table(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS DisbursementDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500) PRIMARY KEY              
+                    )
+                """)
+            else:
+                raise Exception("cursor not initialized in disburshment method")
+        except Exception as e:
+            raise Exception(f"error in while creating disburshement table in disburshment methode:{e}")
+        finally:
+            self.close_connection()
+
+    def insert_into_disbursement_table(self,loanId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO DisbursementDetails(
+                        LoanId                
+                    ) VALUES(%s)
+                """,(loanId,))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized while inserting into  disburshment table")
+        except Exception as e:
+            raise Exception(f"error in while inserting into  disburshement table:{e}")
+        finally:
+            self.close_connection()
+        
+
+        
+
+
     def fetchLoanApplicationDetails(self):
+        self.loanStatus = "notApproved"
         try:
             self.reconnect_if_needed()
             if self.cursor:
@@ -1772,7 +1919,9 @@ class BankingDataBase(ConnectToMySql):
                     JOIN LoanApplications.AddressDetails AS R ON R.LoanId = L.LoanId
                     JOIN LoanApplications.WorkDetails AS B ON B.LoanId = L.LoanId
                     JOIN AccountsVault.BankAccount AS Db on Db.AccountNumber = L.ClientID
-                """)
+                    WHERE
+                        L.Status = %s
+                """,(self.loanStatus,))
                 data = self.cursor.fetchall()
                 return [{
                     "Date":client[0].strftime('%Y-%m-%d %H:%M:%S'),
@@ -1799,6 +1948,171 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialized in fetching loan application details")
         except Exception as e:
             raise Exception(f"error in fetch loan application details:{e}")
+    def fetchApprovedLoandetails(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        
+                        B.FirstName,
+                        B.SirName,
+                        C.BranchName,
+                        E.Firstname,
+                        E.LastName,
+                        A.LoanId,
+                        A.ClientID,
+                        A.BranchId,
+                        A.OfficerId,
+                        A.LoanAmountAppliedFor,
+                        A.LoanAmountApproved,
+                        A.InterestRateInPercentage,
+                        A.LoanPeriodInDays,
+                        B.Date
+                    FROM approvedLoans AS A
+                    JOIN AccountsVault.BankAccount AS B ON B.AccountNumber = A.ClientID
+                    JOIN NisaBranches.Branches AS C ON C.BranchId = A.BranchId
+                    JOIN employeeDatabase.employeeDetails AS E ON E.EmployeeId = A.OfficerId
+                    LEFT JOIN LoanApplications.DisbursementDetails AS O ON O.LoanId = A.LoanId
+                    WHERE
+                        O.LoanId IS NULL
+                """)
+                details = self.cursor.fetchall()
+                return [{
+                            "clientDetails":{
+                                "AccountNumber":data[6],
+                                "FirstName":data[0],
+                                "SirName":data[1],
+                                },
+                            "branchDetails":{
+                                "BranchId":data[7],
+                                "BranchName":data[2],
+                                "Firstname":data[3],
+                                "LastName":data[4],
+                                "OfficerId":data[8]
+                            },
+                            "loanDetails":{
+                                "ApprovedDate":data[13].strftime('%Y-%m-%d %H:%M:%S'),
+                                "LoanId":data[5],
+                                "LoanAmountAppliedFor":data[9],
+                                "LoanAmountApproved":data[10],
+                                "InterestRateInPercentage":data[11],
+                                "LoanPeriodInDays":data[12]
+                            }
+                    } for data in details]
+            else:
+                raise Exception("cursor not initialized in fetching approved loan details methode")
+
+        except Exception as e:
+            raise Exception(f"error while fetching approved loans details:{e}")
+        finally:
+            self.close_connection()
+
+    def fetchApprovedLoandetailsForSpecificBranch(self,branchId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        B.FirstName,
+                        B.SirName,
+                        C.BranchName,
+                        E.Firstname,
+                        E.LastName,
+                        A.LoanId,
+                        A.ClientID,
+                        A.BranchId,
+                        A.OfficerId,
+                        A.LoanAmountAppliedFor,
+                        A.LoanAmountApproved,
+                        A.InterestRateInPercentage,
+                        A.LoanPeriodInDays
+                    FROM approvedLoans AS A
+                    JOIN AccountsVault.BankAccount AS B ON B.AccountNumber = A.ClientID
+                    JOIN NisaBranches.Branches AS C ON C.BranchId = A.BranchId
+                    JOIN employeeDatabase.employeeDetails AS E ON E.EmployeeId = A.OfficerId
+                    WHERE
+                        C.BranchId = %s
+                        
+                """,(branchId,))
+                details = self.cursor.fetchall()
+                return [{
+                            "clientDetails":{
+                                "AccountNumber":data[6],
+                                "FirstName":data[0],
+                                "SirName":data[1],
+                                },
+                            "branchDetails":{
+                                "BranchId":data[7],
+                                "BranchName":data[2],
+                                "Firstname":data[3],
+                                "LastName":data[4],
+                                "OfficerId":data[8]
+                            },
+                            "loanDetails":{
+                                "LoanId":data[5],
+                                "LoanAmountAppliedFor":data[9],
+                                "LoanAmountApproved":data[10],
+                                "InterestRateInPercentage":data[11],
+                                "LoanPeriodInDays":data[12]
+                            }
+                    } for data in details]
+            else:
+                raise Exception("cursor not initialized in fetching approved loan details methode")
+
+        except Exception as e:
+            raise Exception(f"error while fetching approved loans details:{e}")
+        finally:
+            self.close_connection()
+
+
+
+class AuthenticationDetails(ConnectToMySql):
+    def __init__(self) -> None:
+        super().__init__()
+    def employeeLoginCridentials(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS AuthenticationDb")
+                self.cursor.execute("USE AuthenticationDb")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS EmployeeLogindetails(
+                        DATE DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(500) PRIMARY KEY,
+                        Password  VARCHAR(500)              
+                    )
+                """)
+                
+        except Exception as e:
+            raise Exception(f"error while creating login bd:{e}")
+        finally:
+            self.close_connection()
+
+    def insert_into_employeeLoginCridentials(self,loginDetails):
+        self.id = loginDetails["EmployeeId"]
+        self.password = loginDetails["password"]
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE AuthenticationDb")
+                self.cursor.execute("""
+                    INSERT INTO EmployeeLogindetails(
+                        EmployeeId,
+                        Password               
+                    )VALUES(%s,%s)
+                """,(self.id, self.password))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised while inserting into creditOfficers authentications")
+        except Exception as e:
+            raise Exception(f"error while inserting into creditOfficers authentication details:{e}")
+        finally:
+            self.close_connection()
+    
+
 
 
         
@@ -1822,3 +2136,9 @@ class BankingDataBase(ConnectToMySql):
 # banking  = BankingDataBase()
 # banking.createAccountTable()
 # banking.create_loanApplicationTAbles()
+# banking.CreateapprovedLoans_tables()
+# banking.Create_disbursement_table()
+
+
+# auth = AuthenticationDetails()
+# auth.employeeLoginCridentials()

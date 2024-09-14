@@ -17,11 +17,11 @@ async function getLoanApplicationDetails() {
 
 function generatehtml(data){
     html = ""
-    data.forEach(obj =>{
+    data.forEach((obj,index) =>{
         html += `
             <div class="card mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Client: ${obj["FirstName"]} <span> </span> ${obj["SirName"]} </h5>
+                    <h5 class="card-title loanId-${index}" data-loan-id="${obj["LoanId"]}">Client: ${obj["FirstName"]} <span> </span> ${obj["SirName"]} </h5>
                     <div class="row">
                         <div class="col">
                             Application Date: ${obj["Date"]}
@@ -49,15 +49,15 @@ function generatehtml(data){
                     <div class="row">
                         <div class="col-md-4">
                             <p><strong>Loan Amount:</strong></p>
-                            <input type="number" class="form-control" value="${obj["LoanAmount"]}" id="loanAmount1">
+                            <input type="number" class="form-control" value="${obj["LoanAmount"]}" id="loanAmount-${index}">
                         </div>
                         <div class="col-md-4">
                             <p><strong>Interest Rate (%):</strong></p>
-                            <input type="number" class="form-control" value="${obj["intereRate"]}" id="interestRate1">
+                            <input type="number" class="form-control" value="${obj["intereRate"]}" id="interestRate-${index}">
                         </div>
                         <div class="col-md-4">
                             <p><strong>Payment Period (Days):</strong></p>
-                            <input type="number" class="form-control" value="${obj["LoanPeriodInDays"]}" id="paymentPeriod1">
+                            <input type="number" class="form-control" value="${obj["LoanPeriodInDays"]}" id="paymentPeriod-${index}">
                         </div>
                     </div>
                     <div class="row mt-4" style={width:100px}>
@@ -68,7 +68,7 @@ function generatehtml(data){
 
                     <!-- Action Buttons -->
                     <div class="d-flex justify-content-end mt-3">
-                        <button class="btn btn-primary me-2" onclick="approveLoan(1)">Approve</button>
+                        <button class="btn btn-primary me-2" onclick="approveLoan(${index})">Approve</button>
                     </div>
                 </div>
             </div>

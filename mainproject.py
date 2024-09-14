@@ -1,17 +1,23 @@
 
-from crypt import methods
-from flask import Flask, jsonify, render_template, request, send_file, session
+
+from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
+from urllib3 import HTTPResponse
 from enviromentkeys import secret_key
 import mysql.connector as sql
 import io
 import os
-from DatabaseClasses import BankingDataBase, Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
+from DatabaseClasses import AuthenticationDetails, BankingDataBase, Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
 from generateAccountNumber import GenerateAccountNumber
+from loginmodule import Authenticate
 from generateIds import GenerateIds
+from flask_login import LoginManager, UserMixin, logout_user, login_required,login_user,login_remembered, current_user
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = secret_key
+"""configuring logging in functionality with the app"""
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 """image secton, ensuring that client image folder is set proparly """
 
@@ -31,6 +37,22 @@ UPLOAD_CLIENT_BUSINESS_PICTURES = os.path.join("static", "clientBusinessPictures
 app.config["UPLOAD_CLIENT_BUSINESS_PICTURES"] = UPLOAD_CLIENT_BUSINESS_PICTURES
 if not os.path.exists(UPLOAD_CLIENT_BUSINESS_PICTURES):
     os.makedirs(UPLOAD_CLIENT_BUSINESS_PICTURES)
+
+
+class User(UserMixin):
+    def __init__(self,id):
+        super().__init__()
+        self.id = id
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User(user_id)
+
+
+
+@app.route("/")
+def home():
+    return render_template("home.html")
 
 # manager section details bellow
 @app.route("/managrDashboard")
@@ -311,8 +333,21 @@ def underWritter():
         if requesttype == "loandetails":
             bankObj = BankingDataBase()
             data = bankObj.fetchLoanApplicationDetails()
-            print(data)
+            # print(data)
             return jsonify(data)
+    elif request.method == "POST":
+        requesttype = request.json.get("type")
+        if requesttype == "approvedloan":
+            data = request.json.get("data")
+            try:
+                banking = BankingDataBase()
+                banking.updateLoanApplicationApprovalStatus(loanApprovalDetails=data)
+                banking.loanApplicationApprovelTrigger()
+                
+            except Exception as e:
+                raise Exception(f"eror while approving loan application in under writer's route:{e}")
+            return jsonify({"response":"loan approved"})
+
     
     return render_template("underWritter.html")
 
@@ -320,8 +355,26 @@ def underWritter():
 @app.route("/recievableReports")
 def recievableReports():
     return render_template("recievableReports.html")
-@app.route("/disburshmentReports")
+
+@app.route("/disburshmentReports", methods=["GET", "POST"])
 def disburshmentReports():
+    if request.method == "GET":
+        requestType = request.args.get("type")
+        if requestType == "loanApprovedDetails":
+            banking = BankingDataBase()
+            data = banking.fetchApprovedLoandetails()
+            return jsonify(data)
+    else:
+        requestType = request.json.get("type")
+        if requestType == "confirmedLoan":
+            loanid = request.json.get("data")
+            if loanid:
+                try:
+                    banking = BankingDataBase()
+                    banking.insert_into_disbursement_table(loanId=loanid)
+                except Exception as e:
+                    raise Exception(f"error while calling insert into disursement table method :{e}")
+            return jsonify({"response":"LoanConfirmed"})
     return render_template("disburshmentReports.html")
 
 @app.route("/attatchEmployeeTobranch")
@@ -376,10 +429,52 @@ def employeeProfile():
     return render_template("employeeProfile.html")
 
 
+@app.route("/authenticationSetting",methods=["GET","POST"])
+def authenticationSetting():
+    if request.method == "POST":
+        data = request.json
+        try:
+            obj = AuthenticationDetails()
+            obj.insert_into_employeeLoginCridentials(loginDetails=data)
+            return jsonify({"response":"details recieved"})
+        except Exception as e:
+            raise Exception(f"error while calling insert into employee login crediential methode in authentication route:{e}")
+    return render_template("authenticationSetting.html")
+
+
+
 # credit officer dashboard section details bellow
 
-@app.route("/crediofficerDashboard")
+@app.route("/login", methods=["GET","POST"])
+def login():
+    if request.method == "POST":
+        data = request.json
+        EmployeeId = data["EmployeeId"]
+        password = data["Password"]
+        log = Authenticate()
+        response = log.is_authenticatedEmployee(EmployeeId=EmployeeId,password=password)
+        if response:
+            user = User(id=EmployeeId)
+            login_user(user=user)
+            return redirect(url_for("crediofficerDashboard"))
+        
+                
+    return render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return render_template("home.html")
+
+
+
+@app.route("/crediofficerDashboard", methods=["GET"])
 def crediofficerDashboard():
+    # if not current_user.is_authenticated:
+    #     session["crediofficerDashboard"] = request.url
+    #     return redirect(url_for('login'))
     return render_template("creditOfficerDashboard.html")
 
 @app.route("/registerClient",methods =["GET","POST"])
@@ -455,8 +550,8 @@ def registerClient():
                     "Location":nextOfKinLocation},
 
                     "BranchDetails":{
-                        "BranchId":"bi123",
-                        "OfficerId":"Ei123"
+                        "BranchId":"NB01089",
+                        "OfficerId":"NE16854"
                     }
                 }
                 
@@ -555,8 +650,8 @@ def loanApplication():
                     "contact":contact,
                     "businessPictureRelativePath":businessPictureRelativePath,
                     "BranchDetails":{
-                        "BranchId":"bi123",
-                        "OfficerId":"Ei123"
+                        "BranchId":"NB01089",
+                        "OfficerId":"NE16854"
                     }
                 }
                 loan = BankingDataBase()
@@ -586,7 +681,7 @@ def allClientList():
         if requesttype == "allclientslist":
             try:
                 clientObject = BankingDataBase()
-                data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId='Ei123')
+                data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId='NE16854')
                 return jsonify(data)
             except Exception as e:
                 raise Exception(f"error while calling fetchEmployeeDetails method in allclient route:{e}")

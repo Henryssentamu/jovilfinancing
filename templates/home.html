@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microfinance Bank</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .hero {
+            background: url('hero-image.jpg') no-repeat center center;
+            background-size: cover;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .hero h1 {
+            font-size: 3rem;
+        }
+        .hero p {
+            font-size: 1.5rem;
+        }
+        .services {
+            padding: 50px 0;
+        }
+        .service-icon {
+            font-size: 3rem;
+            color: #007bff;
+        }
+        footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="bg-light py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="logo">NISA Financing</h1>
+            <nav>
+                <a href="{{url_for('crediofficerDashboard')}}" class="mr-3">Home</a>
+                <a href="#" class="mr-3">Services</a>
+                <a href="#">Contact</a>
+            </nav>
+            <div>
+                <a href="#" class="btn btn-outline-primary mr-2">Login</a>
+                <a href="#" class="btn btn-primary">Signup</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container text-center">
+            <h1>Empowering Your Financial Future</h1>
+            <p>Offering Loans, Savings, and Financial Services to help you grow</p>
+            <a href="#" class="btn btn-primary btn-lg">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services text-center">
+        <div class="container">
+            <h2 class="mb-5">Our Services</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <i class="service-icon fas fa-hand-holding-usd"></i>
+                    <h4>Loans</h4>
+                    <p>Affordable loan solutions tailored to your needs.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="service-icon fas fa-piggy-bank"></i>
+                    <h4>Savings</h4>
+                    <p>Secure and flexible savings plans.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="service-icon fas fa-briefcase"></i>
+                    <h4>Business Financing</h4>
+                    <p>Empowering small businesses with accessible financing options.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials bg-light py-5">
+        <div class="container text-center">
+            <h2 class="mb-5">What Our Clients Say</h2>
+            <blockquote class="blockquote">
+                <p>"Thanks to this bank, I was able to expand my small business and secure my future!"</p>
+                <footer class="blockquote-footer">John Doe, Business Owner</footer>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 Microfinance Bank | All rights reserved.</p>
+        <p>123 Bank Street, Finance City | +1 234 567 890</p>
+        <div>
+            <a href="#" class="mr-3">Terms & Conditions</a>
+            <a href="#">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+</body>
+</html>
