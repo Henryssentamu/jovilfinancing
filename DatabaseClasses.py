@@ -1773,6 +1773,8 @@ class BankingDataBase(ConnectToMySql):
 
 
 
+
+
     def CreateapprovedLoans_tables(self):
         try:
             self.reconnect_if_needed()
@@ -1881,6 +1883,90 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error in while inserting into  disburshement table:{e}")
         finally:
             self.close_connection()
+
+    def registeredLoans(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS registeredLoans(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500) PRIMARY KEY,
+                        Principle VARCHAR(500),
+                        InterestRate VARCHAR(500),
+                        PaymentperiodinDays VARCHAR(500)            
+                    )
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS LoanRepaymentScheduleDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500) PRIMARY KEY,
+                        Portifolio TEXT,
+                        LoanSecurity TEXT,
+                        DailCommitmentAmount TEXT 
+                        
+                    )
+                """)
+            else:
+                raise Exception("cursor not initialed while creating registeredLoans")
+        except Exception as e:
+            raise Exception(f"error while creating registeredLoans :{e}")
+        finally:
+            self.close_connection()
+    def registeredLoanTriger(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS registeredLoan")
+                self.cursor.execute("""
+                    CREATE TRIGGER registeredLoan
+                    AFTER INSERT ON DisbursementDetails
+                    FOR EACH ROW 
+                    BEGIN 
+                        INSERT INTO registeredLoans(LoanId,Principle,InterestRate,PaymentperiodinDays)
+                        SELECT
+                            LoanId,
+                            LoanAmountApproved,
+                            InterestRateInPercentage,
+                            LoanPeriodInDays
+                        FROM approvedLoans
+                        WHERE 
+                            LoanId = NEW.LoanId;
+                                    
+                        INSERT INTO LoanRepaymentScheduleDetails(LoanId,Portifolio,LoanSecurity,DailCommitmentAmount)
+                        SELECT
+                            LoanId,
+                            LoanAmountApproved * (1 + (InterestRateInPercentage / 100) ) AS Portifolio,
+                            LoanAmountApproved * 0.1 AS LoanSecurity,
+                            (LoanAmountApproved * (1 + (InterestRateInPercentage / 100) )) / LoanPeriodInDays AS DailCommitmentAmount
+                        FROM approvedLoans
+                        WHERE 
+                            LoanId = NEW.LoanId;
+                            
+                    END;
+                                    
+                """)
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialized in register loan trigger")
+        except Exception as e:
+            raise Exception(f"error while registering comfirmed loans in register loan trigger:{e}")
+        
+    def calculateLoanDetails(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS clientRegisteredLoandetails(
+                                    
+                    )
+                """)
+            else:
+                raise Exception("cursor not initialised while creating clientRegisteredLoandetails")
+        except Exception as e:
+            raise Exception(f"error while creating clientRegisteredLoandetails:{e}")
         
 
         
@@ -2138,6 +2224,7 @@ class AuthenticationDetails(ConnectToMySql):
 # banking.create_loanApplicationTAbles()
 # banking.CreateapprovedLoans_tables()
 # banking.Create_disbursement_table()
+# banking.registeredLoans()
 
 
 # auth = AuthenticationDetails()

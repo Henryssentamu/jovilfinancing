@@ -21,6 +21,7 @@ async function approveLoan(index) {
     })
     .then(data =>{
         alert(data["response"])
+        location.reload()
     })
     .catch(error =>{
         console.log(error)

@@ -372,6 +372,7 @@ def disburshmentReports():
                 try:
                     banking = BankingDataBase()
                     banking.insert_into_disbursement_table(loanId=loanid)
+                    banking.registeredLoanTriger()
                 except Exception as e:
                     raise Exception(f"error while calling insert into disursement table method :{e}")
             return jsonify({"response":"LoanConfirmed"})
