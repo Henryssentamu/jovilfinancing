@@ -1,6 +1,6 @@
 
 
-from flask import Flask, jsonify, redirect, render_template, request, send_file, session, url_for
+from flask import Flask, cli, jsonify, redirect, render_template, request, send_file, session, url_for
 from urllib3 import HTTPResponse
 from enviromentkeys import secret_key
 import mysql.connector as sql
@@ -573,10 +573,10 @@ def registerClient():
 
 
 
-@app.route("/makePayment")
-def makePayment():
-    # not yet created
-    return render_template()
+# @app.route("/makePayment")
+# def makePayment():
+#     # not yet created
+#     return render_template()
 
 @app.route("/recievablesCredit")
 def recievablesCredit():
@@ -687,8 +687,6 @@ def allClientList():
             except Exception as e:
                 raise Exception(f"error while calling fetchEmployeeDetails method in allclient route:{e}")
 
-
-
     return render_template("allclientslist.html")
 
 @app.route("/ActiveClients")
@@ -705,11 +703,24 @@ def clientProfile():
         requesttype = request.json.get("type")
         if requesttype == "clientID":
             id = request.json.get("data")
+            session["lorded_account"] = id
             return jsonify({"response":"clientId"})
     elif request.method == "GET":
+        client_id = session.get("lorded_account")
         requesttype = request.args.get("type")
         if requesttype == "clientDetails":
-            pass
+            bank = BankingDataBase()
+            clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
+            
+            return clientDetails
+        elif requesttype == "clientCreditdetails":
+            bank = BankingDataBase()
+            creditDetails = bank.fetchClientCreditDetails(clientId=client_id)
+           
+            return creditDetails 
+
+            
+            
     return render_template("clientProfilePage.html")
 
 @app.route("/clientpaymentDetails")

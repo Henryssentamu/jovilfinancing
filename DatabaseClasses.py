@@ -1429,6 +1429,85 @@ class BankingDataBase(ConnectToMySql):
             raise Exception("cursor not initalised in fetching all clients details")
         
 
+    def fetchSpecificClientAccountDetails(self, clientId):
+        """_This method fetches all clients details for specific branch_
+            _Args:
+                _client id (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.clientId = clientId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        B.AccountNumber,
+                        B.FirstName,
+                        B.SirName,
+                        S.NINNumber,
+                        P.DateOfBirth,
+                        P.Religion,
+                        P.Gender,
+                        C.CurrentAddress,
+                        C.CityDivision,
+                        C.District,
+                        C.PhoneNumber,
+                        N.FirstName,
+                        N.SirName,
+                        N.PhoneNumber,
+                        N.Location,
+                        T.Photo ownerpic,
+                        D.BranchId,
+                        D.OfficerId
+                    FROM
+                        BankAccount AS B
+                    JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
+                    JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
+                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
+                    JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
+                    JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
+                    WHERE
+                        B.AccountNumber =%s
+                        
+                """,(self.clientId,))
+                data = self.cursor.fetchall()
+                return [
+                            {
+                                "AccountNumber":obj[0],
+                                "FirstName":obj[1],
+                                "SirName":obj[2],
+                                "NINNumber":obj[3],
+                                "DateOfBirth":obj[4],
+                                "Religion":obj[5],
+                                "Gender":obj[6],
+                                "CurrentAddress":obj[7],
+                                "CityDivision":obj[8],
+                                "District":obj[9],
+                                "PhoneNumber":obj[10],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[11],
+                                    "SirName":obj[12],
+                                    "PhoneNumber":obj[13],
+                                    "Location":obj[14]
+                                },
+                                "AccountOwnerPic":obj[15],
+                                "branchDetails":{
+                                    "BranchId":obj[16],
+                                    "officerId":obj[17]
+                                }
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client's details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients details")
+
+        
+
     def fetchAllClientAccountDetailsForSpecificBranch(self, branchId):
         """_This method fetches all clients details for specific branch_
             _Args:
@@ -1512,7 +1591,7 @@ class BankingDataBase(ConnectToMySql):
     def fetchAllClientAccountDetailsForSpecificEmployee(self, employeeId):
         """_This method fetches all clients details for specific branch_
             _Args:
-                _branchId (str)_
+                _employeeId (str)_
             Returen:
                 _client details (list)_
         """
@@ -1883,6 +1962,126 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error in while inserting into  disburshement table:{e}")
         finally:
             self.close_connection()
+    def clientloanpaymentsAndInvestmentTable(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS ClientsLOANpaymentDETAILS(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500),
+                        Amount DECIMAL(30, 2)                
+                    )
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS ClientsInvestmentPaymentDetails(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        ClientId  VARCHAR(500),
+                        Amount DECIMAL(30, 2)                
+                    )
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS LoanPaymentStatistics(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId  VARCHAR(500),
+                        Commitment DECIMAL(30, 2),
+                        Paid DECIMAL(30,2),
+                        Balance DECIMAL(30,2),
+                        Portifolio DECIMAL(30,2)               
+                    )
+                """)
+            else:
+                raise Exception("cursor not initialised while creating client loan payment table")
+        except Exception as e:
+            raise Exception(f"error while creating client loan payment table:{e}")
+        finally:
+            self.close_connection()
+    
+    def insert_into_ClientsInvestmentPaymentDetails(self,clientId,amount):
+        self.clientId = clientId
+        self.amount = amount
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO ClientsInvestmentPaymentDetails(
+                        ClientId,
+                        Amoun               
+                    )VALUES(%s,%s)
+                """,(self.clientId,self.amount))
+            else:
+                raise Exception("cursor not initialised in ClientsInvestmentPaymentDetails table")
+        except Exception as e:
+            raise Exception(f"error while inserting into ClientsInvestmentPaymentDetails:{e}")
+    def insert_into_ClientsLOANpaymentDETAILS(self,loanId, amount):
+        self.loanId = loanId
+        self.amount = amount
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO ClientsLOANpaymentDETAILS(
+                        LoanId,
+                        Amount                
+                    ) VALUES(%s,%s)
+                """, (self.loanId,self.amount))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised in ClientsLOANpaymentDETAILS table")
+
+        except Exception as e:
+            raise Exception(f"error while inserting into ClientsLOANpaymentDETAILS :{e}")
+        finally:
+            self.close_connection()
+
+
+    def loanPaymenttrigger(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS populateLoanStatistictTable")
+                self.cursor.execute("""
+                    CREATE TRIGGER populateLoanStatistictTable
+                    AFTER INSERT ON ClientsLOANpaymentDETAILS
+                    FOR EACH ROW
+                    BEGIN
+                        DECLARE Total_payment DECIMAL(30,2);
+                        SELECT
+                            SUM(s.Amount)
+                        INTO Total_payment
+                        FROM
+                            ClientsLOANpaymentDETAILS AS s
+                        WHERE 
+                            NEW.LoanId = s.LoanId
+                                    
+                                    
+                        INSERT INTO LoanPaymentStatistics(
+                        LoanId,
+                        Commitment,
+                        Paid,
+                        Balance,
+                        Portifolio)
+                        SELECT
+                            NEW.LoanId AS LoanId, 
+                            db.DailCommitmentAmount AS Commitment,
+                            NEW.Amount AS Paid,
+                            db.DailCommitmentAmount - NEW.Amount AS Balance,
+                            db.Portifolio - Total_payment  AS Portifolio
+                        FROM
+                            LoanRepaymentScheduleDetails AS db
+                        WHERE
+                            NEW.LoanId = db.LoanId
+                    END;   
+                            
+                """)
+            else:
+                raise Exception("cursor not initialised in loan payment trigger")
+        except Exception as e:
+            raise Exception(f"error in loan payment trigger:{e}")
 
     def registeredLoans(self):
         try:
@@ -1953,6 +2152,52 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialized in register loan trigger")
         except Exception as e:
             raise Exception(f"error while registering comfirmed loans in register loan trigger:{e}")
+        
+    def fetchClientCreditDetails(self,clientId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                                                                      
+                    SELECT
+                        rl.LoanId,
+                        rl.Principle,
+                        rl.InterestRate,
+                        rl.PaymentperiodinDays,
+                        LR.Portifolio,
+                        LR.LoanSecurity,
+                        LR.DailCommitmentAmount
+                    FROM
+                        registeredLoans AS rl
+                    JOIN
+                        LoanRepaymentScheduleDetails AS LR ON LR.LoanId = rl.LoanId
+                    WHERE
+                        rl.LoanId = 
+                        (SELECT
+                            LoanId 
+                        FROM
+                            LoanDetails
+                        WHERE
+                            ClientID = %s
+                        ORDER BY Date DESC
+                        LIMIT 1);                       
+                        
+                """,(clientId,))
+                data = self.cursor.fetchone()
+                return {
+                    "loanId":data[0], 
+                    "Principle":data[1],
+                    "InterestRate":data[2],
+                    "PaymentperiodinDays":data[3],
+                    "Portifolio":data[4],
+                    "LoanSecurity":data[5],
+                    "DailCommitmentAmount": data[6]
+                    }
+            else:
+                raise Exception("cursor not initialised in fetch clients credit details")
+        except Exception as e:
+            raise Exception(f"error in fetching client credit details: {e}")
         
     def calculateLoanDetails(self):
         try:
@@ -2225,6 +2470,7 @@ class AuthenticationDetails(ConnectToMySql):
 # banking.CreateapprovedLoans_tables()
 # banking.Create_disbursement_table()
 # banking.registeredLoans()
+# banking.clientloanpaymentsAndInvestmentTable()
 
 
 # auth = AuthenticationDetails()
