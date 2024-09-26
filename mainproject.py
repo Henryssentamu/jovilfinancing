@@ -1,5 +1,6 @@
 
 
+from crypt import methods
 from flask import Flask, cli, jsonify, redirect, render_template, request, send_file, session, url_for
 from urllib3 import HTTPResponse
 from enviromentkeys import secret_key
@@ -586,8 +587,22 @@ def recievablesCredit():
 def recievablesSavings():
     return render_template("recievablesSavings.html")
 
-@app.route("/Makepayments")
+@app.route("/Makepayments", methods=["GET", "POST"])
 def payment():
+    if request.method == "POST":
+        paymenttype = request.json.get("type")
+        if paymenttype == "loanpayment":
+            session["loanId"] = request.json.get("loanId")
+            return jsonify({"response":"recieved"})
+        elif paymenttype == "amount":
+            amount = request.json.get("amount")
+            loanId = session.get("loanId")
+            paymentDetails = {"loanId":loanId,"amount":amount}
+            bank = BankingDataBase()
+            bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
+            bank.loanPaymenttrigger()
+            return jsonify({"response":"recieved"})
+
     return render_template("payments.html")
 
 @app.route("/loanApplication", methods=["GET", "POST"])
@@ -709,15 +724,20 @@ def clientProfile():
         client_id = session.get("lorded_account")
         requesttype = request.args.get("type")
         if requesttype == "clientDetails":
+            """fetching clients personal details"""
             bank = BankingDataBase()
             clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
-            
             return clientDetails
         elif requesttype == "clientCreditdetails":
+            """fetching clients credit details"""
             bank = BankingDataBase()
             creditDetails = bank.fetchClientCreditDetails(clientId=client_id)
-           
             return creditDetails 
+        elif requesttype == "clientPortifolio":
+            """fetching client's current portifolio"""
+            bank = BankingDataBase()
+            portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
+            return jsonify({"portifolio":portifolio})
 
             
             

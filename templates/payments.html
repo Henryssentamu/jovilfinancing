@@ -28,10 +28,10 @@
                         
                         <div class="input-group mb-3">
                             <span class="input-group-text"> Amount(Ugx)</span>
-                            <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+                            <input type="text" id="money" class="form-control" aria-label="Amount (to the nearest dollar)">
                             <span class="input-group-text">.00</span>
                         </div>
-                        <button type="button" class="btn btn-success w-100 ">Send</button>
+                        <button id="sendbutton" type="button" class="btn btn-success w-100 ">Send</button>
                         
                     </div>
                 </div>
@@ -39,5 +39,37 @@
         </div>
     </div>
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function sendFiger(){
+            document.getElementById("sendbutton")
+                .addEventListener("click",()=>{
+                    const values = document.getElementById("money").value;
+                    fetch("/Makepayments",{
+                        method:"POST",
+                        headers:{
+                            "Content-type":"application/json"
+                        },
+                        body:JSON.stringify({"type": "amount","amount":values})
+                    })
+                    .then(response =>{
+                        if(!response.ok){
+                            throw new Error("server erroe while sending amount on payment route")
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        if(data["response"] === "recieved"){
+                            window.location.href = "/clientProfile"
+                        }
+                    })
+                    .catch(error =>{
+                        console.log(error)
+                    })
+                })
+
+        }
+
+        sendFiger();
+    </script>
 </body>
 </html>

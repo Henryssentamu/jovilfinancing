@@ -31,9 +31,52 @@ async function fetchCreditdetails() {
     
 }
 
+async function fetchClientPortifolio() {
+    return await fetch("/clientProfile?type=clientPortifolio")
+    .then(response =>{
+        if (!response.ok){
+            throw new Error("server error while fetching client credit details")
+        }
+        return response.json()
+    })
+    .then(data =>{
+        return data
+    })
+    .catch(error =>{
+        console.log(error)
+    })
+    
+}
+
+function sendLoanIdForPayment(id){ 
+    fetch("/Makepayments",{
+        method:"POST",
+        headers:{
+            "Content-type":"application/json"
+        },
+        body:JSON.stringify({"type": "loanpayment","loanId":id})
+    })
+    .then(response =>{
+        if(!response.ok){
+            throw new Error("server erroe while sending loan id on payment route")
+        }
+        return response.json()
+    })
+    .then(data =>{
+        if(data["response"] === "recieved"){
+            window.location.href = "/Makepayments"
+        }
+    })
+    .catch(error =>{
+        console.log(error)
+    })
+
+
+}
+
 function generatePaybutton(data){
     return `
-        <a data-loan-id="${data["loanId"]}" href="/Makepayments" class="btn btn-success">pay</a>
+        <a class="btn btn-success" onclick="sendLoanIdForPayment('${data["loanId"]}')">Make loan payment</a>
     `
 
 }
@@ -116,9 +159,11 @@ function generatepersonalHtml(data) {
 
 async function loadCredit() {
     const creditData = await fetchCreditdetails();
+    const portifolio = await fetchClientPortifolio();
     const creditHtml = generateCreditdetails(data = creditData);
     
     document.getElementById("credit-body").innerHTML = creditHtml
+    document.getElementById("current-portifolio").innerHTML = portifolio["portifolio"] 
 
     
 }
@@ -140,5 +185,6 @@ async function loadpaybutton() {
 
 loadhtml();
 loadCredit();
-loadpaybutton()
+loadpaybutton();
+
 

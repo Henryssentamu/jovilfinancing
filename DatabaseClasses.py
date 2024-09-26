@@ -1,5 +1,6 @@
 
 import mysql.connector as sql
+import traceback
 
 
 class ConnectToMySql:
@@ -1998,6 +1999,46 @@ class BankingDataBase(ConnectToMySql):
         finally:
             self.close_connection()
     
+    def fetch_clientsCurrentPortifolio(self,clientId):
+
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    with current_client_loan_id AS (
+                        SELECT
+                            LoanId
+                        FROM
+                            registeredLoans
+                        WHERE
+                            LoanId = (
+                                SELECT
+                                    LoanId 
+                                FROM
+                                    LoanDetails
+                                WHERE
+                                    ClientID = %s
+                                ORDER BY Date DESC
+                                LIMIT 1)
+                    )
+                    SELECT
+                        Portifolio
+                    FROM
+                        LoanPaymentStatistics 
+                    WHERE
+                        LoanId = (SELECT LoanId FROM current_client_loan_id)
+                    ORDER BY Date DESC
+                    LIMIT 1
+
+                """,(clientId,))
+                data = self.cursor.fetchone()
+                return float(data[0])
+            else:
+                raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
+        except Exception as e:
+            raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+    
     def insert_into_ClientsInvestmentPaymentDetails(self,clientId,amount):
         self.clientId = clientId
         self.amount = amount
@@ -2015,9 +2056,9 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialised in ClientsInvestmentPaymentDetails table")
         except Exception as e:
             raise Exception(f"error while inserting into ClientsInvestmentPaymentDetails:{e}")
-    def insert_into_ClientsLOANpaymentDETAILS(self,loanId, amount):
-        self.loanId = loanId
-        self.amount = amount
+    def insert_into_ClientsLOANpaymentDETAILS(self,paymentDetails):
+        self.loanId = paymentDetails["loanId"]
+        self.amount = paymentDetails["amount"]
         try:
             self.reconnect_if_needed()
             if self.cursor:
@@ -2049,39 +2090,34 @@ class BankingDataBase(ConnectToMySql):
                     AFTER INSERT ON ClientsLOANpaymentDETAILS
                     FOR EACH ROW
                     BEGIN
-                        DECLARE Total_payment DECIMAL(30,2);
-                        SELECT
-                            SUM(s.Amount)
-                        INTO Total_payment
-                        FROM
-                            ClientsLOANpaymentDETAILS AS s
-                        WHERE 
-                            NEW.LoanId = s.LoanId
-                                    
                                     
                         INSERT INTO LoanPaymentStatistics(
-                        LoanId,
-                        Commitment,
-                        Paid,
-                        Balance,
-                        Portifolio)
+                            LoanId,
+                            Commitment,
+                            Paid,
+                            Balance,
+                            Portifolio          
+                        )
                         SELECT
-                            NEW.LoanId AS LoanId, 
+                            NEW.LoanId AS LoanId,
                             db.DailCommitmentAmount AS Commitment,
                             NEW.Amount AS Paid,
                             db.DailCommitmentAmount - NEW.Amount AS Balance,
-                            db.Portifolio - Total_payment  AS Portifolio
+                            db.Portifolio - (SELECT COALESCE(SUM(Amount),0) FROM ClientsLOANpaymentDETAILS WHERE LoanId = NEW.LoanId ) AS Portifolio 
                         FROM
-                            LoanRepaymentScheduleDetails AS db
+                            LoanRepaymentScheduleDetails as db
                         WHERE
-                            NEW.LoanId = db.LoanId
+                            db.LoanId = NEW.LoanId;
                     END;   
                             
                 """)
+                self.connection.commit()
             else:
                 raise Exception("cursor not initialised in loan payment trigger")
         except Exception as e:
             raise Exception(f"error in loan payment trigger:{e}")
+
+    
 
     def registeredLoans(self):
         try:
