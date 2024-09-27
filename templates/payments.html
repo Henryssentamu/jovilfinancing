@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Make payment</title>
     <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        /* General Loader Styles */
+        .loader-container {
+            display: none; /* Hide loader initially */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Above all content */
+        }
+
+        /* Spinner Loader */
+        .spinner-loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        
+    </style>
 </head>
 <body>
 
@@ -18,6 +50,11 @@
     </nav>
 
     <div class="container">
+         <!-- Loader Container -->
+        <div class="loader-container" id="loader">
+            <div class="spinner-loader"></div>
+        </div>
+        
         <div class="row">
             <div class="col">
                 <div class="card">
@@ -39,11 +76,16 @@
         </div>
     </div>
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function sendFiger(){
+    <script>    
+        function sendFiger(){  
+            let loader =  document.getElementById("loader");
+            
             document.getElementById("sendbutton")
                 .addEventListener("click",()=>{
                     const values = document.getElementById("money").value;
+                    loader.style.display = "flex"
+                   
+
                     fetch("/Makepayments",{
                         method:"POST",
                         headers:{
@@ -59,11 +101,13 @@
                     })
                     .then(data =>{
                         if(data["response"] === "recieved"){
-                            window.location.href = "/clientProfile"
+                            loader.style.display = "none";
+                            window.location.href = "/succefulpayments"
                         }
                     })
                     .catch(error =>{
-                        console.log(error)
+                        loader.style.display = "none";
+                        
                     })
                 })
 

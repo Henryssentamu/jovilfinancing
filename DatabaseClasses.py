@@ -2038,6 +2038,49 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
         except Exception as e:
             raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+        
+    def fetchClientCurrentLoanPaymentDetails(self,clientId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        Date ,
+                        LoanId ,
+                        Commitment,
+                        Paid ,
+                        Balance,
+                        Portifolio
+                    FROM
+                        LoanPaymentStatistics
+                    WHERE
+                        LoanId  = (SELECT
+                                        LoanId 
+                                    FROM
+                                        LoanDetails
+                                    WHERE
+                                        ClientID = %s
+                                    ORDER BY Date DESC
+                                    LIMIT 1
+                                )
+                """,(clientId,))
+                data = self.cursor.fetchall()
+                return [{
+                    "date":obj[0].strftime("%Y-%m-%d %H:%M:%S"),
+                    "loanId":obj[1],
+                    "Commitment":float(obj[2]),
+                    "Paid":float(obj[3]),
+                    "Balance":float(obj[4]),
+                    "Portifolio":float(obj[5])
+                    
+                    }for obj in data]
+            else:
+                raise Exception("cursor not initialised in fetching current loan payment details")
+                
+        except Exception as e:
+            raise Exception(f"error while fetching current loan payment details:{e}")
+
     
     def insert_into_ClientsInvestmentPaymentDetails(self,clientId,amount):
         self.clientId = clientId

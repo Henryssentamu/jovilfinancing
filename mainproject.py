@@ -574,10 +574,6 @@ def registerClient():
 
 
 
-# @app.route("/makePayment")
-# def makePayment():
-#     # not yet created
-#     return render_template()
 
 @app.route("/recievablesCredit")
 def recievablesCredit():
@@ -604,6 +600,11 @@ def payment():
             return jsonify({"response":"recieved"})
 
     return render_template("payments.html")
+
+@app.route("/succefulpayments")
+def successfulpayment():
+    return render_template("successfulPayment.html")
+
 
 @app.route("/loanApplication", methods=["GET", "POST"])
 def loanApplication():
@@ -743,8 +744,16 @@ def clientProfile():
             
     return render_template("clientProfilePage.html")
 
-@app.route("/clientpaymentDetails")
+@app.route("/clientpaymentDetails", methods =["GET","POST"])
 def clientpaymentDetails():
+    if request.method == "GET":
+        clientId = session.get("lorded_account")
+        requesttype = request.args.get("type")
+        if requesttype == "payementDetails":
+            bank = BankingDataBase()
+            data = bank.fetchClientCurrentLoanPaymentDetails(clientId=clientId)
+            print(data[-1])
+            return jsonify(data)
     return render_template("clientPaymentDetails.html")
 
 @app.route("/clientOverdueAndPenalties")
