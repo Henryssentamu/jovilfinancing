@@ -1701,6 +1701,7 @@ class BankingDataBase(ConnectToMySql):
                 self.close_connection()
         else:
             raise Exception("cursor not availabe to update phone number:")
+        
     
     def create_loanApplicationTAbles(self):
         self.reconnect_if_needed()
@@ -2000,40 +2001,54 @@ class BankingDataBase(ConnectToMySql):
             self.close_connection()
     
     def fetch_clientsCurrentPortifolio(self,clientId):
-
+        self.client_id = clientId
         try:
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
-                    with current_client_loan_id AS (
-                        SELECT
-                            LoanId
-                        FROM
-                            registeredLoans
-                        WHERE
-                            LoanId = (
-                                SELECT
-                                    LoanId 
-                                FROM
-                                    LoanDetails
-                                WHERE
-                                    ClientID = %s
-                                ORDER BY Date DESC
-                                LIMIT 1)
-                    )
                     SELECT
-                        Portifolio
-                    FROM
-                        LoanPaymentStatistics 
-                    WHERE
-                        LoanId = (SELECT LoanId FROM current_client_loan_id)
-                    ORDER BY Date DESC
-                    LIMIT 1
+                            
+                        (SELECT
+                            Portifolio 
+                        FROM
+                            LoanRepaymentScheduleDetails
+                        WHERE
+                            LoanId =(
+                                        SELECT
+                                            LoanId
+                                        FROM 
+                                            registeredLoans
+                                        WHERE
+                                            LoanId = (
+                                                        SELECT 
+                                                            LoanId 
+                                                        FROM 
+                                                            LoanDetails 
+                                                        WHERE 
+                                                            ClientID = %s
+                                                        ORDER BY  Date DESC
+                                                        LIMIT 1 
+                                            )         
+                                    )) - COALESCE((SELECT
+                                            sum(Paid)
 
-                """,(clientId,))
+                                        FROM
+                                            LoanPaymentStatistics
+                                        WHERE
+                                            LoanId  = (SELECT
+                                                            LoanId 
+                                                        FROM
+                                                            LoanDetails
+                                                        WHERE
+                                                            ClientID = %s
+                                                        ORDER BY Date DESC
+                                                        LIMIT 1
+                                    )),0)  as current_portifolio
+
+                """,(self.client_id,self.client_id))
                 data = self.cursor.fetchone()
-                return float(data[0])
+                return data
             else:
                 raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
         except Exception as e:
@@ -2080,6 +2095,32 @@ class BankingDataBase(ConnectToMySql):
                 
         except Exception as e:
             raise Exception(f"error while fetching current loan payment details:{e}")
+        
+
+
+
+
+    def fetchClientLoanSecurityDetails(self,clientId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        sum(LoanSecurity) AS TOTAL_SECURITY
+                    FROM
+                        LoanRepaymentScheduleDetails
+                    WHERE
+                        LoanId IN (SELECT LoanId FROM LoanDetails WHERE  ClientID = %s          
+                        )   
+                        
+                """,(clientId,))
+                data = self.cursor.fetchone()
+                return {"totalSecurity":data[0]}
+            else:
+                raise Exception("cursor not initialised in fetch client loan security details")
+        except Exception as e:
+            raise Exception(f"error while fetching client loan security details:{e}")
 
     
     def insert_into_ClientsInvestmentPaymentDetails(self,clientId,amount):
@@ -2120,6 +2161,34 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while inserting into ClientsLOANpaymentDETAILS :{e}")
         finally:
             self.close_connection()
+
+    # def onLoanRegistrationDefaultpaymentTrigger(self):
+    #     try:
+    #         self.reconnect_if_needed()
+    #         if self.cursor:
+    #             self.cursor.execute("USE LoanApplications")
+    #             self.cursor.execute("DROP TRIGGER IF EXISTS DefaultOnPayment")
+    #             self.cursor.execute("""
+    #                 CREATE TRIGGER DefaultOnPayment
+    #                 AFTER INSERT ON LoanRepaymentScheduleDetails
+    #                 FOR EACH ROW
+    #                 BEGIN
+    #                     INSERT INTO ClientsLOANpaymentDETAILS (
+    #                         LoanId,
+    #                         Amount
+    #                     )
+    #                     VALUES (
+    #                         NEW.LoanId,
+    #                         0
+    #                     );
+                        
+    #             """)
+    #             self.connection.commit()
+    #         else:
+    #             raise Exception("cursor not initialised in onLoanRegistrationDefaultpaymentTrigger")
+
+    #     except Exception as e:
+    #         raise Exception(f"error while creating onLoanRegistrationDefaultpaymentTrigger: {e}")
 
 
     def loanPaymenttrigger(self):

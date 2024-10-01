@@ -48,6 +48,22 @@ async function fetchClientPortifolio() {
     
 }
 
+async function fetchLoanSecurity() {
+    return fetch("/clientProfile?type=clientLoanSecurity")
+        .then(response =>{
+            if(!response.ok){
+                throw new Error("error while fetching client loan security details")
+            }
+            return response.json()
+        })
+        .then(data =>{
+            return data
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+}
+
 function sendLoanIdForPayment(id){ 
     fetch("/Makepayments",{
         method:"POST",
@@ -160,12 +176,10 @@ function generatepersonalHtml(data) {
 async function loadCredit() {
     const creditData = await fetchCreditdetails();
     const portifolio = await fetchClientPortifolio();
+    
     const creditHtml = generateCreditdetails(data = creditData);
-    
-    document.getElementById("credit-body").innerHTML = creditHtml
-    document.getElementById("current-portifolio").innerHTML = portifolio["portifolio"] 
-
-    
+    document.getElementById("credit-body").innerHTML = creditHtml;
+    document.getElementById("current-portifolio").innerHTML = portifolio["portifolio"];
 }
 
 
@@ -183,8 +197,16 @@ async function loadpaybutton() {
     
 }
 
+async function loadLoanSecurity() {
+    const loan_security = await fetchLoanSecurity();
+    document.getElementById("loan_security").innerHTML = loan_security["totalSecurity"]
+    
+}
+
 loadhtml();
 loadCredit();
 loadpaybutton();
+loadLoanSecurity();
+ 
 
 

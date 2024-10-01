@@ -25,11 +25,12 @@ function getLoanApplicationDetails(){
 }
 
 function sendLoanApplicationDetails() {
+    const loader = document.getElementById("loader")
     document.getElementById("submitt")
         .addEventListener("click", async(event)=>{
             event.preventDefault();
             let data = getLoanApplicationDetails();
-        
+            loader.style.display = "flex";
             await fetch("/loanApplication",{
                 method:"POST",
                 body:data
@@ -41,12 +42,12 @@ function sendLoanApplicationDetails() {
                 return response.json()
             })
             .then(data =>{
-                alert(data["response"])
+                loader.style.display = "none";
                 location.reload()
             })
             .catch(error =>{
+                loader.style.display = "none";
                 console.log(error)
-                alert(error)
             })
 
 

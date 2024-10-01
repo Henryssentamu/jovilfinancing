@@ -17,6 +17,35 @@
             top: 0px;
             z-index: 1;
         }
+
+        /* General Loader Styles */
+        .loader-container {
+            display: none; /* Hide loader initially */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Above all content */
+        }
+
+        /* Spinner Loader */
+        .spinner-loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -34,6 +63,13 @@
     </nav>
 
     <div class="container mt-5">
+        <!-- css loader -->
+        <div class="loader-container" id="loader">
+            <div class="spinner-loader"></div>
+        </div>
+
+
+
         <div class="row">
             <div class="col">
                 <div class="card">

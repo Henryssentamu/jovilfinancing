@@ -722,23 +722,24 @@ def clientProfile():
             session["lorded_account"] = id
             return jsonify({"response":"clientId"})
     elif request.method == "GET":
+        bank = BankingDataBase()
         client_id = session.get("lorded_account")
         requesttype = request.args.get("type")
         if requesttype == "clientDetails":
             """fetching clients personal details"""
-            bank = BankingDataBase()
             clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
             return clientDetails
         elif requesttype == "clientCreditdetails":
             """fetching clients credit details"""
-            bank = BankingDataBase()
             creditDetails = bank.fetchClientCreditDetails(clientId=client_id)
             return creditDetails 
         elif requesttype == "clientPortifolio":
             """fetching client's current portifolio"""
-            bank = BankingDataBase()
             portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
             return jsonify({"portifolio":portifolio})
+        elif requesttype == "clientLoanSecurity":
+            loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
+            return jsonify(loan_security)
 
             
             
@@ -752,7 +753,7 @@ def clientpaymentDetails():
         if requesttype == "payementDetails":
             bank = BankingDataBase()
             data = bank.fetchClientCurrentLoanPaymentDetails(clientId=clientId)
-            print(data[-1])
+            
             return jsonify(data)
     return render_template("clientPaymentDetails.html")
 

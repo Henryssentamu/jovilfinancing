@@ -7,6 +7,8 @@ function getApproveddetails(index){
 }
 
 async function approveLoan(index) {
+    const loader = document.getElementById("loader");
+    loader.style.display = "flex";
     const data = await getApproveddetails(index);
     fetch("/underWritter",{
         method:"POST",
@@ -20,10 +22,11 @@ async function approveLoan(index) {
         return response.json()
     })
     .then(data =>{
-        alert(data["response"])
+        loader.style.display = "none";
         location.reload()
     })
     .catch(error =>{
+        loader.style.display = "none";
         console.log(error)
     })
 

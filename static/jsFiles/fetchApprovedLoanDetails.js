@@ -44,6 +44,8 @@ async function loadhtml() {
 }
 
 function sendLoanId(index){
+    const loader = document.getElementById("loader");
+    loader.style.display = "flex"
     var elemt = document.getElementById(`ElementId-${index}`);
     var id = elemt.getAttribute("data-loan-details");
     fetch("/disburshmentReports",{
@@ -61,12 +63,16 @@ function sendLoanId(index){
     })
     .then(data =>{
         if(data["response"] =="LoanConfirmed"){
+            loader.style.display = "none"
             document.getElementById(`element-container-id-${index}`).innerHTML = "";
             location.reload()
         }
+        loader.style.display = "none";
+        location.reload()
     })
     .catch(error =>{
-        alert(error)
+        loader.style.display = "none";
+        console.log(error)
     })
 
     

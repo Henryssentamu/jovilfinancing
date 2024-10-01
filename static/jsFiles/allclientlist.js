@@ -1,4 +1,6 @@
+const loader = document.getElementById("loader")
 async function getclientlist() {
+    loader.style.display = "flex";
     return await fetch("allClientList?type=allclientslist")
         .then(response =>{
             if(!response.ok){
@@ -7,9 +9,14 @@ async function getclientlist() {
             return response.json()
         })
         .then(data => {
-            return data
+            if(data){
+                loader.style.display = "none";
+                return data
+            }
+            
         })
         .catch(error =>{
+            loader.style.display = "none";
             console.log(error)
         })
     

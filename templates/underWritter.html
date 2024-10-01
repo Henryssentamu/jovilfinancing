@@ -6,6 +6,36 @@
     <title>Underwriter's Page</title>
     <!-- Bootstrap CSS -->
     <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+         /* General Loader Styles */
+         .loader-container {
+            display: none; /* Hide loader initially */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Above all content */
+        }
+
+        /* Spinner Loader */
+        .spinner-loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -21,6 +51,10 @@
         </div>
     </nav>
     <div id="body-content" class="container my-5">
+
+        <div class="loader-container" id="loader">
+            <div class="spinner-loader"></div>
+        </div>
         <h2 class="text-center mb-4">Loan Applications</h2>
         <!-- Loan Details Card details loaded by js -->
     </div>
