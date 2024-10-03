@@ -11,6 +11,10 @@ from DatabaseClasses import AuthenticationDetails, BankingDataBase, Branches, Co
 from generateAccountNumber import GenerateAccountNumber
 from loginmodule import Authenticate
 from generateIds import GenerateIds
+from flask_wtf import FlaskForm
+from wtforms import StringField,PasswordField,SubmitField
+from wtforms.validators import DataRequired,Length
+
 from flask_login import LoginManager, UserMixin, logout_user, login_required,login_user,login_remembered, current_user
 
 
@@ -51,14 +55,49 @@ def load_user(user_id):
 
 
 
+class LoginClass(FlaskForm):
+    employeeId = StringField(label="EmployeeId",validators=[DataRequired(), Length(min=4, max=25)])
+    password = PasswordField(label="password",validators=[DataRequired(),Length(min=3,max=30)])
+    submit = SubmitField('login')
+
+
+
 @app.route("/")
 def home():
     return render_template("home.html")
 
 # manager section details bellow
+
+@app.route("/loginManager", methods=["GET","POST"])
+def loginManager():
+    form = LoginClass()
+    if request.method == "POST":
+        if form.validate_on_submit():
+            employee_id = form.employeeId.data
+            password = form.password.data
+            auth = AuthenticationDetails()
+            is_employee = auth.is_authenticatedEmployee(EmployeeId=employee_id,password=password)
+            if is_employee:
+                employee = User(employee_id)
+                login_status = login_user(employee)
+                if login_status:
+                    session["logged_in_manager"] = employee_id
+                    return redirect(url_for('managrDashboard'))
+            else:
+                return redirect(url_for('wrongCredentials'))
+
+    return render_template("loginManager.html",form = form)
+
+@login_required
 @app.route("/managrDashboard")
 def managrDashboard():
+    if not current_user.is_authenticated:
+        return redirect(url_for("loginManager"))
+    managerId = session.get("logged_in_employee")
+    print(managerId)
     return render_template("managerDashboard.html")
+
+
 @app.route("/workersPage", methods= ["GET", "POST"])
 def workersPage():
     if request.method == "GET":
@@ -391,6 +430,13 @@ def employeeProfile():
             employeeId = request.json.get("data")
             session["employeeDetailsToLoad"] = employeeId
             return jsonify({"response":"success"})
+        elif requestType == "resetpassword":
+            resetDetails = request.json.get("data")
+            Eid = resetDetails["employeeId"]
+            pwd = resetDetails['password']
+            authent_obj = AuthenticationDetails()
+            authent_obj.update_EmployeePassword(employeeId=Eid, password=pwd)
+            return jsonify({"message":"successfuly"})
     elif request.method == "GET":
         requestType = request.args.get("type")
         if requestType == "employeeDetails":
@@ -447,36 +493,50 @@ def authenticationSetting():
 
 # credit officer dashboard section details bellow
 
-@app.route("/login", methods=["GET","POST"])
-def login():
+@app.route("/loginEmployess", methods=["GET","POST"])
+def loginEmployess():
+    form = LoginClass()
     if request.method == "POST":
-        data = request.json
-        EmployeeId = data["EmployeeId"]
-        password = data["Password"]
-        log = Authenticate()
-        response = log.is_authenticatedEmployee(EmployeeId=EmployeeId,password=password)
-        if response:
-            user = User(id=EmployeeId)
-            login_user(user=user)
-            return redirect(url_for("crediofficerDashboard"))
-        
-                
-    return render_template("login.html")
+        if form.validate_on_submit():
+            employee_id = form.employeeId.data
+            password = form.password.data
+            auth = AuthenticationDetails()
+            is_employee = auth.is_authenticatedEmployee(EmployeeId=employee_id,password=password)
+            if is_employee:
+                employee = User(employee_id)
+                login_status = login_user(employee)
+                if login_status:
+                    session["logged_in_employee"] = employee_id
+                    return redirect(url_for('crediofficerDashboard'))
+            else:
+                return redirect(url_for('wrongCredentials'))
+
+    return render_template("login.html",form = form)
+
+@app.route("/wrongCredentials")
+def wrongCredentials():
+    return render_template("wrongCredentials.html")
+
+@app.route("/resetpassword")
+def resetpassword():
+    return render_template("resetpassword.html")
+
 
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return render_template("home.html")
+    return redirect(url_for("home"))
 
 
-
+@login_required
 @app.route("/crediofficerDashboard", methods=["GET"])
 def crediofficerDashboard():
-    # if not current_user.is_authenticated:
-    #     session["crediofficerDashboard"] = request.url
-    #     return redirect(url_for('login'))
+    if not current_user.is_authenticated:
+        return redirect(url_for('loginEmployess'))
+    loggedEmployee = session.get("logged_in_employee")
+    print(loggedEmployee)
     return render_template("creditOfficerDashboard.html")
 
 @app.route("/registerClient",methods =["GET","POST"])
