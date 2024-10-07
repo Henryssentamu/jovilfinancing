@@ -38,8 +38,8 @@
                         <div >statistics</div>
                     </div>
                     <div class="card-body">
-                        <div> No. Clients: <span>20</span></div>
-                        <div>Total Amount Due: <span>300000</span> </div>
+                        <div> No. Clients: <span id="numberOfClients"></span></div>
+                        <div>TotalExpectation: <span id="totalExpectation"></span> </div>
                     </div>
                 </div>
             </div>
@@ -68,49 +68,8 @@
                                     </tr>
     
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Namujju jessca</td>
-                                        <td class="text-danger">12000</td>
-                                        <td>0766237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Geral Musis</td>
-                                        <td class="text-danger">8000</td>
-                                        <td>0786237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td class="text-danger">16000</td>
-                                        <td>0755237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>Namuddu veronica</td>
-                                        <td class="text-danger">10000</td>
-                                        <td>0755237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td class="text-danger">16000</td>
-                                        <td>0755237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td class="text-danger">16000</td>
-                                        <td>0755237638</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td class="text-danger">16000</td>
-                                        <td>0755237638</td>
-                                    </tr>
+                                <tbody id="collectionsheetbody">
+                                    
                                 </tbody>
                             </table>
                         </div>
@@ -124,6 +83,62 @@
 
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        async function getcollectionSheetDetails(){
+            return await fetch("/collectionSheet?type=ForSpecificEmployee")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching collection sheet details")
+                    }
+                    return response.json()
+                    
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        }
+
+        function calaculateTotalExpectation(data){
+            let total = 0
+            data.forEach((obj) =>{
+                total += Number(obj["commitment"])
+            })
+            return total
+        }
+
+        function generatehtml(data){
+            let html = '';
+            data.forEach((obj,index) =>{
+                html += `
+                    <tr>
+                        <td>${index + 1 }</td>
+                        <td> ${obj["clientFName"]} <span> </span> ${obj["clientSName"]}</td>
+                        <td class="text-danger">${obj["commitment"]}</td>
+                        <td> ${obj["ClientPhonenumber"]}</td>
+                    </tr>
+                `
+            });
+            return html;
+
+        }
+
+        async function loadhtml() {
+            const data = await getcollectionSheetDetails();
+            const html = await generatehtml(data);
+            const totalExpectation = calaculateTotalExpectation(data);
+            document.querySelector("#collectionsheetbody").innerHTML = html;
+            document.querySelector("#numberOfClients").innerHTML = data.length;
+            document.querySelector("#totalExpectation").innerHTML = totalExpectation;
+            
+        }
+
+        loadhtml()
+        
+    </script>
     
 </body>
 </html>

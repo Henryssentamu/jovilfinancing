@@ -94,7 +94,7 @@ def managrDashboard():
     if not current_user.is_authenticated:
         return redirect(url_for("loginManager"))
     managerId = session.get("logged_in_employee")
-    print(managerId)
+    
     return render_template("managerDashboard.html")
 
 
@@ -535,13 +535,17 @@ def logout():
 def crediofficerDashboard():
     if not current_user.is_authenticated:
         return redirect(url_for('loginEmployess'))
-    loggedEmployee = session.get("logged_in_employee")
-    print(loggedEmployee)
+    
     return render_template("creditOfficerDashboard.html")
 
 @app.route("/registerClient",methods =["GET","POST"])
 def registerClient():
     if request.method == "POST":
+        officer_id = current_user.id
+        branchDetails = EmployeeDatabase()
+        branchDetails = branchDetails.fetchEmployeeBranchdetails(employeeId=officer_id)
+        branchId = branchDetails[0]
+            
         # get registered accounts
         try:
             obj = ExistingAccounts()
@@ -612,8 +616,8 @@ def registerClient():
                     "Location":nextOfKinLocation},
 
                     "BranchDetails":{
-                        "BranchId":"NB01089",
-                        "OfficerId":"NE16854"
+                        "BranchId":branchId,
+                        "OfficerId":officer_id
                     }
                 }
                 
@@ -657,6 +661,8 @@ def payment():
             bank = BankingDataBase()
             bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
             bank.loanPaymenttrigger()
+            # changing activate status from a default unfinshed to finshed if current portifolio is 0
+            bank.changeLoanRegistrationStatusTrigger()
             return jsonify({"response":"recieved"})
 
     return render_template("payments.html")
@@ -670,6 +676,11 @@ def successfulpayment():
 def loanApplication():
     if request.method == "POST":
         if request.content_type.startswith("multipart/form-data"):
+            officer_id = current_user.id
+            branchDetails = EmployeeDatabase()
+            branchDetails = branchDetails.fetchEmployeeBranchdetails(employeeId=officer_id)
+            branchId = branchDetails[0]
+            
             # get loan application details
             try:
                 clientId = request.form.get("clientId")
@@ -727,8 +738,8 @@ def loanApplication():
                     "contact":contact,
                     "businessPictureRelativePath":businessPictureRelativePath,
                     "BranchDetails":{
-                        "BranchId":"NB01089",
-                        "OfficerId":"NE16854"
+                        "BranchId":branchId,
+                        "OfficerId":officer_id
                     }
                 }
                 loan = BankingDataBase()
@@ -743,8 +754,16 @@ def loanApplication():
 
     return render_template("loanApplication.html")
 
-@app.route("/collectionSheet")
+@app.route("/collectionSheet", methods =["GET"])
 def collectionSheet():
+    if request.method == "GET":
+        officerId = current_user.id
+        Bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "ForSpecificEmployee":
+            collectionSheetDetails = Bank.fetchCollectionSheetDetails(employeeId=officerId)
+            print(collectionSheetDetails)
+            return jsonify(collectionSheetDetails)
     return render_template("collectionsheet.html")
 
 @app.route("/overdueAndPenalties")
@@ -754,11 +773,12 @@ def overdueAndPenalties():
 @app.route("/allClientList", methods=["GET","POST"])
 def allClientList():
     if request.method == "GET":
+        officer_id = current_user.id
         requesttype = request.args.get("type")
         if requesttype == "allclientslist":
             try:
                 clientObject = BankingDataBase()
-                data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId='NE16854')
+                data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId=officer_id)
                 return jsonify(data)
             except Exception as e:
                 raise Exception(f"error while calling fetchEmployeeDetails method in allclient route:{e}")
@@ -798,6 +818,7 @@ def clientProfile():
             portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
             return jsonify({"portifolio":portifolio})
         elif requesttype == "clientLoanSecurity":
+            """fetch client's loan security"""
             loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
             return jsonify(loan_security)
 

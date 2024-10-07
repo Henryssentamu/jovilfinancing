@@ -26,9 +26,11 @@ function getRegistrationDetails(){
 }
 
 function sendInputToServer() {
+    let loader =  document.getElementById("loader");
     document.getElementById("submitt").addEventListener("click", async (event) => {
         event.preventDefault(); // Prevent the default form submission behavior
         const Details = getRegistrationDetails()
+        loader.style.display = "flex";
 
         await fetch("/registerClient",{
             method:"POST",
@@ -41,12 +43,12 @@ function sendInputToServer() {
             return response.json()
         })
         .then(data =>{
-            alert(data)
+            loader.style.display = "none";
             location.reload()
             
         })
         .catch(error =>{
-            alert(error)
+            loader.style.display = "none";
         })
         
     });
