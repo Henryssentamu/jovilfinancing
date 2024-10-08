@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Collection sheet</title>
+    <title> Loan Recivables</title>
     <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <style>
         .table-wrapper{
@@ -38,8 +38,8 @@
                         <div >statistics</div>
                     </div>
                     <div class="card-body">
-                        <div> Clients paid: <span>20</span></div>
-                        <div>Total Amount collected: <span style="color: green;">300000</span> </div>
+                        <div> Number Of Clients Who have  paid: <span id="numberOfclients"></span></div>
+                        <div>Total Amount collected: <span style="color: green;" id="totalAmount"></span> </div>
                     </div>
                 </div>
             </div>
@@ -68,49 +68,8 @@
                                     </tr>
     
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Namujju jessca</td>
-                                        <td style="color: green;">12000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Geral Musis</td>
-                                        <td style="color: green;">8000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td style="color: green;">16000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>4</td>
-                                        <td>Namuddu veronica</td>
-                                        <td style="color: green;">10000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td style="color: green;">16000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td style="color: green;">16000</td>
-                                        
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>Namanda veronica</td>
-                                        <td style="color: green;" >16000</td>
-                                       
-                                    </tr>
+                                <tbody id="table_body">
+                                    
                                 </tbody>
                             </table>
                         </div>
@@ -124,6 +83,63 @@
 
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetchClientDebtedLoanAccountDetails() {
+            return fetch("/recievablesCredit?type=credit")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching client debted loan details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+        function generatehtml(data) {
+            let html = "";
+            let numbers = 0;
+            let totalAmountpaid = 0;
+
+            if (data && data.length >0){
+                numbers = data.length
+                data.forEach((obj, index) =>{
+                    totalAmountpaid += Number(obj["AmountPaid"]);
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${obj["fName"]} <span> </span> ${obj["lName"]} </td>
+                            <td style="color: green;"> ${obj["AmountPaid"]}</td>
+                                        
+                        </tr>    
+                    `
+
+                })
+
+            }else{
+                html += "<tr> <td> No one has made any payment yet </td> </tr>"
+            }
+
+            return {"numberOfpayment": numbers,"TotalAmountPaid":totalAmountpaid, "html":html}
+            
+            
+        }
+
+        async function loadHtml() {
+            const data  = await fetchClientDebtedLoanAccountDetails();
+            const details = generatehtml(data);
+            document.getElementById("table_body").innerHTML = details["html"];
+            document.getElementById("totalAmount").innerHTML = details["TotalAmountPaid"];
+            document.getElementById("numberOfclients").innerHTML = details["numberOfpayment"]
+        };
+        loadHtml()
+        
+    </script>
+
     
 </body>
 </html>

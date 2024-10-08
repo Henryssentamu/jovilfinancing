@@ -639,8 +639,14 @@ def registerClient():
 
 
 
-@app.route("/recievablesCredit")
+@app.route("/recievablesCredit", methods=["GET","POST"])
 def recievablesCredit():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requesttype = request.args.get("type")
+        if requesttype == "credit":
+            data = bank.fetchDebtedLoanAccountDetail()
+            return jsonify(data)
     return render_template("recievablesCredit.html")
 
 @app.route("/recievablesSavings")

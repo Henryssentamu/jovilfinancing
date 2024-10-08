@@ -1,6 +1,7 @@
 
+from datetime import datetime
 import mysql.connector as sql
-import traceback
+
 
 
 class ConnectToMySql:
@@ -2158,9 +2159,7 @@ class BankingDataBase(ConnectToMySql):
                             FROM
                                 registeredLoans
                             WHERE
-                                ActiveStatus = "unfinished"
-                                
-                                    
+                                ActiveStatus = "unfinished"  
                         ) AS P ON P.LoanId = s.LoanId
                     JOIN
                         AccountsVault.BankAccount AS B ON B.AccountNumber = D.ClientID
@@ -2404,6 +2403,7 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("""
                                                                       
                     SELECT
+                        rl.Date,
                         rl.LoanId,
                         rl.Principle,
                         rl.InterestRate,
@@ -2415,46 +2415,79 @@ class BankingDataBase(ConnectToMySql):
                         registeredLoans AS rl
                     JOIN
                         LoanRepaymentScheduleDetails AS LR ON LR.LoanId = rl.LoanId
-                    WHERE
-                        rl.LoanId = 
+                    JOIN
                         (SELECT
                             LoanId 
                         FROM
                             LoanDetails
                         WHERE
                             ClientID = %s
-                        ORDER BY Date DESC
-                        LIMIT 1);                       
+                        )AS D ON D.LoanId = rl.LoanId
+                    WHERE
+                        rl.ActiveStatus = "unfinished"                      
                         
                 """,(clientId,))
                 data = self.cursor.fetchone()
-                return {
-                    "loanId":data[0], 
-                    "Principle":data[1],
-                    "InterestRate":data[2],
-                    "PaymentperiodinDays":data[3],
-                    "Portifolio":data[4],
-                    "LoanSecurity":data[5],
-                    "DailCommitmentAmount": data[6]
-                    }
+                if data:
+                    return {
+                        "Date":data[0].strftime(("%Y-%m-%d")),
+                        "loanId":data[1], 
+                        "Principle":data[2],
+                        "InterestRate":data[3],
+                        "PaymentperiodinDays":data[4],
+                        "Portifolio":data[5],
+                        "LoanSecurity":data[6],
+                        "DailCommitmentAmount": data[7]
+                        }
+                return []
             else:
                 raise Exception("cursor not initialised in fetch clients credit details")
         except Exception as e:
             raise Exception(f"error in fetching client credit details: {e}")
         
-    def calculateLoanDetails(self):
+    def fetchDebtedLoanAccountDetail(self):
+        current_date = datetime.now()
+        current_date = current_date.strftime("%Y-%m-%d")
+        print(current_date)
         try:
             self.reconnect_if_needed()
             if self.cursor:
+                self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS clientRegisteredLoandetails(
-                                    
-                    )
-                """)
+                    SELECT
+                        r.LoanId,
+                        r.Amount,
+                        B.ClientID,
+                        C.FirstName,
+                        C.SirName
+                    FROM
+                        ClientsLOANpaymentDETAILS AS r
+                    JOIN
+                        (
+                            SELECT
+                                ClientID,
+                                LoanId
+                            FROM
+                                LoanDetails                 
+                        ) AS B ON B.LoanId = r.LoanId
+                    JOIN
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID 
+                        
+                    WHERE
+                        DATE(r.Date) = %s
+                         
+                """,(current_date,))
+                data = self.cursor.fetchall()
+                return [{"LoanId":obj[0],
+                         "AmountPaid":float(obj[1]),
+                         "AccountNumber":obj[2],
+                         "fName":obj[3],
+                         "lName":obj[4]
+                         } for obj in data]
             else:
-                raise Exception("cursor not initialised while creating clientRegisteredLoandetails")
+                raise Exception("cursor not initialised while fetching client debted loan accounts")
         except Exception as e:
-            raise Exception(f"error while creating clientRegisteredLoandetails:{e}")
+            raise Exception(f"error while fetching client debted loan account details in fetchDebtedLoanAccountDetail method:{e}")
         
 
         
