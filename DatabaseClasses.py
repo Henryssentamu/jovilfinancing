@@ -1689,6 +1689,171 @@ class BankingDataBase(ConnectToMySql):
                 self.close_connection()
         else:
             raise Exception("cursor not initalised in fetching all clients details")
+        
+
+
+
+    def fetchClientAccountDetailsWithActivateLoanForSpecificEmployee(self, employeeId):
+        """_This method fetches all clients with activate loans details for specific credit officer_
+            _Args:
+                _employeeId (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.employeeID = employeeId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        r.LoanId,
+                        r.ActiveStatus,
+                        B.ClientID,
+                        C.FirstName,
+                        C.SirName,
+                        E.Contact,
+                        F.Gender
+                    FROM
+                        registeredLoans AS r
+                    JOIN
+                        (
+                            SELECT
+                                ClientID,
+                                LoanId
+                            FROM
+                                LoanDetails                 
+                        ) AS B ON B.LoanId = r.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                LoanId,
+                                Contact
+                            FROM
+                                WorkDetails              
+                        )AS E ON E.LoanId = r.LoanId
+                    JOIN
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID
+                    JOIN
+                        AccountsVault.AccountPersonalDetails AS F ON F.AccountNumber = B.ClientID
+                            
+                    JOIN
+                        (SELECT
+                            AccountNumber,
+                            OfficerId
+                        FROM
+                            AccountsVault.branchDetails
+                        WHERE
+                            OfficerId = %s            
+                        ) AS D ON D.AccountNumber = B.ClientID
+                        
+                    WHERE
+                        r.ActiveStatus = 'unfinished'
+                         
+                """,(employeeId,))
+                data = self.cursor.fetchall()
+                return [{"LoanId":obj[0],
+                         "ActivateStatus": obj[1],
+                         "AccountNumber":obj[2],
+                         "fName":obj[3],
+                         "lName":obj[4],
+                         "Phonenumber":obj[5],
+                         "Gender":obj[6]
+                         } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client with activate loans details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients  with activate loansdetails")
+
+
+
+
+    def fetchClientAccountDetailsWithFinshedLoanForSpecificEmployee(self, employeeId):
+        """_This method fetches all clients with finished loans details for specific credit officer_
+            _Args:
+                _employeeId (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.employeeID = employeeId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        r.LoanId,
+                        r.ActiveStatus,
+                        B.ClientID,
+                        C.FirstName,
+                        C.SirName,
+                        E.Contact,
+                        F.Gender
+                    FROM
+                        registeredLoans AS r
+                    JOIN
+                        (
+                            SELECT
+                                ClientID,
+                                LoanId
+                            FROM
+                                LoanDetails                 
+                        ) AS B ON B.LoanId = r.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                LoanId,
+                                Contact
+                            FROM
+                                WorkDetails              
+                        )AS E ON E.LoanId = r.LoanId
+                    JOIN
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID
+                    JOIN
+                        AccountsVault.AccountPersonalDetails AS F ON F.AccountNumber = B.ClientID
+                            
+                    JOIN
+                        (SELECT
+                            AccountNumber,
+                            OfficerId
+                        FROM
+                            AccountsVault.branchDetails
+                        WHERE
+                            OfficerId = %s            
+                        ) AS D ON D.AccountNumber = B.ClientID
+                        
+                    WHERE
+                        r.ActiveStatus = 'Finshed' AND B.ClientID NOT IN  (
+                                        SELECT
+                                            L.ClientID
+                                        FROM
+                                            registeredLoans AS r
+                                        JOIN
+                                            LoanDetails AS L ON L.LoanId = r.LoanId
+                                        WHERE
+                                            r.ActiveStatus = "unfinished" AND L.OfficerId = %s
+                                            
+                                    )
+                         
+                """,(self.employeeID,self.employeeID))
+                data = self.cursor.fetchall()
+                return [{"LoanId":obj[0],
+                         "ActivateStatus": obj[1],
+                         "AccountNumber":obj[2],
+                         "fName":obj[3],
+                         "lName":obj[4],
+                         "Phonenumber":obj[5],
+                         "Gender":obj[6]
+                         } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client with Finshed loans details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients  with Finshed loansdetails")
+
 
 
 
@@ -2445,10 +2610,9 @@ class BankingDataBase(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error in fetching client credit details: {e}")
         
-    def fetchDebtedLoanAccountDetail(self):
+    def fetchDebtedLoanAccountDetailForSpecificOfficer(self, officerId):
         current_date = datetime.now()
         current_date = current_date.strftime("%Y-%m-%d")
-        print(current_date)
         try:
             self.reconnect_if_needed()
             if self.cursor:
@@ -2471,12 +2635,21 @@ class BankingDataBase(ConnectToMySql):
                                 LoanDetails                 
                         ) AS B ON B.LoanId = r.LoanId
                     JOIN
-                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID 
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID
+                    JOIN
+                        (SELECT
+                            AccountNumber,
+                            OfficerId
+                        FROM
+                            AccountsVault.branchDetails
+                        WHERE
+                            OfficerId = %s            
+                        ) AS D ON D.AccountNumber = B.ClientID
                         
                     WHERE
                         DATE(r.Date) = %s
                          
-                """,(current_date,))
+                """,(officerId,current_date))
                 data = self.cursor.fetchall()
                 return [{"LoanId":obj[0],
                          "AmountPaid":float(obj[1]),

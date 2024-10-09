@@ -642,10 +642,11 @@ def registerClient():
 @app.route("/recievablesCredit", methods=["GET","POST"])
 def recievablesCredit():
     if request.method == "GET":
+        officerId = current_user.id
         bank = BankingDataBase()
         requesttype = request.args.get("type")
         if requesttype == "credit":
-            data = bank.fetchDebtedLoanAccountDetail()
+            data = bank.fetchDebtedLoanAccountDetailForSpecificOfficer(officerId=officerId)
             return jsonify(data)
     return render_template("recievablesCredit.html")
 
@@ -768,7 +769,6 @@ def collectionSheet():
         requestType = request.args.get("type")
         if requestType == "ForSpecificEmployee":
             collectionSheetDetails = Bank.fetchCollectionSheetDetails(employeeId=officerId)
-            print(collectionSheetDetails)
             return jsonify(collectionSheetDetails)
     return render_template("collectionsheet.html")
 
@@ -791,12 +791,30 @@ def allClientList():
 
     return render_template("allclientslist.html")
 
-@app.route("/ActiveClients")
+@app.route("/ActiveClients", methods=["GET","POST"])
 def ActiveClients():
+    if request.method ==  "GET":
+        bank = BankingDataBase()
+        employeeId = current_user.id
+        requestType = request.args.get("type")
+        if requestType == "activeLoan":
+            data = bank.fetchClientAccountDetailsWithActivateLoanForSpecificEmployee(employeeId=employeeId)
+            print(data)
+            return jsonify(data)
+            
     return render_template("activeClients.html")
 
-@app.route("/onHoldClients")
+@app.route("/onHoldClients",methods=["GET","POST"])
 def onHoldClients():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        employeeId = current_user.id
+        requestTyep = request.args.get("type")
+        if requestTyep == "finshedLoans":
+            data = bank.fetchClientAccountDetailsWithFinshedLoanForSpecificEmployee(employeeId=employeeId)
+            print(data)
+            return jsonify(data)
+
     return render_template("onhold.html")
 
 @app.route("/clientProfile",methods=["GET","POST"])
