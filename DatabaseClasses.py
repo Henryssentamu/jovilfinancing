@@ -1833,8 +1833,7 @@ class BankingDataBase(ConnectToMySql):
                                         JOIN
                                             LoanDetails AS L ON L.LoanId = r.LoanId
                                         WHERE
-                                            r.ActiveStatus = "unfinished" AND L.OfficerId = %s
-                                            
+                                            r.ActiveStatus = "unfinished" AND L.OfficerId = %s  
                                     )
                          
                 """,(self.employeeID,self.employeeID))
@@ -2188,6 +2187,47 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while creating client loan payment table:{e}")
         finally:
             self.close_connection()
+
+    def insert_into_ClientsInvestmentPaymentDetails(self,AccountNumber,amount):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO ClientsInvestmentPaymentDetails(
+                        ClientId,
+                        Amount               
+                    )VALUES(%s,%s)
+                """,(AccountNumber,amount))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised while inserting into investmentpayment  table")
+        except Exception as e:
+            raise Exception(f"error while inserting into  ClientsInvestmentPaymentDetails  table:{e}")
+        
+
+    def fetch_ClientsInvestmentDetails(self,AccountNumber):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SLECT 
+                        ClientId,
+                        Amount
+                    FROM
+                        ClientsInvestmentPaymentDetails
+                    WHERE
+                        ClientId = %s             
+                """,(AccountNumber,))
+                data = self.cursor.fetchall()
+                return data
+            else:
+                raise Exception("cursor not initialised while fetching client investment details")
+        except Exception as e:
+            raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  table:{e}")
+
+
     
     def fetch_clientsCurrentPortifolio(self,clientId):
         self.client_id = clientId
@@ -2374,23 +2414,7 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while fetching client loan security details:{e}")
 
     
-    def insert_into_ClientsInvestmentPaymentDetails(self,clientId,amount):
-        self.clientId = clientId
-        self.amount = amount
-        try:
-            self.reconnect_if_needed()
-            if self.cursor:
-                self.cursor.execute("USE LoanApplications")
-                self.cursor.execute("""
-                    INSERT INTO ClientsInvestmentPaymentDetails(
-                        ClientId,
-                        Amoun               
-                    )VALUES(%s,%s)
-                """,(self.clientId,self.amount))
-            else:
-                raise Exception("cursor not initialised in ClientsInvestmentPaymentDetails table")
-        except Exception as e:
-            raise Exception(f"error while inserting into ClientsInvestmentPaymentDetails:{e}")
+    
     def insert_into_ClientsLOANpaymentDETAILS(self,paymentDetails):
         self.loanId = paymentDetails["loanId"]
         self.amount = paymentDetails["amount"]
@@ -2960,13 +2984,13 @@ class AuthenticationDetails(ConnectToMySql):
 # dept.createDatabase()
 
 
-# banking  = BankingDataBase()
+banking  = BankingDataBase()
 # banking.createAccountTable()
 # banking.create_loanApplicationTAbles()
 # banking.CreateapprovedLoans_tables()
 # banking.Create_disbursement_table()
 # banking.registeredLoans()
-# banking.clientloanpaymentsAndInvestmentTable()
+banking.clientloanpaymentsAndInvestmentTable()
 
 
 # auth = AuthenticationDetails()

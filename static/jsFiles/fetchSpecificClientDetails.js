@@ -97,6 +97,43 @@ function generatePaybutton(data){
 
 }
 
+function generateInvestmentButton(data){
+    var html = "";
+    if(data){
+        data.forEach((obj)=>{
+            html += `<a class="btn btn-primary" onclick="sendClientAccountNumberForInvestment('${obj["AccountNumber"]}')">Make An Investment</a>`
+
+        })
+    }
+    return html
+}
+
+function sendClientAccountNumberForInvestment(accountnumber){ 
+    fetch("/Investmentpayments",{
+        method:"POST",
+        headers:{
+            "Content-type":"application/json"
+        },
+        body:JSON.stringify({"type": "investment","accountnumber":accountnumber})
+    })
+    .then(response =>{
+        if(!response.ok){
+            throw new Error("server erroe while sending accountnumber on investment payment route")
+        }
+        return response.json()
+    })
+    .then(data =>{
+        if(data["response"] === "recieved"){
+            window.location.href = "/Investmentpayments"
+        }
+    })
+    .catch(error =>{
+        console.log(error)
+    })
+
+
+}
+
 function generateCreditdetails(data) {
     let html = "";
     if (data) {
@@ -212,10 +249,18 @@ async function loadLoanSecurity() {
     
 }
 
+async function loadinvestmentAndLoanSecurityButton() {
+    const data = await fetchClientDetails();
+    var html = generateInvestmentButton(data)
+    document.getElementById("makeinvestmentPayment").innerHTML = html;
+    
+}
+
 loadhtml();
 loadCredit();
 loadpaybutton();
 loadLoanSecurity();
+loadinvestmentAndLoanSecurityButton();
  
 
 

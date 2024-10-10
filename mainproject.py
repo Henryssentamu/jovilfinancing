@@ -1,6 +1,7 @@
 
 
 from crypt import methods
+from lib2to3.pygram import python_grammar_no_print_statement
 from flask import Flask, cli, jsonify, redirect, render_template, request, send_file, session, url_for
 from urllib3 import HTTPResponse
 from enviromentkeys import secret_key
@@ -671,8 +672,28 @@ def payment():
             # changing activate status from a default unfinshed to finshed if current portifolio is 0
             bank.changeLoanRegistrationStatusTrigger()
             return jsonify({"response":"recieved"})
+            
+
 
     return render_template("payments.html")
+
+
+@app.route("/Investmentpayments", methods=["GET", "POST"])
+def Investmentpayments():
+    if request.method == "POST":
+        banking = BankingDataBase()
+        postType = request.json.get("type")
+        if postType == "investment":
+            accountNumber = request.json.get("accountnumber")
+            session["client_Account_Number"] = accountNumber
+            return jsonify({"response":"recieved"})
+        elif postType == "amount":
+            accountNumber = session.get("client_Account_Number")
+            amount = request.json.get("amount")
+            banking.insert_into_ClientsInvestmentPaymentDetails(AccountNumber=accountNumber,amount=amount)
+            return jsonify({"response":"recieved"})
+    
+    return render_template("investmentPayment.html")
 
 @app.route("/succefulpayments")
 def successfulpayment():
