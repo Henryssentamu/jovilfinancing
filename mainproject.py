@@ -651,8 +651,16 @@ def recievablesCredit():
             return jsonify(data)
     return render_template("recievablesCredit.html")
 
-@app.route("/recievablesSavings")
+@app.route("/recievablesSavings", methods=["GET","POST"])
 def recievablesSavings():
+    if request.method == "GET":
+        officerId = current_user.id
+        bank = BankingDataBase()
+        requesttype = request.args.get("type")
+        if requesttype == "savings":
+            data = bank.fetch_ClientsInvestmentDetailsForSpecficEmployee(EmployeeId=officerId)
+            return jsonify(data)
+
     return render_template("recievablesSavings.html")
 
 @app.route("/Makepayments", methods=["GET", "POST"])
@@ -820,7 +828,6 @@ def ActiveClients():
         requestType = request.args.get("type")
         if requestType == "activeLoan":
             data = bank.fetchClientAccountDetailsWithActivateLoanForSpecificEmployee(employeeId=employeeId)
-            print(data)
             return jsonify(data)
             
     return render_template("activeClients.html")
@@ -833,7 +840,6 @@ def onHoldClients():
         requestTyep = request.args.get("type")
         if requestTyep == "finshedLoans":
             data = bank.fetchClientAccountDetailsWithFinshedLoanForSpecificEmployee(employeeId=employeeId)
-            print(data)
             return jsonify(data)
 
     return render_template("onhold.html")
@@ -866,6 +872,9 @@ def clientProfile():
             """fetch client's loan security"""
             loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
             return jsonify(loan_security)
+        elif requesttype == "investments":
+            investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
+            return jsonify(investments)
 
             
             

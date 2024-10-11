@@ -62,6 +62,29 @@ async function fetchLoanSecurity() {
         .catch(error =>{
             console.log(error)
         })
+};
+
+async function fetchClientInvestment() {
+    return fetch("/clientProfile?type=investments")
+        .then(response =>{
+            if(!response.ok){
+                throw new Error("server error while fetching clients investments")
+            }
+            return response.json()
+        })
+        .then(data =>{
+            var total = 0;
+            if(data){
+                data.forEach((obj)=>{
+                    total += obj["Amount"]
+                })
+            }
+            return total
+        })
+        .catch(error =>{
+            console.log(error)
+        })
+    
 }
 
 function sendLoanIdForPayment(id){ 
@@ -254,6 +277,11 @@ async function loadinvestmentAndLoanSecurityButton() {
     var html = generateInvestmentButton(data)
     document.getElementById("makeinvestmentPayment").innerHTML = html;
     
+};
+async function loadInvestmentDetails() {
+    const totalInvestment = await fetchClientInvestment();
+    document.getElementById("investment"). innerHTML = totalInvestment;
+    
 }
 
 loadhtml();
@@ -261,6 +289,8 @@ loadCredit();
 loadpaybutton();
 loadLoanSecurity();
 loadinvestmentAndLoanSecurityButton();
+loadInvestmentDetails();
+
  
 
 

@@ -2212,8 +2212,8 @@ class BankingDataBase(ConnectToMySql):
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
-                    SLECT 
-                        ClientId,
+                    SELECT
+                        DATE(Date),
                         Amount
                     FROM
                         ClientsInvestmentPaymentDetails
@@ -2221,11 +2221,60 @@ class BankingDataBase(ConnectToMySql):
                         ClientId = %s             
                 """,(AccountNumber,))
                 data = self.cursor.fetchall()
-                return data
+                return [{"date": str(obj[0]),"Amount": float(obj[1])} for obj in data]
             else:
                 raise Exception("cursor not initialised while fetching client investment details")
         except Exception as e:
             raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  table:{e}")
+        
+    
+
+    def fetch_ClientsInvestmentDetailsForSpecficEmployee(self,EmployeeId):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                print(current_date)
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        DATE(A.Date),
+                        A.ClientId,
+                        C.FirstName,
+                        C.SirName,
+                        A.Amount
+                    FROM
+                        ClientsInvestmentPaymentDetails AS A
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                FirstName,
+                                SirName
+                            FROM
+                                AccountsVault.BankAccount                   
+                        ) AS C ON C.AccountNumber = A.ClientId
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                OfficerId
+                            FROM
+                                AccountsVault.branchDetails
+                            WHERE
+                                OfficerId = %s 
+                        ) AS B ON B.AccountNumber = A.ClientId 
+                    WHERE
+                        DATE(A.Date) = %s
+                                  
+                """,(EmployeeId,current_date))
+                data = self.cursor.fetchall()
+                return [{"date": str(obj[0]), "AccountNumber":obj[1], "fname":obj[2], "lName":obj[3], "Amount": float(obj[4])} for obj in data]
+            else:
+                raise Exception("cursor not initialised while fetching client investment details for a specific employee")
+        except Exception as e:
+            raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific employee table:{e}")
 
 
     
