@@ -537,6 +537,14 @@ def crediofficerDashboard():
     if not current_user.is_authenticated:
         return redirect(url_for('loginEmployess'))
     
+    officerId = current_user.id
+    if request.method == "GET":
+        Bank = BankingDataBase()
+        requestType = request.args.get("type")
+    if requestType == "ForSpecificEmployee":
+            collectionSheetDetails = Bank.fetchCollectionSheetDetails(employeeId=officerId)
+            return jsonify(collectionSheetDetails)
+    
     return render_template("creditOfficerDashboard.html")
 
 @app.route("/registerClient",methods =["GET","POST"])

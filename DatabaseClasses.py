@@ -2332,6 +2332,64 @@ class BankingDataBase(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
         
+
+
+
+
+
+
+    def fetch_officerCurrentPortifolio(self,officerID):
+        self.employeeId = officerID
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                            
+                        (SELECT
+                            SUM(Portifolio) AS portifolio
+                        FROM
+                            LoanRepaymentScheduleDetails
+                        WHERE
+                            LoanId IN (
+                                        SELECT
+                                            LoanId
+                                        FROM 
+                                            registeredLoans
+                                        WHERE
+                                            LoanId IN (
+                                                        SELECT 
+                                                            LoanId 
+                                                        FROM 
+                                                            LoanDetails 
+                                                        WHERE 
+                                                            OfficerId = %s 
+                                            )         
+                                    )) - COALESCE((SELECT
+                                            sum(Paid)
+
+                                        FROM
+                                            LoanPaymentStatistics
+                                        WHERE
+                                            LoanId  = (SELECT
+                                                            LoanId 
+                                                        FROM
+                                                            LoanDetails
+                                                        WHERE
+                                                            ClientID = %s
+                                                        ORDER BY Date DESC
+                                                        LIMIT 1
+                                    )),0)  as current_portifolio
+
+                """,(self.client_id,self.client_id))
+                data = self.cursor.fetchone()
+                return data
+            else:
+                raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
+        except Exception as e:
+            raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+        
     def fetchClientCurrentLoanPaymentDetails(self,clientId):
         try:
             self.reconnect_if_needed()

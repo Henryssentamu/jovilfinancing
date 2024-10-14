@@ -65,7 +65,7 @@
     <div class="container" style="margin-top: 90px;">
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
            <div class="col">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm" style="background-color: #dc3545; padding: 10px;">
                     <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
                         <div class="card-title">
                             <h1>
@@ -73,7 +73,16 @@
                             </h1>
                         </div>
                         <div class="card-text">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, deleniti?
+                            <div class="row">
+                                <div class="col" style="position: relative;">
+                                    <img src="../static/icons/briefcase-solid (1).svg" alt="Portfolio " width="46px" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
+                                    <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                                </div>
+                                <div class="col" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;" >
+                                    12300000
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -81,30 +90,50 @@
 
            <!-- targets -->
            <div class="col">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm" style="background-color: #d63384; padding: 10px;">
                 <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
                     <div class="card-title">
                         <h1>
                             Targets
                         </h1>
                     </div>
-                    <div class="card-text">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, deleniti?
+                    <div class="card-text" >
+                        <div class="row">
+                            <div class="col" style="position: relative;">
+                                <img src="../static/icons/icons8-sales-96.png" alt="Portfolio " width="46px" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
+                                <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                            </div>
+                            <div class="col" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;" >
+                                12300000
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
        </div>
             <!-- collection -->
-            <div class="col ">
-                <div class="card shadow-sm">
+            <div class="col  ">
+                <div class="card shadow-sm border-0 " style="background-color: #fd7e14; color: white; padding: 10px;">
                     <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
                         <div class="card-title">
-                            <h1>
-                                Collection
+                            <h1 style="color: black;">
+                                
+                                Expectation
                             </h1>
                         </div>
-                        <div class="card-text">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores, deleniti?
+                        <div class="card-text" >
+                            <div class="row">
+                                <div class="col" style="position: relative">
+                                    <img src="../static/icons/groupIcon.svg" alt="Exceptation icon" width="46" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
+                                    <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                                </div>
+                                <div class="col" id="Exceptation" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;">
+                                     
+                                </div>
+                                
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -377,7 +406,41 @@
                 }
             })
 
-        })
+        });
+        async function getcollectionSheetDetails(){
+            return await fetch("/crediofficerDashboard?type=ForSpecificEmployee")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching collection sheet details")
+                    }
+                    return response.json()
+                    
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        }
+
+        function calaculateTotalExpectation(data){
+            let total = 0
+            data.forEach((obj) =>{
+                total += Number(obj["commitment"])
+            })
+            return total
+        };
+        async function loadExceptation() {
+            const data = await getcollectionSheetDetails();
+            const exceptation =  calaculateTotalExpectation(data);
+            
+            document.getElementById("Exceptation").innerHTML = exceptation;
+
+            
+        };
+        loadExceptation();
+        
     </script> 
 </body>
 </html>
