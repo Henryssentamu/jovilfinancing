@@ -2235,7 +2235,6 @@ class BankingDataBase(ConnectToMySql):
             if self.cursor:
                 current_date = datetime.now()
                 current_date = current_date.strftime("%Y-%m-%d")
-                print(current_date)
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
                     SELECT
@@ -2270,7 +2269,10 @@ class BankingDataBase(ConnectToMySql):
                                   
                 """,(EmployeeId,current_date))
                 data = self.cursor.fetchall()
-                return [{"date": str(obj[0]), "AccountNumber":obj[1], "fname":obj[2], "lName":obj[3], "Amount": float(obj[4])} for obj in data]
+                if data:
+                    return [{"date": str(obj[0]), "AccountNumber":obj[1], "fname":obj[2], "lName":obj[3], "Amount": float(obj[4])} for obj in data]
+                else:
+                    return 0
             else:
                 raise Exception("cursor not initialised while fetching client investment details for a specific employee")
         except Exception as e:
@@ -2346,44 +2348,122 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
                     SELECT
-                            
-                        (SELECT
-                            SUM(Portifolio) AS portifolio
+                    
+                        (SELECT   
+                            SUM(A.Portifolio) AS portifolio
                         FROM
-                            LoanRepaymentScheduleDetails
+                            LoanRepaymentScheduleDetails AS A
+                        JOIN
+                            (
+                                SELECT
+                                    LoanId
+                                FROM
+                                    registeredLoans
+                                WHERE
+                                    ActiveStatus = "unfinished"        
+                            ) AS B ON B.LoanId = A.LoanId
                         WHERE
-                            LoanId IN (
+                            A.LoanId IN (
                                         SELECT
                                             LoanId
-                                        FROM 
-                                            registeredLoans
-                                        WHERE
-                                            LoanId IN (
-                                                        SELECT 
-                                                            LoanId 
-                                                        FROM 
-                                                            LoanDetails 
-                                                        WHERE 
-                                                            OfficerId = %s 
-                                            )         
-                                    )) - COALESCE((SELECT
-                                            sum(Paid)
-
                                         FROM
-                                            LoanPaymentStatistics
+                                            LoanDetails
                                         WHERE
-                                            LoanId  = (SELECT
-                                                            LoanId 
+                                            OfficerId = %s
+                                        )  ) - COALESCE((
+                                                SELECT
+                                                    sum(C.Paid)
+                                                FROM
+                                                    LoanPaymentStatistics AS C
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
                                                         FROM
                                                             LoanDetails
                                                         WHERE
-                                                            ClientID = %s
-                                                        ORDER BY Date DESC
-                                                        LIMIT 1
-                                    )),0)  as current_portifolio
+                                                            OfficerId = %s
+                                                    ) AS E ON E.LoanId = C.LoanId
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
+                                                        FROM
+                                                            registeredLoans
+                                                        WHERE
+                                                            ActiveStatus = "unfinished"
 
-                """,(self.client_id,self.client_id))
+                                                    ) AS D ON D.LoanId =  C.LoanId
+                                        
+                                        ),0)
+
+                """,(self.employeeId,self.employeeId))
                 data = self.cursor.fetchone()
+                return {"totalPortifoli":data[0]}
+            else:
+                raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
+        except Exception as e:
+            raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+        
+
+
+
+
+    def fetch_CurrentPortifolio_FORgenralManager(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                    
+                        (SELECT   
+                            SUM(A.Portifolio) AS portifolio
+                        FROM
+                            LoanRepaymentScheduleDetails AS A
+                        JOIN
+                            (
+                                SELECT
+                                    LoanId
+                                FROM
+                                    registeredLoans
+                                WHERE
+                                    ActiveStatus = "unfinished"        
+                            ) AS B ON B.LoanId = A.LoanId
+                        WHERE
+                            A.LoanId IN (
+                                        SELECT
+                                            LoanId
+                                        FROM
+                                            LoanDetails
+                                    
+                                        )  ) - COALESCE((
+                                                SELECT
+                                                    sum(C.Paid)
+                                                FROM
+                                                    LoanPaymentStatistics AS C
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
+                                                        FROM
+                                                            LoanDetails
+                                                    ) AS E ON E.LoanId = C.LoanId
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
+                                                        FROM
+                                                            registeredLoans
+                                                        WHERE
+                                                            ActiveStatus = "unfinished"
+
+                                                    ) AS D ON D.LoanId =  C.LoanId
+                                        
+                                        ),0)
+
+                """)
+                data = self.cursor.fetchall()
                 return data
             else:
                 raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
@@ -2782,12 +2862,15 @@ class BankingDataBase(ConnectToMySql):
                          
                 """,(officerId,current_date))
                 data = self.cursor.fetchall()
-                return [{"LoanId":obj[0],
-                         "AmountPaid":float(obj[1]),
-                         "AccountNumber":obj[2],
-                         "fName":obj[3],
-                         "lName":obj[4]
-                         } for obj in data]
+                if data:
+                    return [{"LoanId":obj[0],
+                            "AmountPaid":float(obj[1]),
+                            "AccountNumber":obj[2],
+                            "fName":obj[3],
+                            "lName":obj[4]
+                            } for obj in data]
+                else:
+                    return 0
             else:
                 raise Exception("cursor not initialised while fetching client debted loan accounts")
         except Exception as e:

@@ -541,9 +541,21 @@ def crediofficerDashboard():
     if request.method == "GET":
         Bank = BankingDataBase()
         requestType = request.args.get("type")
-    if requestType == "ForSpecificEmployee":
-            collectionSheetDetails = Bank.fetchCollectionSheetDetails(employeeId=officerId)
-            return jsonify(collectionSheetDetails)
+        if requestType == "ForSpecificEmployee":
+                collectionSheetDetails = Bank.fetchCollectionSheetDetails(employeeId=officerId)
+                return jsonify(collectionSheetDetails)
+        elif requestType == "portifolio":
+            portifolio = Bank.fetch_officerCurrentPortifolio(officerID=officerId)
+            return jsonify(portifolio)
+        elif requestType == "credit":
+            data = Bank.fetchDebtedLoanAccountDetailForSpecificOfficer(officerId=officerId)
+            
+            return jsonify(data)
+        if requestType== "savings":
+            data = Bank.fetch_ClientsInvestmentDetailsForSpecficEmployee(EmployeeId=officerId)
+            
+            return jsonify(data)
+        
     
     return render_template("creditOfficerDashboard.html")
 
