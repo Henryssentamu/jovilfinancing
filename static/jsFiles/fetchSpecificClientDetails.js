@@ -194,16 +194,13 @@ function generatepersonalHtml(data) {
                             <div class="col">Name</div>
                             <div class="col">${obj["FirstName"]} <span> </span> ${obj["SirName"]} </div>
                         </div>
-                        <div class="row g-3">
-                            <div class="col">Branch</div>
-                            <div class="col">${obj["branchDetails"]["BranchId"]}</div>
-                        </div>
+                        
     
                     </div>
                 </div>
-                <div class="row mt-2">
+                <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-lg-2  mt-2">
                     <div class="col">
-                        <div class="card">
+                        <div class="card mb-3">
                             <div class="card-header">
                                 <div>contact info</div>
                             </div>

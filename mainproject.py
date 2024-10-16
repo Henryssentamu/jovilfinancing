@@ -16,11 +16,14 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,SubmitField
 from wtforms.validators import DataRequired,Length
 
+
 from flask_login import LoginManager, UserMixin, logout_user, login_required,login_user,login_remembered, current_user
 
 
 app = Flask(__name__)
+
 app.config["SECRET_KEY"] = secret_key
+
 """configuring logging in functionality with the app"""
 login_manager = LoginManager()
 login_manager.init_app(app)
