@@ -93,11 +93,27 @@ def loginManager():
     return render_template("loginManager.html",form = form)
 
 @login_required
-@app.route("/managrDashboard")
+@app.route("/managrDashboard", methods=["GET","POST"])
 def managrDashboard():
     if not current_user.is_authenticated:
         return redirect(url_for("loginManager"))
     managerId = session.get("logged_in_employee")
+    if request.method == "GET":
+        Bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "portifolio":
+            portifolio = Bank.fetch_GeneralCurrentPortifolio()
+            return jsonify(portifolio)
+        elif requestType == "principle":
+            principle = Bank.fetch_GeneralCurrentPrinciple()
+            return jsonify(principle)
+        elif requestType == "current_total_investment":
+            total_investment = Bank.fetch_total_investments()
+            return jsonify(total_investment)
+        elif requestType == "loanSecurity":
+            loanSecurity = Bank.fetch_total_security()
+            print(loanSecurity)
+            return loanSecurity
     
     return render_template("managerDashboard.html")
 
@@ -334,6 +350,18 @@ def createDeptments():
 @app.route("/branch")
 def branch():
     return render_template("Abranch.html")
+
+@app.route("/activateClientsOnManagersPage", methods=["GET","POST"])
+def activateClientsOnManagersPage():
+    if request.method ==  "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "activeLoan":
+            data = bank.fetchClientAccountDetailsWithActivateLoanFormanager()
+            return jsonify(data)
+    return render_template("activateClientsOnManagersPage.html")
+
+
 @app.route("/mergeBranches")
 def mergeBranches():
     return render_template("mergebranches.html")

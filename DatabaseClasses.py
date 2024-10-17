@@ -1766,6 +1766,88 @@ class BankingDataBase(ConnectToMySql):
                 self.close_connection()
         else:
             raise Exception("cursor not initalised in fetching all clients  with activate loansdetails")
+        
+
+
+    def fetchClientAccountDetailsWithActivateLoanFormanager(self):
+        """_This method fetches all clients with activate loans details for the general manager_
+            _Args:
+                _None_
+            Returen:
+                _client details (list)_
+        """
+        
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        r.LoanId,
+                        r.ActiveStatus,
+                        B.ClientID,
+                        C.FirstName,
+                        C.SirName,
+                        E.Contact,
+                        F.Gender,
+                        B.BranchId,
+                        G.BranchName
+                    FROM
+                        registeredLoans AS r
+                    JOIN
+                        (
+                            SELECT
+                                ClientID,
+                                LoanId,
+                                BranchId
+                            FROM
+                                LoanDetails                 
+                        ) AS B ON B.LoanId = r.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                LoanId,
+                                Contact
+                            FROM
+                                WorkDetails              
+                        )AS E ON E.LoanId = r.LoanId
+                    JOIN
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID
+                    JOIN
+                        AccountsVault.AccountPersonalDetails AS F ON F.AccountNumber = B.ClientID
+                    JOIN
+                        (
+                            SELECT
+                                BranchId,
+                                BranchName
+                            FROM
+                                NisaBranches.Branches                
+                        ) AS G ON G.BranchId = B.BranchId
+                        
+                        
+                    WHERE
+                        r.ActiveStatus = 'unfinished'
+                    ORDER BY B.BranchId
+                            
+                """)
+                data = self.cursor.fetchall()
+                return [{"LoanId":obj[0],
+                            "ActivateStatus": obj[1],
+                            "AccountNumber":obj[2],
+                            "fName":obj[3],
+                            "lName":obj[4],
+                            "Phonenumber":obj[5],
+                            "Gender":obj[6],
+                            "BranchId":obj[7],
+                            "BranchName": obj[8]
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client with activate loans details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients  with activate loansdetails")
+
 
 
 
@@ -2279,6 +2361,121 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific employee table:{e}")
 
 
+    def fetch_current_total_investments(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(Amount)
+                    FROM
+                        ClientsInvestmentPaymentDetails
+                    WHERE
+                        DATE(Date) =  %s  
+                """,(current_date,))
+                data = self.cursor.fetchone()
+                return data
+            else:
+                raise Exception("cursor not initialised while fetching otal current investments")
+
+        except Exception as e:
+            raise Exception(f"error while fetching total current investments:{e}")
+
+
+    def fetch_total_investments(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(Amount)
+                    FROM
+                        ClientsInvestmentPaymentDetails  
+                """)
+                data = self.cursor.fetchone()
+                return {"totalInvetment":float(data[0])}
+            else:
+                raise Exception("cursor not initialised while fetching total investments")
+
+        except Exception as e:
+            raise Exception(f"error while fetching total investments:{e}")
+        
+
+    def fetch_total_security(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(LoanSecurity)
+                    FROM
+                        LoanRepaymentScheduleDetails
+                """) 
+                data = self.cursor.fetchone()
+                return {"totalSecurity":float(data[0])}
+            else:
+                raise Exception("cursor not initialised while fetching total_securitl")
+
+        except Exception as e:
+            raise Exception(f"error while fetching total_securitl:{e}")
+
+
+
+
+
+    def fetch_General_ClientsInvestmentDetails(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        DATE(A.Date),
+                        A.ClientId,
+                        C.FirstName,
+                        C.SirName,
+                        A.Amount
+                    FROM
+                        ClientsInvestmentPaymentDetails AS A
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                FirstName,
+                                SirName
+                            FROM
+                                AccountsVault.BankAccount                   
+                        ) AS C ON C.AccountNumber = A.ClientId 
+                    WHERE
+                        DATE(A.Date) = %s
+                                  
+                """,(current_date,))
+                data = self.cursor.fetchall()
+                if data:
+                    return [{"date": str(obj[0]), "AccountNumber":obj[1], "fname":obj[2], "lName":obj[3], "Amount": float(obj[4])} for obj in data]
+                else:
+                    return 0
+            else:
+                raise Exception("cursor not initialised while fetching client investment details for a specific employee")
+        except Exception as e:
+            raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific employee table:{e}")
+
+
+
+
+
+
+
+
+
+
     
     def fetch_clientsCurrentPortifolio(self,clientId):
         self.client_id = clientId
@@ -2404,6 +2601,94 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
         except Exception as e:
             raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+
+
+
+
+
+
+
+    def fetch_GeneralCurrentPortifolio(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                    
+                        (SELECT   
+                            SUM(A.Portifolio) AS portifolio
+                        FROM
+                            LoanRepaymentScheduleDetails AS A
+                        JOIN
+                            (
+                                SELECT
+                                    LoanId
+                                FROM
+                                    registeredLoans
+                                WHERE
+                                    ActiveStatus = "unfinished"        
+                            ) AS B ON B.LoanId = A.LoanId
+                        WHERE
+                            A.LoanId IN (
+                                        SELECT
+                                            LoanId
+                                        FROM
+                                            LoanDetails
+                                        )  ) - COALESCE((
+                                                SELECT
+                                                    sum(C.Paid)
+                                                FROM
+                                                    LoanPaymentStatistics AS C
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
+                                                        FROM
+                                                            LoanDetails
+                                                    ) AS E ON E.LoanId = C.LoanId
+                                                JOIN
+                                                    (
+                                                        SELECT
+                                                            LoanId
+                                                        FROM
+                                                            registeredLoans
+                                                        WHERE
+                                                            ActiveStatus = "unfinished"
+
+                                                    ) AS D ON D.LoanId =  C.LoanId
+                                        
+                                        ),0)
+
+                """,)
+                data = self.cursor.fetchone()
+                return {"totalPortifoli":data[0]}
+            else:
+                raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
+        except Exception as e:
+            raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+        
+
+    def fetch_GeneralCurrentPrinciple(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                        SELECT
+                            SUM(Principle)
+                        FROM
+                            registeredLoans
+                        WHERE
+                            ActiveStatus = "unfinished"
+                """)
+                data = self.cursor.fetchone()
+                return {"TOtalprinciple":data[0]}
+            else:
+                raise Exception("cursor not initialised in fetching current principle")
+
+        except Exception as e:
+            raise Exception(f"error while fetching current principle:{e}")
         
 
 
