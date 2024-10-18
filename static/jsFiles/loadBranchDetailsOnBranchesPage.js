@@ -36,17 +36,43 @@ async function fetchNumberOfBranches() {
 
 function generateHtml(data) {
     let html = "";
-    data.forEach((branchObject) => {
+    data.forEach((branchObject, index) => {
         html += `
             <tr>
                 <td>
-                    <a data-branch-id=${branchObject["branchId"]} class="link btn  btn-outline-dark" href="/branch">${branchObject.branchName}</a>
+                    <a id="branch_${index}" data-branch-id=${branchObject["branchId"]} class="link btn  btn-outline-dark"   onclick="sendSelectedBranchIdToServer(${index})">${branchObject.branchName}</a>
                 </td>
                 <td>${branchObject.officeLocation}</td>
             </tr>
         `;
     });
     return html;
+}
+
+function sendSelectedBranchIdToServer(id){
+    const element = document.getElementById(`branch_${id}`)
+    const branchId = element.getAttribute("data-branch-id")
+    fetch("/branch",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({"BranchId":branchId})
+    })
+    .then(response =>{
+        if(!response.ok){
+            throw new Error("error while sending selected branch id to server")
+        }
+        return response.json()
+    })
+    .then(data =>{
+        if (data){
+            window.location.href = "/branch"
+        }
+    })
+    .catch(error =>{
+        console.log(error)
+    })
 }
 
 async function loadDetailsOnPage(){

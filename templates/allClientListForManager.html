@@ -105,7 +105,7 @@
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         async function fetchClientsWithActivateLoans() {
-            return fetch("/activateClientsOnManagersPage?type=activeLoan")
+            return fetch("/allClientsForManager?type=allClients")
                 .then(response =>{
                     if(!response.ok){
                         throw new Error("server error while fetching client debted loan details")

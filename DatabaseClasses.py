@@ -1769,7 +1769,7 @@ class BankingDataBase(ConnectToMySql):
         
 
 
-    def fetchClientAccountDetailsWithActivateLoanFormanager(self):
+    def fetchClientAccountDetailsWithActivateLoanFormanager(self,branchId):
         """_This method fetches all clients with activate loans details for the general manager_
             _Args:
                 _None_
@@ -1826,10 +1826,9 @@ class BankingDataBase(ConnectToMySql):
                         
                         
                     WHERE
-                        r.ActiveStatus = 'unfinished'
-                    ORDER BY B.BranchId
+                        r.ActiveStatus = 'unfinished' AND B.BranchId = %s
                             
-                """)
+                """,(branchId,))
                 data = self.cursor.fetchall()
                 return [{"LoanId":obj[0],
                             "ActivateStatus": obj[1],
@@ -1847,6 +1846,177 @@ class BankingDataBase(ConnectToMySql):
                 self.close_connection()
         else:
             raise Exception("cursor not initalised in fetching all clients  with activate loansdetails")
+        
+
+
+
+    def fetchClientAccountDetailsWithFinshedLoanFormanager(self,branchId):
+        """_This method fetches all clients with finshed loans details for the general manager_
+            _Args:
+                _None_
+            Returen:
+                _client details (list)_
+        """
+        
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        r.LoanId,
+                        r.ActiveStatus,
+                        B.ClientID,
+                        C.FirstName,
+                        C.SirName,
+                        E.Contact,
+                        F.Gender,
+                        B.BranchId,
+                        G.BranchName
+                    FROM
+                        registeredLoans AS r
+                    JOIN
+                        (
+                            SELECT
+                                ClientID,
+                                LoanId,
+                                BranchId
+                            FROM
+                                LoanDetails                 
+                        ) AS B ON B.LoanId = r.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                LoanId,
+                                Contact
+                            FROM
+                                WorkDetails              
+                        )AS E ON E.LoanId = r.LoanId
+                    JOIN
+                        AccountsVault.BankAccount AS C ON C.AccountNumber = B.ClientID
+                    JOIN
+                        AccountsVault.AccountPersonalDetails AS F ON F.AccountNumber = B.ClientID
+                    JOIN
+                        (
+                            SELECT
+                                BranchId,
+                                BranchName
+                            FROM
+                                NisaBranches.Branches
+                            WHERE
+                                BranchId = %s
+                                                   
+                        ) AS G ON G.BranchId = B.BranchId
+                        
+                        
+                    WHERE
+                        r.ActiveStatus = 'Finshed' AND B.ClientID NOT IN (
+                                        SELECT
+                                            L.ClientID
+                                        FROM
+                                            registeredLoans AS r
+                                        JOIN
+                                            LoanDetails AS L ON L.LoanId = r.LoanId
+                                        WHERE
+                                            r.ActiveStatus = "unfinished" AND L.BranchId = %s 
+                                    )
+                            
+                """,(branchId,branchId))
+                data = self.cursor.fetchall()
+                return [{"LoanId":obj[0],
+                            "ActivateStatus": obj[1],
+                            "AccountNumber":obj[2],
+                            "fName":obj[3],
+                            "lName":obj[4],
+                            "Phonenumber":obj[5],
+                            "Gender":obj[6],
+                            "BranchId":obj[7],
+                            "BranchName": obj[8]
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client with activate loans details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients  with activate loansdetails")
+        
+    def fetchAllClientAccountDetailsForSpecificBranchFormanager(self, branchId):
+        """_This method fetches all clients details for specific credit branch_
+            _Args:
+                _Branch (str)_
+            Returen:
+                _client details (list)_
+        """
+        self.branchId = branchId
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE AccountsVault")
+                self.cursor.execute("""
+                    SELECT
+                        B.AccountNumber,
+                        B.FirstName,
+                        B.SirName,
+                        S.NINNumber,
+                        P.DateOfBirth,
+                        P.Religion,
+                        P.Gender,
+                        C.CurrentAddress,
+                        C.CityDivision,
+                        C.District,
+                        C.PhoneNumber,
+                        N.FirstName,
+                        N.SirName,
+                        N.PhoneNumber,
+                        N.Location,
+                        T.Photo ownerpic,
+                        D.BranchId,
+                        D.OfficerId
+                        
+                    FROM
+                        BankAccount AS B
+                    JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
+                    JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
+                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
+                    JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
+                    JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
+                    WHERE
+                        D.BranchId = %s
+                                      
+                """,(self.branchId,))
+                data = self.cursor.fetchall()
+                return [
+                            {
+                                "AccountNumber":obj[0],
+                                "FirstName":obj[1],
+                                "SirName":obj[2],
+                                "NINNumber":obj[3],
+                                "DateOfBirth":obj[4],
+                                "Religion":obj[5],
+                                "Gender":obj[6],
+                                "CurrentAddress":obj[7],
+                                "CityDivision":obj[8],
+                                "District":obj[9],
+                                "PhoneNumber":obj[10],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[11],
+                                    "SirName":obj[12],
+                                    "PhoneNumber":obj[13],
+                                    "Location":obj[14]
+                                },
+                                "AccountOwnerPic":obj[15],
+                                "branchDetails":{
+                                    "BranchId":obj[16],
+                                    "officerId":obj[17]
+                                }
+                            } for obj in data]
+            except Exception as e:
+                raise Exception(f"error while fetching all client's details:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initalised in fetching all clients details")
 
 
 

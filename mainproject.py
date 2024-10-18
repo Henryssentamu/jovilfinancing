@@ -276,6 +276,9 @@ def branches():
             branchObj = Branches()
             numberOfBranches = branchObj.numberOfBranches()
             return jsonify(numberOfBranches)
+
+        
+
     return render_template("branches.htm")
 
 
@@ -347,19 +350,51 @@ def createDeptments():
         
     return render_template("createDeptments.html")
 
-@app.route("/branch")
+@app.route("/branch", methods=["GET","POST"])
 def branch():
+    if request.method == "POST":
+        session["branchId"] = request.json.get("BranchId")
+        return jsonify({"status":"branchId recieved"})
+    
     return render_template("Abranch.html")
 
 @app.route("/activateClientsOnManagersPage", methods=["GET","POST"])
 def activateClientsOnManagersPage():
     if request.method ==  "GET":
+        branchId = session.get("branchId")
         bank = BankingDataBase()
         requestType = request.args.get("type")
         if requestType == "activeLoan":
-            data = bank.fetchClientAccountDetailsWithActivateLoanFormanager()
+            data = bank.fetchClientAccountDetailsWithActivateLoanFormanager(branchId=branchId)
             return jsonify(data)
     return render_template("activateClientsOnManagersPage.html")
+
+
+@app.route("/finshedLoanClientsOnManagersPage", methods=["GET","POST"])
+def finshedLoanClientsOnManagersPage():
+    if request.method ==  "GET":
+        branchId = session.get("branchId")
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "finshedLoans":
+            data = bank.fetchClientAccountDetailsWithFinshedLoanFormanager(branchId=branchId)
+            return jsonify(data)
+    return render_template("finshedClientsOnmanagersPage.html")
+
+
+@app.route("/allClientsForManager", methods=["GET","POST"])
+def allClientsForManager():
+    if request.method ==  "GET":
+        branchId = session.get("branchId")
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "allClients":
+            data = bank.fetchAllClientAccountDetailsForSpecificBranchFormanager(branchId=branchId)
+            print(data)
+            return jsonify(data)
+    return render_template("allClientListForManager.html")
+
+
 
 
 @app.route("/mergeBranches")
