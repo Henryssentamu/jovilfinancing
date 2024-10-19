@@ -104,7 +104,7 @@
     
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        async function fetchClientsWithActivateLoans() {
+        async function fetchClientsForAspecificbranch() {
             return fetch("/allClientsForManager?type=allClients")
                 .then(response =>{
                     if(!response.ok){
@@ -122,23 +122,29 @@
         };
 
         function generateHtml(data){
-            let html = "";
-            let totalNumber = data.length;
-            data.forEach((clientObject,index) =>{
-                html += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>
-                            <a class="clientLink" data-client-id="${clientObject["AccountNumber"]}" style="cursor: pointer;" >${clientObject["fName"]} <span style="margin-left:3px"> ${clientObject["lName"]}</span> </a>
-                        </td>
-                        <td> ${clientObject["Phonenumber"]}</td>
-                        <td> ${clientObject["Gender"]}</td>
-                        <td> ${clientObject["BranchName"]}</td>
-                    </tr>
-                `
+            if(data){
+                let html = "";
+                let totalNumber = data.length;
+                data.forEach((clientObject,index) =>{
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>
+                                <a class="clientLink" data-client-id="${clientObject["AccountNumber"]}" style="cursor: pointer;" >${clientObject["FirstName"]} <span style="margin-left:3px"> ${clientObject["SirName"]}</span> </a>
+                            </td>
+                            <td> ${clientObject["PhoneNumber"]}</td>
+                            <td> ${clientObject["Gender"]}</td>
+                            <td> ${clientObject["branchDetails"]["Branchname"]}</td>
+                        </tr>
+                    `
 
-            })
-            return {"html":html, "NumberOfClients":totalNumber}
+                })
+                return {"html":html, "NumberOfClients":totalNumber}    
+            }
+            else{
+                return "<div>No client registered yet from this branch </div>"
+            }
+            
         };
 
         async function sendClientIdToserver(){
@@ -178,7 +184,7 @@
         }
 
         async function loadhtml() {
-            const data = await fetchClientsWithActivateLoans();
+            const data = await fetchClientsForAspecificbranch();
             const Clientdetails = await generateHtml(data);
             document.getElementById("tablebody").innerHTML = Clientdetails["html"];
             document.getElementById("numberofclient").innerHTML = Clientdetails["NumberOfClients"];

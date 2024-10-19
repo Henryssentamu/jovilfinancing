@@ -390,7 +390,6 @@ def allClientsForManager():
         requestType = request.args.get("type")
         if requestType == "allClients":
             data = bank.fetchAllClientAccountDetailsForSpecificBranchFormanager(branchId=branchId)
-            print(data)
             return jsonify(data)
     return render_template("allClientListForManager.html")
 

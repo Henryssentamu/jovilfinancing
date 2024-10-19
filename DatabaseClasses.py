@@ -1971,7 +1971,8 @@ class BankingDataBase(ConnectToMySql):
                         N.Location,
                         T.Photo ownerpic,
                         D.BranchId,
-                        D.OfficerId
+                        D.OfficerId,
+                        M.BranchName
                         
                     FROM
                         BankAccount AS B
@@ -1981,6 +1982,7 @@ class BankingDataBase(ConnectToMySql):
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
+                    JOIN NisaBranches.Branches AS M ON M.BranchId = D.BranchId
                     WHERE
                         D.BranchId = %s
                                       
@@ -2008,6 +2010,7 @@ class BankingDataBase(ConnectToMySql):
                                 "AccountOwnerPic":obj[15],
                                 "branchDetails":{
                                     "BranchId":obj[16],
+                                    "Branchname":obj[18],
                                     "officerId":obj[17]
                                 }
                             } for obj in data]
