@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Collection sheet</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        .table-wrapper{
+            height: 200px;
+            overflow: auto;
+
+        }
+
+        .table-fixed-header thead th{
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md nav-dark bg-dark text-white">
+        <div class="container">
+            <div class="nav-bland">
+                <a href="{{url_for('branch')}}" class="nav-link">Back</a>
+            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item">home</li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <div >statistics</div>
+                    </div>
+                    <div class="card-body">
+                        <div> No. Clients: <span id="numberOfClients"></span></div>
+                        <div>TotalExpectation: <span id="totalExpectation"></span> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <div class="card" style="height: auto;">
+                    <div class="card-header">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="client's name">
+                            <button class="btn btn-outline-secondary" type="button">search</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive-lg table-wrapper" >
+                            <table class="table table-fixed-header table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Name</th>
+                                        <th>Amount (Ugx)</th>
+                                        <th>Contact</th>
+                                        <th>Branch</th>
+                                    </tr>
+    
+                                </thead>
+                                <tbody id="collectionsheetbody">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        async function getcollectionSheetDetails(){
+            return await fetch("/collectionSheetOnmanagerpage?type=ForSpecificEmployee")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching collection sheet details")
+                    }
+                    return response.json()
+                    
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        }
+
+        function calaculateTotalExpectation(data){
+            let total = 0
+            data.forEach((obj) =>{
+                total += Number(obj["commitment"])
+            })
+            return total
+        }
+
+        function generatehtml(data){
+            let html = '';
+            data.forEach((obj,index) =>{
+                html += `
+                    <tr>
+                        <td>${index + 1 }</td>
+                        <td> ${obj["clientFName"]} <span> </span> ${obj["clientSName"]}</td>
+                        <td class="text-danger">${obj["commitment"]}</td>
+                        <td> ${obj["ClientPhonenumber"]}</td>
+                        <td> ${obj["Branchname"]}</td>
+                    </tr>
+                `
+            });
+            return html;
+
+        }
+
+        async function loadhtml() {
+            const data = await getcollectionSheetDetails();
+            const html = await generatehtml(data);
+            const totalExpectation = calaculateTotalExpectation(data);
+            document.querySelector("#collectionsheetbody").innerHTML = html;
+            document.querySelector("#numberOfClients").innerHTML = data.length;
+            document.querySelector("#totalExpectation").innerHTML = totalExpectation;
+            
+        }
+
+        loadhtml()
+        
+    </script>
+    
+</body>
+</html>

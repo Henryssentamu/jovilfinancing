@@ -394,6 +394,52 @@ def allClientsForManager():
     return render_template("allClientListForManager.html")
 
 
+@app.route("/recievablesCreditOnManagerspage", methods=["GET","POST"])
+def recievablesCreditOnManagerspage():
+    if request.method == "GET":
+        branchId = session.get("branchId")
+        bank = BankingDataBase()
+        requesttype = request.args.get("type")
+        if requesttype == "credit":
+            data = bank.fetchDebtedLoanAccountDetailForSpecificBranch(branchId=branchId)
+            print(data)
+            return jsonify(data)
+    return render_template("recievableCreditOnManagerspage.html")
+
+@app.route("/recievablesSavingsOnManagerspage", methods=["GET","POST"])
+def recievablesSavingsOnManagerspage():
+    if request.method == "GET":
+        branchId = session.get("branchId")
+        bank = BankingDataBase()
+        requesttype = request.args.get("type")
+        if requesttype == "savings":
+            data = bank.fetch_ClientsInvestmentDetailsForSpecficBranch(BranchId=branchId)
+            return jsonify(data)
+
+    return render_template("recievablesSavingsOnManagerspage.html")
+
+
+@app.route("/collectionSheetOnmanagerpage", methods =["GET"])
+def collectionSheetOnmanagerpage():
+    if request.method == "GET":
+        branchId = session.get("branchId")
+        Bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "ForSpecificEmployee":
+            collectionSheetDetails = Bank.fetchCollectionSheetDetailsForAspecificBranch(branchId=branchId)
+            return jsonify(collectionSheetDetails)
+        elif requestType == "portifolio":
+            portifolio = Bank.fetch_CurrentPortifolioForSpecificBranch(branchId=branchId)
+            return jsonify(portifolio)
+        elif requestType == "credit":
+            data = Bank.fetchDebtedLoanAccountDetailForSpecificBranch(branchId=branchId)
+            return jsonify(data)
+        if requestType== "savings":
+            data = Bank.fetch_ClientsInvestmentDetailsForSpecficBranch(BranchId=branchId)
+            return jsonify(data)
+    return render_template("collectionSheetOnmanagersPage.html")
+
+
 
 
 @app.route("/mergeBranches")

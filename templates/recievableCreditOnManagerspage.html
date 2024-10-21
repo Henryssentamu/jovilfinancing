@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Loan Recivables</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        .table-wrapper{
+            height: 200px;
+            overflow: auto;
+
+        }
+
+        .table-fixed-header thead th{
+            position: sticky;
+            top: 0;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md nav-dark bg-dark text-white">
+        <div class="container">
+            <div class="nav-bland">
+                <a href="{{url_for('branch')}}" class="nav-link">Back</a>
+            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item">home</li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <div >statistics</div>
+                    </div>
+                    <div class="card-body">
+                        <div> Number Of Clients Who have  paid: <span id="numberOfclients"></span></div>
+                        <div>Total Amount collected: <span style="color: green;" id="totalAmount"></span> </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col">
+                <div class="card" style="height: auto;">
+                    <div class="card-header">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="client's name">
+                            <button class="btn btn-outline-secondary" type="button">search</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive-lg table-wrapper" >
+                            <table class="table table-fixed-header table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Name</th>
+                                        <th>Branch</th>
+                                        <th>Amount (Ugx)</th>
+                                        
+                                    </tr>
+    
+                                </thead>
+                                <tbody id="table_body">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetchClientDebtedLoanAccountDetails() {
+            return fetch("/recievablesCreditOnManagerspage?type=credit")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching client debted loan details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+        function generatehtml(data) {
+            let html = "";
+            let numbers = 0;
+            let totalAmountpaid = 0;
+
+            if (data && data.length >0){
+                numbers = data.length
+                data.forEach((obj, index) =>{
+                    totalAmountpaid += Number(obj["AmountPaid"]);
+                    html += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${obj["fName"]} <span> </span> ${obj["lName"]} </td>
+                            <td> ${obj["Branchname"]}</td>
+                            <td style="color: green;"> ${obj["AmountPaid"]}</td>
+                                        
+                        </tr>    
+                    `
+
+                })
+
+            }else{
+                html += "<tr> <td> No one has made any payment yet </td> </tr>"
+            }
+
+            return {"numberOfpayment": numbers,"TotalAmountPaid":totalAmountpaid, "html":html}
+            
+            
+        }
+
+        async function loadHtml() {
+            const data  = await fetchClientDebtedLoanAccountDetails();
+            const details = generatehtml(data);
+            document.getElementById("table_body").innerHTML = details["html"];
+            document.getElementById("totalAmount").innerHTML = details["TotalAmountPaid"];
+            document.getElementById("numberOfclients").innerHTML = details["numberOfpayment"]
+        };
+        loadHtml()
+        
+    </script>
+
+    
+</body>
+</html>

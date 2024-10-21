@@ -59,28 +59,86 @@
     </nav>
 
     <div class="container-fluid " style="margin-top: 150px;">
-        <div class="row">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- portifolio -->
             <div class="col">
-                <div class="card stat-card ">
-                    <div class="card-tittle text-center">Performance</div>
-                    <div class="card-text text-center display-3">85%</div>
+                <div class="card stat-card shadow-sm" style="background-color: #dc3545; padding: 10px;">
+                    <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
+                        <div class="card-title">
+                            <h1>
+                                 Portfolio
+                            </h1>
+                        </div>
+                        <div class="card-text">
+                            <div class="row">
+                                <div class="col" >
+                                    <img src="../static/icons/briefcase-solid (1).svg" alt="Portfolio " width="46px" >
+                                    <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                                </div>
+                                <div id="portifolio" class="col" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;" >
+                                    0    
+                                </div>
+ 
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
+            </div> 
+            <!-- targets -->
             <div class="col">
-                <div class="card stat-card">
-                    <div class="card-tittle text-center">Targets</div>
-                    <div class="card-text text-center display-3">85%</div>
-                </div>
-            </div>
-
-            <div class="col">
-                <div class="card stat-card">
-                    <div class="card-tittle text-center">Collections</div>
-                    <div class="card-text text-center display-3">856666</div>
+                <div class="card stat-card shadow-sm" style="background-color: #d63384; padding: 1px;">
+                    <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
+                        <div class="card-title">
+                             <h1>
+                                 Collections
+                             </h1>
+                        </div>
+                        <div class="card-text" >
+                            <div class="row">
+                                <div class="col" style="position: relative;">
+                                    <img src="../static/icons/icons8-sales-96.png" alt="Portfolio " width="46px" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
+                                    <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                                </div>
+                                <div id="collections" class="col" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;" >
+                                    0     
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div  class="col credit " style="font-size:small;">savings:<span style="color: white;" id="credit">0</span>/= </div>
+                                <div  class=" col savings" style="font-size:small;">credit:<span style="color: white;" id="savings">0</span>/= </div>
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
+             <!-- collection -->
+            <div class="col  ">
+                <div class="card stat-card shadow-sm border-0 " style="background-color: #fd7e14; color: white; padding: 10px;">
+                    <div class="card-body d-flex  flex-column justify-content-center  align-items-center">
+                        <div class="card-title">
+                            <h1 style="color: black;">
+                                Expectation
+                            </h1>
+                        </div>
+                        <div class="card-text" >
+                            <div class="row">
+                                <div class="col" style="position: relative">
+                                    <img src="../static/icons/groupIcon.svg" alt="Exceptation icon" width="46" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
+                                    <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
+                                </div>
+                                <div class="col" id="Exceptation" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;">
+                                    0     
+                                </div>
+                                 
+                            </div>
+                             
+                        </div>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        
+        
 
         <div class="row mt-5">
             <div class="col">
@@ -107,19 +165,34 @@
             </div>
             <div class="col">
                 <div class="card ">
-                    <a href="#" class="btn btn-primary"> Acount Recivables</a>
+                    <a class="btn btn-primary" data-bs-target="#recievable_category" data-bs-toggle="modal"> Acount Recivables</a>
+                    <div class="modal" id="recievable_category">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <div class="modal-title">Close</div>
+                                    <button class="btn-close" data-bs-dismiss="modal" data-bs-target="#recievable_category"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <a href="{{url_for('recievablesSavingsOnManagerspage')}}" class="btn btn-primary">Savings</a>
+                                    <a href="{{url_for('recievablesCreditOnManagerspage')}}" class="btn btn-secondary">Credit</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
                 </div>
             </div>
             <div class="col">
                 <div class="card ">
-                    <a href="#" class="btn btn-primary"> Collection Sheet </a>
+                    <a href="{{url_for('collectionSheetOnmanagerpage')}}" class="btn btn-primary"> Collection Sheet </a>
                 </div>
             </div>
-            <div class="col">
+            <!-- <div class="col">
                 <div class="card ">
                     <a href="#" class="btn btn-primary"> Overdue & Penalties </a>
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <div class="row  mt-4">
