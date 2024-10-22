@@ -87,7 +87,7 @@
 
     <script>
         async function getcollectionSheetDetails(){
-            return await fetch("/collectionSheetOnmanagerpage?type=ForSpecificEmployee")
+            return await fetch("/collectionSheetOnmanagerpage?type=ForSpecificBranch")
                 .then(response =>{
                     if(!response.ok){
                         throw new Error("server error while fetching collection sheet details")
@@ -126,7 +126,8 @@
             });
             return html;
 
-        }
+        };
+
 
         async function loadhtml() {
             const data = await getcollectionSheetDetails();
@@ -139,7 +140,7 @@
         }
 
         loadhtml()
-        
+    
     </script>
     
 </body>

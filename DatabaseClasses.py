@@ -2915,9 +2915,15 @@ class BankingDataBase(ConnectToMySql):
                                         
                                         ),0)
 
-                """,(self.employeeId,self.employeeId))
+                """,(self.branchId,self.branchId))
                 data = self.cursor.fetchone()
-                return {"totalPortifoli":data[0]}
+                print(data)
+                if data[0] == None:
+                    return {"totalPortifoli":0}
+                    
+                else:
+                    return {"totalPortifoli":data[0]}
+                    
             else:
                 raise Exception("cursor not initialised in CurrentPortifolioForSpecificBranch")
         except Exception as e:

@@ -352,10 +352,27 @@ def createDeptments():
 
 @app.route("/branch", methods=["GET","POST"])
 def branch():
-    if request.method == "POST":
+    if request.method == "GET":
+        branchId = session.get("branchId")
+        Bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "portifolio":
+            portifolio = Bank.fetch_CurrentPortifolioForSpecificBranch(branchId=branchId)
+            return jsonify(portifolio)
+        elif requestType == "credit":
+            data = Bank.fetchDebtedLoanAccountDetailForSpecificBranch(branchId=branchId)
+            return jsonify(data)
+        elif requestType== "savings":
+            data = Bank.fetch_ClientsInvestmentDetailsForSpecficBranch(BranchId=branchId)
+            return jsonify(data)
+        elif requestType == "ForSpecificBranch":
+            collectionSheetDetails = Bank.fetchCollectionSheetDetailsForAspecificBranch(branchId=branchId)
+            print(collectionSheetDetails)
+            return jsonify(collectionSheetDetails)
+    elif request.method == "POST":
         session["branchId"] = request.json.get("BranchId")
         return jsonify({"status":"branchId recieved"})
-    
+
     return render_template("Abranch.html")
 
 @app.route("/activateClientsOnManagersPage", methods=["GET","POST"])
@@ -402,7 +419,6 @@ def recievablesCreditOnManagerspage():
         requesttype = request.args.get("type")
         if requesttype == "credit":
             data = bank.fetchDebtedLoanAccountDetailForSpecificBranch(branchId=branchId)
-            print(data)
             return jsonify(data)
     return render_template("recievableCreditOnManagerspage.html")
 
@@ -419,24 +435,15 @@ def recievablesSavingsOnManagerspage():
     return render_template("recievablesSavingsOnManagerspage.html")
 
 
-@app.route("/collectionSheetOnmanagerpage", methods =["GET"])
+@app.route("/collectionSheetOnmanagerpage", methods =["GET","POST"])
 def collectionSheetOnmanagerpage():
     if request.method == "GET":
         branchId = session.get("branchId")
         Bank = BankingDataBase()
         requestType = request.args.get("type")
-        if requestType == "ForSpecificEmployee":
+        if requestType == "ForSpecificBranch":
             collectionSheetDetails = Bank.fetchCollectionSheetDetailsForAspecificBranch(branchId=branchId)
             return jsonify(collectionSheetDetails)
-        elif requestType == "portifolio":
-            portifolio = Bank.fetch_CurrentPortifolioForSpecificBranch(branchId=branchId)
-            return jsonify(portifolio)
-        elif requestType == "credit":
-            data = Bank.fetchDebtedLoanAccountDetailForSpecificBranch(branchId=branchId)
-            return jsonify(data)
-        if requestType== "savings":
-            data = Bank.fetch_ClientsInvestmentDetailsForSpecficBranch(BranchId=branchId)
-            return jsonify(data)
     return render_template("collectionSheetOnmanagersPage.html")
 
 

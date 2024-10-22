@@ -28,6 +28,44 @@
         .table-hover tbody tr:hover {
             background-color: #e9ecef;
         }
+
+        /* make list scrollable */
+        .scrollable {
+            max-height: 200px;  /* Set the maximum height of the scrollable area */
+            overflow-y: auto;   /* Enables vertical scrolling */
+            overflow-x: auto;   /* Enables horizontal scrolling */
+            white-space: nowrap; /* Prevents text from wrapping and forces horizontal scrolling */
+        }
+
+
+        /* General Loader Styles */
+        .loader-container {
+            display: none; /* Hide loader initially */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Above all content */
+        }
+
+        /* Spinner Loader */
+        .spinner-loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -38,7 +76,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto text-white ">
                     <li class="nav-item m-2">
                         <div class="text-display-2  "> Portfolio</div>
@@ -54,11 +92,15 @@
                         <div class="fs-4 text-info">3003837474440</div>
                     </li>
                 </ul>
-            </div>
+            </div> -->
         </div>
     </nav>
 
     <div class="container-fluid " style="margin-top: 150px;">
+        <!-- Loader Container -->
+        <div class="loader-container" id="loader">
+            <div class="spinner-loader"></div>
+        </div>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <!-- portifolio -->
             <div class="col">
@@ -104,8 +146,8 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div  class="col credit " style="font-size:small;">savings:<span style="color: white;" id="credit">0</span>/= </div>
-                                <div  class=" col savings" style="font-size:small;">credit:<span style="color: white;" id="savings">0</span>/= </div>
+                                <div  class="col credit " style="font-size:small;">savings:<span style="color: white;" id="total_credit">0</span>/= </div>
+                                <div  class=" col savings" style="font-size:small;">credit:<span style="color: white;" id="total_savings">0</span>/= </div>
                             </div>
                     </div>
                 </div>
@@ -126,7 +168,7 @@
                                     <img src="../static/icons/groupIcon.svg" alt="Exceptation icon" width="46" style="position: absolute; left: -39px; right: 0px; top: 0px; bottom: 10px; padding-right: 5px;">
                                     <div class="badge" style="position: absolute; left: 0px; right: 10px; bottom: 6px; font-size: medium;">Ugx:</div>
                                 </div>
-                                <div class="col" id="Exceptation" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;">
+                                <div class="col" id="Exceptation_value" style="font-size: 32px; font-weight: bolder; margin-left: 10px; color: white;">
                                     0     
                                 </div>
                                  
@@ -196,41 +238,29 @@
         </div>
 
         <div class="row  mt-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card p-3">
-                    <h5 class="card-title">Clients to Pay</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client A
-                            <span class="badge bg-primary">$500</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client B
-                            <span class="badge bg-primary">$300</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client C
-                            <span class="badge bg-primary">$700</span>
-                        </li>
+                    <h5 class="card-title">Exceptation</h5>
+                    <ul class="list-group list-group-flush scrollable" id="Exceptation_details">
+                       
                     </ul>
                 </div>
             </div>
-            <div class="col-md-6">
+
+            <div class="col-md-4">
                 <div class="card p-3">
-                    <h5 class="card-title">Clients Paid</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client X
-                            <span class="badge bg-success">Paid</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client Y
-                            <span class="badge bg-success">Paid</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Client Z
-                            <span class="badge bg-success">Paid</span>
-                        </li>
+                    <h5 class="card-title">Credit Payments</h5>
+                    <ul class="list-group list-group-flush scrollable" id="credit">
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card p-3">
+                    <h5 class="card-title"> Investments </h5>
+                    <ul class="list-group list-group-flush scrollable" id="investment">
+                        
                     </ul>
                 </div>
             </div>
@@ -281,6 +311,174 @@
     </div> -->
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function getOfficerPortifolioDetails(){
+            return await fetch("/branch?type=portifolio")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching portifolio details")
+                    }
+                    return response.json()
+                    
+                })
+                .then(data =>{
+                    if(data != 'None'){
+                        return data
+                    }
+                    else{
+                        return {"totalPortifoli":0}
+                    }
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        };
+
+        async function fetchInvestmentDetails() {
+            return await fetch("/branch?type=savings")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error  while fetching investment details for a specfic employee")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        async function fetchClientDebtedLoanAccountDetails() {
+            return fetch("/branch?type=credit")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching client debted loan details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        async function collectionSheetDetails() {
+            return fetch("/branch?type=ForSpecificBranch")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching client debted loan details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        function generateCreditPaymentHtml(data){
+            let html = "";
+            let total = 0;
+            if (data){
+                data.forEach((obj) =>{
+                    total += obj["AmountPaid"]
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${obj["fName"]}
+                            <span class="badge bg-primary">Paid</span>
+                        </li>
+                    `
+                })
+                return {"total":total, "html": html}
+
+            }else{
+                return {"total":total, "html": "<li> No One has paid yet </li>"}
+            }
+            
+
+
+        };
+
+        function generateinvestmenthtml(data){
+            let html = "";
+            let total = 0;
+            if(data){
+                data.forEach((obj) =>{
+                    total += obj["Amount"];
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${obj["fname"]}    
+                            <span class="badge bg-success">invested </span>
+                        </li>   
+                    ` 
+
+                });
+                return {"total":total, "html": html}
+
+            }else{
+                return {"total":total, "html": "<li> No One has invested yet </li>"}
+            }
+
+        };
+        function generateCollectionSheetAndExpectationHtml(data){
+            let html = "";
+            let total = 0;
+            if(data){
+                data.forEach((obj) =>{
+                    total += Number(obj["commitment"]);
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${obj["clientFName"]}<span>${obj["clientSName"]}</span>
+                            <span class="badge bg-primary">${obj["commitment"]}</span>
+                        </li>   
+                    ` 
+
+                });
+                return {"total":total, "html": html};
+
+            }else{
+                return {"total":total, "html": "<li> No loan issued out  yet </li>"}
+            }
+
+        }
+
+
+        async function loadHtml(){
+            // data
+            const portifolio =   await getOfficerPortifolioDetails();
+            const credit =  await  fetchClientDebtedLoanAccountDetails();
+            const collectionSheet = await collectionSheetDetails();
+            const savings = await fetchInvestmentDetails();
+
+            // htmls 
+            const chtml = await generateCreditPaymentHtml(credit);
+            const ihtml = await generateinvestmenthtml(savings);
+            const ehtml = await generateCollectionSheetAndExpectationHtml(collectionSheet)
+            const total_collections = ihtml["total"] + chtml["total"]
+            
+    
+            document.getElementById("portifolio").innerHTML = portifolio["totalPortifoli"]
+            document.getElementById("investment").innerHTML = ihtml["html"];
+            document.getElementById("credit").innerHTML = chtml["html"];
+            document.getElementById("collections").innerHTML = total_collections;
+            document.getElementById("total_savings").innerHTML = ihtml["total"] ;
+            document.getElementById("total_credit").innerHTML = chtml["total"];
+            document.getElementById("Exceptation_details").innerHTML = ehtml["html"];
+            document.getElementById("Exceptation_value").innerHTML  = ehtml["total"]
+        }
+
+        loadHtml();
+        
+    </script>
 
 </body>
 </html>
