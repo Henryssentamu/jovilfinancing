@@ -57,7 +57,7 @@
                         Credit Collections
                     </div>
                     <div class="card-body">
-                        <div>33444444444444444444442</div>
+                        <div id="total_collections"></div>
                     </div>
                     <div class="card-footer">
                         <a href="{{url_for('creditCollection')}}" class="btn btn-outline-dark">Details </a>
@@ -68,10 +68,10 @@
             <div class="col">
                 <div class="card">
                     <div class="card-header">
-                        Credit Balances
+                        Portifolio
                     </div>
                     <div class="card-body">
-                        <div>33444442</div>
+                        <div id="portifolio">   </div>
                     </div>
                     <div class="card-footer">
                         <a href="{{url_for('creditbalance')}}" class="btn btn-outline-dark">Details </a>
@@ -115,6 +115,77 @@
 
     <!-- Bootstrap JS and dependencies -->
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetch_portifolio() {
+            return fetch("/credit?type=portifolio")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching portifolio details from credit route")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        async function fetch_collections() {
+            return fetch("/credit?type=collections")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching collections details from credit route")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        function generateCollectionHtml(data){
+            let html = "";
+            let total = 0;
+            if (data){
+                data.forEach((obj) =>{
+                    total += obj["AmountPaid"]
+                    html += `
+                    <tr>
+                        <td>${obj["date"]}</td>
+                        <td>${obj["fName"]} <span></span>  ${obj['lName']}</td>
+                        <td>${obj["Branchname"]}</td>
+                        <td>${obj["AmountPaid"]}</td>
+                    </tr>
+                `
+                })
+                return {"html":html, "total":total}
+            }else{
+                return {"total":0,"html": "no payment yet"}
+            }
+
+        }
+
+        async function loadhtml() {
+            const portifolio = await fetch_portifolio();
+            const collections = await fetch_collections();
+
+            // html
+            const collection_details = await generateCollectionHtml(collections)
+            document.getElementById("portifolio").innerHTML =  portifolio["totalPortifoli"];
+            document.getElementById("total_collections").innerHTML = collection_details["total"];
+
+        };
+
+        loadhtml();
+        
+    </script>
     
 </body>
 </html>

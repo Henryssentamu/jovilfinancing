@@ -367,8 +367,11 @@ def branch():
             return jsonify(data)
         elif requestType == "ForSpecificBranch":
             collectionSheetDetails = Bank.fetchCollectionSheetDetailsForAspecificBranch(branchId=branchId)
-            print(collectionSheetDetails)
             return jsonify(collectionSheetDetails)
+        elif requestType == "officers":
+            employee = Bank.fetch_branchOfficerdetails(branchId=branchId)
+            return jsonify(employee)
+            
     elif request.method == "POST":
         session["branchId"] = request.json.get("BranchId")
         return jsonify({"status":"branchId recieved"})
@@ -452,8 +455,19 @@ def collectionSheetOnmanagerpage():
 @app.route("/mergeBranches")
 def mergeBranches():
     return render_template("mergebranches.html")
-@app.route("/credit")
+@app.route("/credit", methods=["GET","POST"])
 def credit():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "portifolio":
+            portifolio = bank.fetch_GeneralCurrentPortifolio()
+            return jsonify(portifolio)
+        elif requestType == "collections":
+            collections = bank.fetchGeneralDebtedLoanAccountDetail()
+            print(collections)
+            return jsonify(collections)
+
     return render_template("credit.html")
 
 @app.route("/creditCollection")
@@ -556,6 +570,10 @@ def employeeProfile():
             authent_obj = AuthenticationDetails()
             authent_obj.update_EmployeePassword(employeeId=Eid, password=pwd)
             return jsonify({"message":"successfuly"})
+        elif requestType == "employeeIdFromManagersPage":
+            eid = request.json.get("data")
+            session["employeeDetailsToLoad"] = eid
+            return jsonify({"status":"idRecieved"})
     elif request.method == "GET":
         requestType = request.args.get("type")
         if requestType == "employeeDetails":

@@ -277,19 +277,7 @@
                                 <th>Contacts</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <a href="{{url_for('crediofficerDashboard')}}" class="link">Peter mowonge</a>
-                                </td>
-                                <td>0756333333</td>
-                            </tr>
-                            <tr>
-                                <td> 
-                                    <a href="{{url_for('crediofficerDashboard')}}" class="link">Brain niragire</a>
-                                </td>
-                                <td> 07886666666</td>
-                            </tr>
+                        <tbody id="employeeDetails">
                             
                             
                         </tbody>
@@ -385,6 +373,24 @@
             
         };
 
+        async function branchOfficersDetails() {
+            return fetch("/branch?type=officers")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("server error while fetching client debted loan details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+        
+
         function generateCreditPaymentHtml(data){
             let html = "";
             let total = 0;
@@ -449,6 +455,57 @@
                 return {"total":total, "html": "<li> No loan issued out  yet </li>"}
             }
 
+        };
+
+        function sendEmployeeId(id){
+            const Element = document.getElementById(`${id}`);
+            Element.addEventListener("click",(event) =>{
+                event.preventDefault();
+                const Eid = Element.getAttribute("data-employee-id");
+                fetch("/employeeProfile",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body:JSON.stringify({"type":"employeeIdFromManagersPage","data":Eid})
+                    
+
+                })
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while sending employee id from managers page")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    if (data["status"] === "idRecieved"){
+                        window.location.href = "/employeeProfile"
+                    }
+                })
+                
+                
+
+            })
+
+        }
+
+        function generateOfficersDetails(data){
+            let html = "";
+            if(data){
+                data.forEach((obj, index) =>{
+                    html += `
+                        <tr>
+                            <td>
+                                <div  id=${index} data-employee-id=${obj["employeeId"]} class="link btn btn-outline-primary text-black" onclick="sendEmployeeId('${index}')"> ${obj["Fname"]} <span> </span> ${obj["Lname"]} </div>
+                            </td>
+                            <td>0756333333</td>
+                        </tr>
+                    `
+                })
+                return html;
+            }
+            return "<div> No Employee attached to this branch yet </div>"
+
         }
 
 
@@ -458,11 +515,13 @@
             const credit =  await  fetchClientDebtedLoanAccountDetails();
             const collectionSheet = await collectionSheetDetails();
             const savings = await fetchInvestmentDetails();
+            const employeebranchDetails = await branchOfficersDetails();
 
             // htmls 
             const chtml = await generateCreditPaymentHtml(credit);
             const ihtml = await generateinvestmenthtml(savings);
-            const ehtml = await generateCollectionSheetAndExpectationHtml(collectionSheet)
+            const ehtml = await generateCollectionSheetAndExpectationHtml(collectionSheet);
+            const bhtml = await generateOfficersDetails(employeebranchDetails)
             const total_collections = ihtml["total"] + chtml["total"]
             
     
@@ -473,7 +532,8 @@
             document.getElementById("total_savings").innerHTML = ihtml["total"] ;
             document.getElementById("total_credit").innerHTML = chtml["total"];
             document.getElementById("Exceptation_details").innerHTML = ehtml["html"];
-            document.getElementById("Exceptation_value").innerHTML  = ehtml["total"]
+            document.getElementById("Exceptation_value").innerHTML  = ehtml["total"];
+            document.getElementById("employeeDetails").innerHTML = bhtml;
         }
 
         loadHtml();
