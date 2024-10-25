@@ -465,17 +465,30 @@ def credit():
             return jsonify(portifolio)
         elif requestType == "collections":
             collections = bank.fetchGeneralDebtedLoanAccountDetail()
-            print(collections)
+            
             return jsonify(collections)
 
     return render_template("credit.html")
 
-@app.route("/creditCollection")
+@app.route("/creditCollection",methods=["POST","GET"])
 def creditCollection():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "collections":
+            collections = bank.fetchGeneralDebtedLoanAccountDetail()
+            return jsonify(collections)
     return render_template("creditCollections.html")
 
-@app.route("/creditbalance")
+@app.route("/creditbalance", methods=["GET","POST"])
 def creditbalance():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "portifolioDetails":
+            data = bank.fetch_GeneralCurrentPortifolioDetails()
+            print(data)
+            return jsonify(data)
     return render_template("creditBalances.html")
 
 @app.route("/collectionCreditOverdue")
@@ -689,6 +702,7 @@ def crediofficerDashboard():
             return jsonify(data)
         if requestType== "savings":
             data = Bank.fetch_ClientsInvestmentDetailsForSpecficEmployee(EmployeeId=officerId)
+            print(data)
             
             return jsonify(data)
         

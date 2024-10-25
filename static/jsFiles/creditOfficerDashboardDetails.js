@@ -211,12 +211,48 @@ function calaculateTotalExpectation(data){
     })
     return total
 };
+
+
+function calaculateTotalCredit(data){
+    let total = 0;
+    if(data){
+        data.forEach((obj)=>{
+            total += obj["AmountPaid"]
+        })
+        return total;
+    }
+    else{
+        return total;
+    }
+};
+
+function calaculateTotalSavings(data){
+    let total = 0;
+    if(data){
+        data.forEach((obj)=>{
+            total += obj["Amount"]
+        })
+        return total;
+    }
+    else{
+        return total;
+    }
+};
+
+
 async function loadExceptation() {
     const data = await getcollectionSheetDetails();
     const portifolio = await getOfficerPortifolioDetails();
-    const credit =  await fetchClientDebtedLoanAccountDetails() ;
-    const savings = await fetchInvestmentDetails();
+    const creditDetails =  await fetchClientDebtedLoanAccountDetails() ;
+    const savingsDetails = await fetchInvestmentDetails();
     const exceptation =  calaculateTotalExpectation(data);
+
+    // calculations
+    const credit = calaculateTotalCredit(creditDetails);
+    const savings = calaculateTotalSavings(savingsDetails);
+
+
+
     const totalCollections = Number(savings) + Number(credit)
     
     

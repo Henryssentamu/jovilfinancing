@@ -31,32 +31,13 @@
                     <thead class="thead-light">
                         <tr>
                             <th>Collection Date</th>
-                            <th>Account Number</th>
-                            <th>Customer Name</th>
+                            <th>Client</th>
                             <th>Branch</th>
                             <th>Amount Paid</th>
-                            <th>Balance</th>
-                            
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>$5000</td>
-                            <td> 455555</td>
-                            
-                        </tr>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>123456789</td>
-                            <td>Jame Doe</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>$5000</td>
-                            <td> 455555</td>
-                        </tr>
+                    <tbody id="total_collections">
+                        
                     </tbody>
                 </table>
             </div>
@@ -64,6 +45,53 @@
     </div>
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetch_collections() {
+            return fetch("/creditCollection?type=collections")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching collections details from credit route")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+        function generateCollectionHtml(data){
+            let html = "";
+            if (data){
+                data.forEach((obj) =>{
+                    html += `
+                    <tr>
+                        <td>${obj["date"]}</td>
+                        <td>${obj["fName"]} <span></span>  ${obj['lName']}</td>
+                        <td>${obj["Branchname"]}</td>
+                        <td>${obj["AmountPaid"]}</td>
+                    </tr>
+                `
+                })
+                return {"html":html}
+            }else{
+                return {"html": "no payment yet"}
+            }
+
+        };
+        async function loadhtml() {
+            const collections = await fetch_collections();
+            // html
+            const collection_details = await generateCollectionHtml(collections)
+            document.getElementById("total_collections").innerHTML = collection_details["html"];
+
+        };
+
+        loadhtml();
+    </script>
     
 </body>
 </html>

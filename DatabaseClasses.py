@@ -4,6 +4,7 @@ import mysql.connector as sql
 
 
 
+
 class ConnectToMySql:
     def __init__(self) -> None:
         self.connection = None
@@ -3038,65 +3039,92 @@ class BankingDataBase(ConnectToMySql):
 
 
 
-    def fetch_GeneralCurrentPortifolio(self):
+    def fetch_GeneralCurrentPortifolioDetails(self):
+        datedetails = datetime.now()
+        currentDate = datedetails.strftime("%Y,%m,%d")
         try:
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
                     SELECT
+                        A.LoanId,
+                        B.Portifolio,
+                        C.ClientID,
+                        C.BranchId,
+                        D.FirstName,
+                        D.SirName,
+                        E.PhoneNumber,
+                        F.BranchName
+                    FROM
+                        registeredLoans AS A
+                    JOIN
+                        (
+                            SELECT
+                                LoanId,
+                                ClientID,
+                                BranchId
+                            FROM
+                                LoanDetails              
+                        )AS C ON C.LoanId = A.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                DATE(Date),
+                                LoanId,
+                                Portifolio
+                            FROM
+                                LoanPaymentStatistics
+                            WHERE
+                                DATE(Date) = %s
+                             
+                        ) AS B ON B.LoanId = A.LoanId
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                FirstName,
+                                SirName
+                            FROM
+                                AccountsVault.BankAccount               
+                        ) AS D ON D.AccountNumber = C.ClientID
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                PhoneNumber
+                            FROM
+                                AccountsVault.ContactDetails               
+                        ) AS E ON E.AccountNumber = C.ClientID
+                    JOIN
+                        (
+                            SELECT
+                                BranchId,
+                                BranchName
+                            FROM
+                                NisaBranches.Branches         
+                        )AS F ON F.BranchId = C.BranchId
                     
-                        (SELECT   
-                            SUM(A.Portifolio) AS portifolio
-                        FROM
-                            LoanRepaymentScheduleDetails AS A
-                        JOIN
-                            (
-                                SELECT
-                                    LoanId
-                                FROM
-                                    registeredLoans
-                                WHERE
-                                    ActiveStatus = "unfinished"        
-                            ) AS B ON B.LoanId = A.LoanId
-                        WHERE
-                            A.LoanId IN (
-                                        SELECT
-                                            LoanId
-                                        FROM
-                                            LoanDetails
-                                        )  ) - COALESCE((
-                                                SELECT
-                                                    sum(C.Paid)
-                                                FROM
-                                                    LoanPaymentStatistics AS C
-                                                JOIN
-                                                    (
-                                                        SELECT
-                                                            LoanId
-                                                        FROM
-                                                            LoanDetails
-                                                    ) AS E ON E.LoanId = C.LoanId
-                                                JOIN
-                                                    (
-                                                        SELECT
-                                                            LoanId
-                                                        FROM
-                                                            registeredLoans
-                                                        WHERE
-                                                            ActiveStatus = "unfinished"
+                    WHERE
+                        A.ActiveStatus = "unfinished"
+                    ORDER BY C.BranchId
+                """,(currentDate,))
+                data = self.cursor.fetchall()
+                return [{
+                    "loanId":obj[0],
+                    "portifolio":float(obj[1]),
+                    "accountNumber":obj[2],
+                    "branchId":obj[3],
+                    "FirstName":obj[4],
+                    "lastname":obj[5],
+                    "phoneNumber":obj[6],
+                    "BranchName":obj[7]
 
-                                                    ) AS D ON D.LoanId =  C.LoanId
-                                        
-                                        ),0)
-
-                """,)
-                data = self.cursor.fetchone()
-                return {"totalPortifoli":data[0]}
+                } for obj in data]
             else:
-                raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
+                raise Exception("cursor not initialised in fetch general portifolio details")
         except Exception as e:
-            raise Exception(f"error while fetching LoanPaymentStatistics:{e}")
+            raise Exception(f"error while fetching general portifolio details:{e}")
         
 
     def fetch_GeneralCurrentPrinciple(self):

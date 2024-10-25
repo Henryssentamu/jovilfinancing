@@ -151,23 +151,14 @@
         };
 
         function generateCollectionHtml(data){
-            let html = "";
             let total = 0;
             if (data){
                 data.forEach((obj) =>{
-                    total += obj["AmountPaid"]
-                    html += `
-                    <tr>
-                        <td>${obj["date"]}</td>
-                        <td>${obj["fName"]} <span></span>  ${obj['lName']}</td>
-                        <td>${obj["Branchname"]}</td>
-                        <td>${obj["AmountPaid"]}</td>
-                    </tr>
-                `
+                    total += obj["AmountPaid"];
                 })
-                return {"html":html, "total":total}
+                return {"total":total}
             }else{
-                return {"total":0,"html": "no payment yet"}
+                return {"total":0}
             }
 
         }

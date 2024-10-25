@@ -30,33 +30,16 @@
                 <table class="table table-bordered">
                     <thead class="thead-light">
                         <tr>
-                            <th> Date</th>
                             <th>Account Number</th>
                             <th>Customer Name</th>
                             <th>Branch</th>
-                            <th>Un Paid</th>
+                            <th>Phone Number</th>
                             <th>Balance</th>
                             
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>$5000</td>
-                            <td> 455555</td>
-                            
-                        </tr>
-                        <tr>
-                            <td>2024-07-20</td>
-                            <td>123456789</td>
-                            <td>Jame Doe</td>
-                            <td>Wandegeya kalarwe</td>
-                            <td>$5000</td>
-                            <td> 455555</td>
-                        </tr>
+                    <tbody id="p_content">
+                        
                     </tbody>
                 </table>
             </div>
@@ -65,6 +48,52 @@
     </div>
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetch_collections() {
+            return fetch("/creditbalance?type=portifolioDetails")
+                    .then(response =>{
+                        if(!response.ok){
+                            throw new Error("error while fetching portifolio details from credit route")
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        return data
+                    })
+                    .catch(error =>{
+                        console.log(error)
+                    })
+        };
+        function generateHtml(data){
+            let html = "";
+            if(data){
+                data.forEach((obj) =>{
+                    html += `
+                        <tr>
+                            <td>${obj["accountNumber"]}</td>
+                            <td> ${obj["lastname"]} <span> </span> ${obj["FirstName"]}</td>
+                            <td> ${ obj["BranchName"]}</td>
+                            <td>${obj["phoneNumber"]}</td>
+                            <td> ${obj["portifolio"]} </td>
+                            
+                        </tr>   
+                    `
+                })
+
+                return html
+            }
+            return "current portifolio is zero"
+        };
+
+        async function loadhtml() {
+            const data = await fetch_collections();
+            const html =  await generateHtml(data);
+            document.getElementById("p_content").innerHTML = html;
+            
+        };
+        loadhtml()
+        
+    </script>
     
 </body>
 </html>
