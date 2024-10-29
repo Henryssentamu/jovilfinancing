@@ -34,24 +34,10 @@
                             <th>Customer Name</th>
                             <th>Branch</th>
                             <th>Deposited (UGX)</th>
-                            <th>On Account (UGX)</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>123456789</td>
-                            <td>John Doe</td>
-                            <td>Wandegeya kalerwe</td>
-                            <td>15,000</td>
-                            <td>300000</td>
-                        </tr>
-                        <tr>
-                            <td>987654321</td>
-                            <td>Jane Smith</td>
-                            <td>Kampala Natete</td>
-                            <td>$25,000</td>
-                            <td>400000</td>
-                        </tr>
+                    <tbody id="content_body">
+                        
                     </tbody>
                 </table>
             </div>
@@ -59,6 +45,51 @@
     </div>
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetchInvestmentDetails() {
+            return await fetch("/savingCollections?type=details")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching current investment details")
+                    }
+                    return response.json()
+                })
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        };
+
+        function generatehtml(data){
+            let html = "";
+            if(data){
+                data.forEach((obj) =>{
+                    html += `
+                        <tr>
+                            <td>${obj["AccountNumber"]}</td>
+                            <td>${obj["fname"]} <span> </span> ${obj["lName"]}</td>
+                            <td>${obj["BranchName"]}</td>
+                            <td>${obj["Amount"]}</td>
+                        </tr>
+                    `
+                })
+                return html
+            }else{
+                return "no one has saved yet"
+            }
+        }
+
+        async function loadhtml() {
+            const data = await fetchInvestmentDetails();
+            const html = await generatehtml(data);
+            document.getElementById("content_body").innerHTML = html;
+
+            
+        };
+        loadhtml();
+    </script>
     
 </body>
 </html>

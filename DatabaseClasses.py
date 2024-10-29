@@ -2607,6 +2607,281 @@ class BankingDataBase(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific  branch:{e}")
 
+    def fetch_GeneralCurrent_ClientsInvestmentDetails(self):
+        """
+            This method fetches recieved  general investment details
+            _Arg:none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        DATE(A.Date),
+                        A.ClientId,
+                        C.FirstName,
+                        C.SirName,
+                        A.Amount,
+                        B.BranchId,
+                        M.BranchName
+                    FROM
+                        ClientsInvestmentPaymentDetails AS A
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                FirstName,
+                                SirName
+                            FROM
+                                AccountsVault.BankAccount                   
+                        ) AS C ON C.AccountNumber = A.ClientId
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                BranchId
+                            FROM
+                                AccountsVault.branchDetails
+                             
+                        ) AS B ON B.AccountNumber = A.ClientId
+                    JOIN
+                        (
+                            SELECT
+                                BranchId,
+                                BranchName
+                            FROM
+                                NisaBranches.Branches             
+                        ) AS M ON M.BranchId = B.BranchId
+                    WHERE
+                        DATE(A.Date) = %s
+                    ORDER BY B.BranchId 
+                                  
+                """,(current_date,))
+                data = self.cursor.fetchall()
+                if data:
+                    return [{"date": str(obj[0]), 
+                             "AccountNumber":obj[1], 
+                             "fname":obj[2], 
+                             "lName":obj[3], 
+                             "Amount": float(obj[4]),
+                             "BranchId":obj[5],
+                             "BranchName":obj[6]
+                             } for obj in data]
+                else:
+                    return 0
+            else:
+                raise Exception("cursor not initialised while fetching client investment details for a specific branch")
+        except Exception as e:
+            raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific  branch:{e}")
+
+
+
+    def fetch_GeneralCurrentClientsInvestmentTotal(self):
+        """
+            This method fetches   general  total investment
+            _Arg:none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(Amount) AS TotalSavings
+                    FROM
+                        (
+                            SELECT
+                                DATE(A.Date),
+                                A.ClientId,
+                                C.FirstName,
+                                C.SirName,
+                                A.Amount,
+                                B.BranchId,
+                                M.BranchName
+                            FROM
+                                ClientsInvestmentPaymentDetails AS A
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        FirstName,
+                                        SirName
+                                    FROM
+                                        AccountsVault.BankAccount                   
+                                ) AS C ON C.AccountNumber = A.ClientId
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        BranchId
+                                    FROM
+                                        AccountsVault.branchDetails
+                                    
+                                ) AS B ON B.AccountNumber = A.ClientId
+                            JOIN
+                                (
+                                    SELECT
+                                        BranchId,
+                                        BranchName
+                                    FROM
+                                        NisaBranches.Branches             
+                                ) AS M ON M.BranchId = B.BranchId
+                            WHERE
+                                DATE(A.Date) = %s           
+                        ) AS subquery;
+                    
+                                  
+                """,(current_date,))
+                data = self.cursor.fetchone()
+                
+                if data[0] != None:
+                    return {"total":float(data[0])}
+                else:
+                    return {"total":0}
+            else:
+                raise Exception("cursor not initialised while fetching client total investment ")
+        except Exception as e:
+            raise Exception(f"error while fetching from  total ClientsInvestmentPaymentDetails :{e}")
+
+
+    def fetch_GeneralClientsInvestmentTotal(self):
+        """
+            This method fetches   general  total investment
+            _Arg:none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(Amount) AS TotalSavings
+                    FROM
+                        (
+                            SELECT
+                                A.ClientId,
+                                C.FirstName,
+                                C.SirName,
+                                A.Amount,
+                                B.BranchId,
+                                M.BranchName
+                            FROM
+                                ClientsInvestmentPaymentDetails AS A
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        FirstName,
+                                        SirName
+                                    FROM
+                                        AccountsVault.BankAccount                   
+                                ) AS C ON C.AccountNumber = A.ClientId
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        BranchId
+                                    FROM
+                                        AccountsVault.branchDetails
+                                    
+                                ) AS B ON B.AccountNumber = A.ClientId
+                            JOIN
+                                (
+                                    SELECT
+                                        BranchId,
+                                        BranchName
+                                    FROM
+                                        NisaBranches.Branches             
+                                ) AS M ON M.BranchId = B.BranchId          
+                        ) AS subquery;
+                    
+                                  
+                """)
+                data = self.cursor.fetchone()
+                
+                if data[0] != None:
+                    return {"total":float(data[0])}
+                else:
+                    return {"total":0}
+            else:
+                raise Exception("cursor not initialised while fetching client total investment ")
+        except Exception as e:
+            raise Exception(f"error while fetching from  total ClientsInvestmentPaymentDetails :{e}")
+
+    def fetch_GeneralClientsInvestmentDetails(self):
+        """
+            This method fetches recieved  general investment details
+            _Arg:none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                current_date = datetime.now()
+                current_date = current_date.strftime("%Y-%m-%d")
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        DATE(A.Date),
+                        A.ClientId,
+                        C.FirstName,
+                        C.SirName,
+                        A.Amount,
+                        B.BranchId,
+                        M.BranchName
+                    FROM
+                        ClientsInvestmentPaymentDetails AS A
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                FirstName,
+                                SirName
+                            FROM
+                                AccountsVault.BankAccount                   
+                        ) AS C ON C.AccountNumber = A.ClientId
+                    JOIN
+                        (
+                            SELECT
+                                AccountNumber,
+                                BranchId
+                            FROM
+                                AccountsVault.branchDetails
+                             
+                        ) AS B ON B.AccountNumber = A.ClientId
+                    JOIN
+                        (
+                            SELECT
+                                BranchId,
+                                BranchName
+                            FROM
+                                NisaBranches.Branches             
+                        ) AS M ON M.BranchId = B.BranchId
+                    ORDER BY B.BranchId 
+                                  
+                """)
+                data = self.cursor.fetchall()
+                if data:
+                    return [{"date": str(obj[0]), 
+                             "AccountNumber":obj[1], 
+                             "fname":obj[2], 
+                             "lName":obj[3], 
+                             "Amount": float(obj[4]),
+                             "BranchId":obj[5],
+                             "BranchName":obj[6]
+                             } for obj in data]
+                else:
+                    return 0
+            else:
+                raise Exception("cursor not initialised while fetching client investment details for a specific branch")
+        except Exception as e:
+            raise Exception(f"error while fetching from  ClientsInvestmentPaymentDetails  for a specific  branch:{e}")
 
 
 
@@ -2861,58 +3136,74 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
                     SELECT
-                    
-                        (SELECT   
-                            SUM(A.Portifolio) AS portifolio
-                        FROM
-                            LoanRepaymentScheduleDetails AS A
-                        JOIN
-                            (
-                                SELECT
-                                    LoanId
-                                FROM
-                                    registeredLoans
-                                WHERE
-                                    ActiveStatus = "unfinished"        
-                            ) AS B ON B.LoanId = A.LoanId
-                        WHERE
-                            A.LoanId IN (
-                                        SELECT
-                                            LoanId
-                                        FROM
-                                            LoanDetails
-                                        )  ) - COALESCE((
-                                                SELECT
-                                                    sum(C.Paid)
-                                                FROM
-                                                    LoanPaymentStatistics AS C
-                                                JOIN
-                                                    (
-                                                        SELECT
-                                                            LoanId
-                                                        FROM
-                                                            LoanDetails
-                                                    ) AS E ON E.LoanId = C.LoanId
-                                                JOIN
-                                                    (
-                                                        SELECT
-                                                            LoanId
-                                                        FROM
-                                                            registeredLoans
-                                                        WHERE
-                                                            ActiveStatus = "unfinished"
-
-                                                    ) AS D ON D.LoanId =  C.LoanId
-                                        
-                                        ),0)
-
+                        SUM(Portifolio) AS TotalPortifolio
+                    FROM(
+                            SELECT
+                                A.LoanId,
+                                B.Portifolio,
+                                C.ClientID,
+                                C.BranchId,
+                                D.FirstName,
+                                D.SirName,
+                                E.PhoneNumber,
+                                F.BranchName
+                            FROM
+                                registeredLoans AS A
+                            JOIN
+                                (
+                                    SELECT
+                                        LoanId,
+                                        ClientID,
+                                        BranchId
+                                    FROM
+                                        LoanDetails              
+                                )AS C ON C.LoanId = A.LoanId
+                            JOIN
+                                (
+                                    SELECT
+                                        DATE(Date),
+                                        LoanId,
+                                        Portifolio
+                                    FROM
+                                        LoanPaymentStatistics
+                                    
+                                ) AS B ON B.LoanId = A.LoanId
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        FirstName,
+                                        SirName
+                                    FROM
+                                        AccountsVault.BankAccount               
+                                ) AS D ON D.AccountNumber = C.ClientID
+                            JOIN
+                                (
+                                    SELECT
+                                        AccountNumber,
+                                        PhoneNumber
+                                    FROM
+                                        AccountsVault.ContactDetails               
+                                ) AS E ON E.AccountNumber = C.ClientID
+                            JOIN
+                                (
+                                    SELECT
+                                        BranchId,
+                                        BranchName
+                                    FROM
+                                        NisaBranches.Branches         
+                                )AS F ON F.BranchId = C.BranchId
+                            
+                            WHERE
+                                A.ActiveStatus = "unfinished"           
+                        ) AS Subquery;
                 """)
                 data = self.cursor.fetchone()
-                if data[0] == None:
+                if data:
+                    return {"totalPortifoli":float(data[0])} 
+                else:
                     return {"totalPortifoli":0}
                     
-                else:
-                    return {"totalPortifoli":data[0]}
                     
             else:
                 raise Exception("cursor not initialised in GeneralCurrentPortifolio")
@@ -3075,8 +3366,6 @@ class BankingDataBase(ConnectToMySql):
                                 Portifolio
                             FROM
                                 LoanPaymentStatistics
-                            WHERE
-                                DATE(Date) = %s
                              
                         ) AS B ON B.LoanId = A.LoanId
                     JOIN
@@ -3108,7 +3397,7 @@ class BankingDataBase(ConnectToMySql):
                     WHERE
                         A.ActiveStatus = "unfinished"
                     ORDER BY C.BranchId
-                """,(currentDate,))
+                """)
                 data = self.cursor.fetchall()
                 return [{
                     "loanId":obj[0],

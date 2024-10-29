@@ -455,6 +455,8 @@ def collectionSheetOnmanagerpage():
 @app.route("/mergeBranches")
 def mergeBranches():
     return render_template("mergebranches.html")
+
+
 @app.route("/credit", methods=["GET","POST"])
 def credit():
     if request.method == "GET":
@@ -487,7 +489,6 @@ def creditbalance():
         requestType = request.args.get("type")
         if requestType == "portifolioDetails":
             data = bank.fetch_GeneralCurrentPortifolioDetails()
-            print(data)
             return jsonify(data)
     return render_template("creditBalances.html")
 
@@ -500,16 +501,42 @@ def collectionCreditpenalties():
     return render_template("collectionCreditPenalities.html")
 
 
-@app.route("/savingsgeneral")
+@app.route("/savingsgeneral",methods=["GET","POST"])
 def savingsgeneral():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "totalCurrentSavings":
+            data = bank.fetch_GeneralCurrentClientsInvestmentTotal()
+            return jsonify(data)
+        elif requestType == "totalSavings":
+            data = bank.fetch_GeneralClientsInvestmentTotal()
+            return jsonify(data)
+
+            
     return render_template("savingsgeneral.html")
 
-@app.route("/savingCollections")
+@app.route("/savingCollections", methods=["GET","POST"])
 def savingCollections():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "details":
+            data = bank.fetch_GeneralCurrent_ClientsInvestmentDetails()
+            print(data)
+            return jsonify(data)
+
     return render_template("savingCollections.html")
 
-@app.route("/savingAtMaturity")
+@app.route("/savingAtMaturity", methods=["GET","POST"])
 def savingAtMaturity():
+    if request.method == "GET":
+        bank = BankingDataBase()
+        requestType = request.args.get("type")
+        if requestType == "savingDetails":
+            data = bank.fetch_GeneralClientsInvestmentDetails()
+            print(data)
+            return jsonify(data)
     return render_template("savingAcountsAtMaturity.html")
 
 @app.route("/underWritter", methods=["GET","POST"])

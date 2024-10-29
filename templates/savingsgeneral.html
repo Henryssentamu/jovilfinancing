@@ -54,11 +54,14 @@
         <div class="row">
             <div class="col">
                 <div class="card">
-                    <div class="card-header">
-                        Saving Collections
+                    <div class="card-header" style="background-color: #fd7e14;">
+                        Current investment Details
                     </div>
                     <div class="card-body">
-                        <div>2244442</div>
+                        <div class="row">
+                            <div class="col">Total collections (Daily)</div>
+                            <div class="col" id="current_investments"></div>
+                        </div>
                     </div>
                     <div class="card-footer">
                         <a href="{{url_for('savingCollections')}}" class="btn btn-outline-dark">Details </a>
@@ -68,14 +71,34 @@
 
             <div class="col">
                 <div class="card">
-                    <div class="card-header">
-                        Saving A/Cs At Maturity
+                    <div class="card-header" style="background-color: #dc3545;">
+                        General Investment Details
                     </div>
                     <div class="card-body">
-                        <div>4442</div>
+                        <div class="row">
+                            <div class="col">Total General Investment</div>
+                            <div class="col" id="total_general_investment"></div>
+                        </div>
                     </div>
                     <div class="card-footer">
                         <a href="{{url_for('savingAtMaturity')}}" class="btn btn-outline-dark">Details </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card">
+                    <div class="card-header" style="background-color: #d63384;">
+                        INVESTMENT ACCOUNTS AT MATURITY
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">Total Accounts </div>
+                            <div class="col" id="..">100</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="#" class="btn btn-outline-dark">Details </a>
                     </div>
                 </div>
             </div>
@@ -176,6 +199,54 @@
 
     <!-- Bootstrap JS and dependencies -->
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function fetchTotalCurrentSavings() {
+            return await fetch("/savingsgeneral?type=totalCurrentSavings")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching current total savings")
+                    }
+                    return response.json()
+                })
+                
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+        async function fetchTotalSavings() {
+            return await fetch("/savingsgeneral?type=totalSavings")
+                .then(response =>{
+                    if(!response.ok){
+                        throw new Error("error while fetching current total savings")
+                    }
+                    return response.json()
+                })
+                
+                .then(data =>{
+                    return data
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+            
+        };
+
+
+        async function loadhtml() {
+            // data
+            const totalSavings = await fetchTotalSavings();
+            const currentInvestment = await fetchTotalCurrentSavings();
+            document.getElementById("current_investments").innerHTML = currentInvestment["total"]
+            document.getElementById("total_general_investment").innerHTML = totalSavings["total"]
+            
+        };
+        loadhtml();
+        
+    </script>
     
 </body>
 </html>
