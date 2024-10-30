@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Successful</title>
+  <!-- Bootstrap CSS -->
+  <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-mQ93h+Iq8JG8pgU6OzAhdO5t5GoNYC8iZ+hFVhB4Vb+1I9Zl5xdW9y2bkIR1XSc/" crossorigin="anonymous">
+  
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .success-container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      margin-top: 100px;
+    }
+
+    .success-icon {
+      font-size: 70px;
+      color: #28a745;
+    }
+
+    .success-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 10px;
+    }
+
+    .success-message {
+      color: #666;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .transaction-details {
+      margin-top: 25px;
+      text-align: left;
+      font-size: 16px;
+    }
+
+    .transaction-details p {
+      margin: 6px 0;
+      color: #333;
+    }
+
+    .transaction-details p strong {
+      color: #28a745;
+    }
+
+    .home-button {
+      margin-top: 30px;
+      padding: 12px 28px;
+      background-color: #28a745;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .home-button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container d-flex justify-content-center">
+    <div class="col-lg-6 col-md-8 success-container">
+      <div class="success-icon">✔️</div>
+      <h1 class="success-title">Transaction Successful!</h1>
+      <p class="success-message">Thank you! Balancing processed successfully.</p>
+      
+      <!-- <div class="transaction-details">
+        <p><strong>Transaction ID:</strong> 123456789</p>
+        <p><strong>Amount Paid:</strong> $150.00</p>
+        <p><strong>Date:</strong> 27th September 2024</p>
+      </div> -->
+      
+      <button class="home-button" onclick="window.location.href='/clientProfileOnManagersPage'">Return To Client's Account</button>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS (Optional) -->
+  <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js" integrity="sha384-qUo6xnUCjwKC6yLFXmx5i2gmgcKAR1q6z0DZ8Zt3HeJva9jZwdgONs08zAjgD72r" crossorigin="anonymous"></script>
+</body>
+</html>

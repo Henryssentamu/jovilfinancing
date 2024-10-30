@@ -877,10 +877,31 @@ def payment():
             # changing activate status from a default unfinshed to finshed if current portifolio is 0
             bank.changeLoanRegistrationStatusTrigger()
             return jsonify({"response":"recieved"})
-            
-
 
     return render_template("payments.html")
+
+
+@app.route("/balancing", methods=["GET", "POST"])
+def balancing():
+    if request.method == "POST":
+        paymenttype = request.json.get("type")
+        if paymenttype == "loanpayment":
+            session["data"] = request.json.get("data")
+            return jsonify({"response":"recieved"})
+        elif paymenttype == "amount":
+            amount = request.json.get("amount")
+            data = session.get("data")
+            # paymentDetails = {"loanId":loanId,"amount":amount}
+            details = {"loanId":data["loanId"],"withdrawAccount":data["reductFrom"],"amount":amount}
+            print(details)
+            # bank = BankingDataBase()
+            # bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
+            # bank.loanPaymenttrigger()
+            # changing activate status from a default unfinshed to finshed if current portifolio is 0
+            # bank.changeLoanRegistrationStatusTrigger()
+            return jsonify({"response":"recieved"})
+
+    return render_template("balancing.html")
 
 
 @app.route("/Investmentpayments", methods=["GET", "POST"])
@@ -903,6 +924,10 @@ def Investmentpayments():
 @app.route("/succefulpayments")
 def successfulpayment():
     return render_template("successfulPayment.html")
+
+@app.route("/succefulBalancing")
+def succefulBalancing():
+    return render_template("successFullBalancing.html")
 
 
 @app.route("/loanApplication", methods=["GET", "POST"])
@@ -1071,11 +1096,47 @@ def clientProfile():
             return jsonify(loan_security)
         elif requesttype == "investments":
             investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
-            return jsonify(investments)
-
-            
+            return jsonify(investments)      
             
     return render_template("clientProfilePage.html")
+
+
+@app.route("/clientProfileOnManagersPage",methods=["GET","POST"])
+def clientProfileOnManagersPage():
+    if request.method == "POST":
+        requesttype = request.json.get("type")
+        if requesttype == "clientID":
+            id = request.json.get("data")
+            session["lorded_account"] = id
+            return jsonify({"response":"clientId"})
+    elif request.method == "GET":
+        bank = BankingDataBase()
+        client_id = session.get("lorded_account")
+        print(f"client on mg:{client_id}")
+        requesttype = request.args.get("type")
+        if requesttype == "clientDetails":
+            """fetching clients personal details"""
+            clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
+            return clientDetails
+        elif requesttype == "clientCreditdetails":
+            """fetching clients credit details"""
+            creditDetails = bank.fetchClientCreditDetails(clientId=client_id)
+            return creditDetails 
+        elif requesttype == "clientPortifolio":
+            """fetching client's current portifolio"""
+            portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
+            return jsonify({"portifolio":portifolio})
+        elif requesttype == "clientLoanSecurity":
+
+            """fetch client's loan security"""
+            loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
+            return jsonify(loan_security)
+        elif requesttype == "investments":
+            investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
+            return jsonify(investments)      
+            
+    return render_template("clientProfileOnManagersPage.html")
+
 
 @app.route("/clientpaymentDetails", methods =["GET","POST"])
 def clientpaymentDetails():

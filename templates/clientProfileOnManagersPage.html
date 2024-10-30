@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>client profile On Managers Route</title>
+  <!-- bootsrap -->
+  <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+  
+  <style>
+    .table-wrapper {
+        height: 200px; /* Adjust the height as needed */
+        overflow-y: auto;
+    }
+    .table-fixed-header thead th {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 1;
+    }
+</style>
+
+</head>
+<body>
+	<nav class="navbar navbar-expand navbar-dark bg-dark text-white" style="position: fixed; top: 0px; left: 0px; right: 0px; z-index: 2;">
+		<div class="container">
+			<a href="{{url_for('branch')}}" class="navbar-brand   d-none  d-sm-flex d-lg-flex"> Back </a>
+      <!-- <i class="bi bi-person-fill"> </i> -->
+			<ul class="navbar-nav d-flex flex-row align-items-center justify-content-center">
+				<li  class="nav-item me-4"> Portfolio: Ugx<span id="current-portifolio" style="color: red;">  </span>/=</li>
+				<li class="nav-item me-4 ">
+					Security
+					Ugx:<span class="money-value" style="color: yellow;" id="loan_security">  </span>/=
+				</li>
+				<li class="nav-item">
+					<i class="bi bi-database"></i> Savings Ugx:<span id="investment" style="color: rgb(69, 234, 69);"></span>/=
+				</li>
+			</ul>
+			
+		</div>
+
+	</nav>
+
+	<div class="container mt-5">
+		<div class="row row-cols-1 row-cols-md-2 gy-3 mt-4">
+			<div class="col">
+				<!-- profile info -->
+				<div class="card shadow-sm mt-3">
+					<div class="card-header bg-primary text-white">
+						personal info
+					</div>
+					<div class="card-body personalDetails">
+
+
+
+
+					</div>
+				</div>
+			</div>
+			<!-- credit details -->
+			<div class="col">
+				<div class="card shadow-sm">
+					<div class="card-header bg-success text-whit" style="color: white; font-weight: bolder; font-size: large;">
+						credit details
+					</div>
+					<div class="card-body ">
+
+                        <div class="  table-responsive table-wrapper">
+							<table class="table table-striped table-fixed-header">
+								<thead>
+								<tr>
+									<th>Disbursed On</th>
+									<th>Loan Type</th>
+									<th>Principle(Ugx)</th>
+									<th>Interest Rate(%)</th>
+									<th>Total Amount Due</th>
+									<th>Loan Duration</th>
+									<th>Daily Commitment Amount</th>
+
+								</tr>
+								</thead>
+								<tbody id="credit-body">
+								
+								</tbody>
+							</table>
+                        </div>
+
+						<div class="row  mt-5">
+							<div class="col" id="paybutton">
+								<!-- generated pay button here  -->
+							</div>
+                            <div class="col" id="balanceTheLoan">
+                                <!-- generated balancing buttin here -->
+                            </div>
+						</div>
+						<div class="row gy-3 p-2">
+							<a href="{{url_for('clientpaymentDetails')}}" class="btn btn-primary">View Payment Detaills</a>
+                  			<a href="{{url_for('clientOverdueAndPenalties')}}" class="btn btn-secondary"> Overdue and Penalties</a>
+
+						</div>
+            </div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container mt-5">
+		<div class="row row-cols-1 row-cols-md-2 gy-3">
+			<div class="col">
+				<div class="card shadow-sm">
+					<div class="card-header bg-dark  text-white">
+						Documents
+					</div>
+					<div class="card-body">
+						<button class="btn btn-secondary">Agreements and colleratoral</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- gurantor -->
+			<div class="col">
+				<div class="card">
+					<div class="card-header  bg-dark  text-white">
+						Guarantor
+					</div>
+					<div class="card-body">
+						<a href="{{url_for('guranteer')}}" class="btn btn-secondary">view Details</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- savings -->
+			<div class="col mb-2">
+				<div class="card">
+					<div class="card-header  bg-dark  text-white">
+						Loan Securities & Investments
+					</div>
+					<div class="card-body">
+						<div class="row  row-cols-1 row-cols-md-2 row-cols-lg-2">
+							<div class="col">
+								<button class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#viewsavingDetails" >view Details</button>
+								<div class="modal" id="viewsavingDetails">
+									<div class="modal-dialog modal-dialog-centered ">
+										<div class="modal-content">
+											<div class="modal-header">
+												select category
+												<button class="btn-close" data-bs-dismiss="modal" modal-bs-target="#viewsavingDetails"></button>
+											</div>
+											<div class="modal-body">
+												<a href="{{url_for('savings')}}" class="btn btn-primary">Investments</a>
+												<a href="{{url_for('loanSecurities')}}" class="btn btn-secondary"> Loan Securities</a>
+											</div>
+											
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col col-md-6 col-sm-7 pt-2">
+								<div class="ml-2" id="makeinvestmentPayment">
+									<!-- investment payment button generated by js setts here -->
+
+								</div>
+							</div>
+							
+							
+
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<a href="{{url_for('crediofficerDashboard')}}" class="btn btn-primary d-sm-none d-md-none  d-lg-none "> Go Back  </a>
+	</div>
+
+
+  <!-- Bootstrap JS and Popper.js -->
+  <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../static/jsFiles/fetchSpecificClientDetailsOnManagersPage.js"></script>
+  
+  
+</body>
+</html>
+

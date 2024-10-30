@@ -188,7 +188,7 @@
                     let id = clientElement.getAttribute("data-client-id");
                     let data = {"type":"clientID","data":id}
 
-                    fetch("/clientProfile",{
+                    fetch("/clientProfileOnManagersPage",{
                         method:"POST",
                         headers:{
                             "Content-Type":"application/json"
@@ -202,7 +202,7 @@
                         return response.json()
                     })
                     .then(data =>{
-                        window.location.href = "/clientProfile"
+                        window.location.href = "/clientProfileOnManagersPage"
                     } )
                     .catch(error =>{
                         alert(error)
