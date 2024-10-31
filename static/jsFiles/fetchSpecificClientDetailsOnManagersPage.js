@@ -122,6 +122,7 @@ function generatePaybutton(data){
 function captureSelectedOption(select){
     var selectedOption = select.options[select.selectedIndex];
     var loanId = selectedOption.getAttribute("data-loanId");
+    var portifolio = selectedOption.getAttribute("data-portifolio");
     var selectedValue = selectedOption.value;
     if(loanId && (selectedValue === "loanSecurity" || selectedValue === "investment" )){
         fetch("/balancing",{
@@ -129,7 +130,7 @@ function captureSelectedOption(select){
             headers:{
                 "Content-type":"application/json"
             },
-            body:JSON.stringify({"type": "loanpayment","data":{"reductFrom":selectedValue,"loanId":loanId}})
+            body:JSON.stringify({"type": "loanpayment","data":{"reductFrom":selectedValue,"loanId":loanId, "previousPortifolio":portifolio}})
         })
         .then(response =>{
             if(!response.ok){
@@ -149,7 +150,9 @@ function captureSelectedOption(select){
 
 }
 
-function generatebalancingButton(data){
+async function generatebalancingButton(data){
+    const portifolio = await fetchClientPortifolio();
+    // const m = portifolio["portifolio"]
     return `
         <a class="btn btn-outline-primary"  data-bs-target="#balancing" data-bs-toggle="modal"> Loan Balance </a>
         <div class="modal" id="balancing">
@@ -162,8 +165,8 @@ function generatebalancingButton(data){
                     <div class="modal-body">
                         <select class="form-select" size="2" aria-label="size 2" onchange="captureSelectedOption(this)"> 
                             <option selected> Balance With ?</option>
-                            <option value="loanSecurity" data-loanId='${data["loanId"]}'> Loan Security </option>
-                            <option value="investment" data-loanId='${data["loanId"]}'> Investment </option>
+                            <option value="loanSecurity" data-loanId='${data["loanId"]}' data-portifolio='${portifolio["portifolio"]}'> Loan Security </option>
+                            <option value="investment" data-loanId='${data["loanId"]}' data-portifolio='${portifolio["portifolio"]}'> Investment </option>
                         </select>
                     
                     </div>
@@ -311,12 +314,13 @@ async function loadhtml() {
 
 async function loadpaybutton() {
     const data = await fetchCreditdetails();
+    const balances = await generatebalancingButton(data);
     const btn  = generatePaybutton(data);
-    const balances = generatebalancingButton(data);
     document.getElementById("paybutton").innerHTML = btn;
     document.getElementById("balanceTheLoan").innerHTML = balances;
     
 }
+
 
 async function loadLoanSecurity() {
     const loan_security = await fetchLoanSecurity();

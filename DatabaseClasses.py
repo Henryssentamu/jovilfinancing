@@ -2153,7 +2153,6 @@ class BankingDataBase(ConnectToMySql):
             if self.cursor:
                 self.cursor.execute("CREATE DATABASE IF NOT EXISTS LoanApplications")
                 self.cursor.execute("USE LoanApplications")
-                
 
                 # Create LoanDetails table
                 self.cursor.execute("""
@@ -2195,6 +2194,7 @@ class BankingDataBase(ConnectToMySql):
                         FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId)
                     )
                 """)
+
             else:
                 raise Exception("cursor not intialized in create loanapplication tables methods")
         except Exception as e:
@@ -2297,7 +2297,27 @@ class BankingDataBase(ConnectToMySql):
             self.close_connection()
 
 
-
+    def create_loanBalancingTable(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE  LoanApplications")
+                self.cursor.execute("""
+                    
+                    CREATE TABLE IF NOT EXISTS LoanBalancing(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId VARCHAR(500),
+                        PortifolioB4Balancing VARCHAR(300),
+                        BalancingAmount VARCHAR(300),
+                        AccountBalancedWith VARCHAR(500)              
+                    )
+                """)
+            else:
+                raise Exception("error while creating loan balancing table")
+        except Exception as e:
+            raise Exception(f"error while creating loan balancing table:{e}")
+        finally:
+            self.close_connection()
 
 
     def CreateapprovedLoans_tables(self):
@@ -3014,40 +3034,34 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
                     SELECT
-                            
-                        (SELECT
-                            Portifolio 
-                        FROM
-                            LoanRepaymentScheduleDetails
-                        WHERE
-                            LoanId =(
-                                        SELECT
-                                            LoanId
-                                        FROM 
-                                            registeredLoans
-                                        WHERE
-                                            ActiveStatus = "unfinished" AND 
-                                            LoanId IN  (
-                                                        SELECT 
-                                                            LoanId 
-                                                        FROM 
-                                                            LoanDetails 
-                                                        WHERE 
-                                                            ClientID = %s
-                                            )         
-                                    )) - COALESCE((SELECT
-                                            sum(Paid)
-
-                                        FROM
-                                            LoanPaymentStatistics
-                                        WHERE
-                                            LoanId  IN ( SELECT
-                                                            LoanId
-                                                        FROM 
-                                                            registeredLoans
-                                                        WHERE
-                                                            ActiveStatus = "unfinished"
-                                    )),0)  as current_portifolio
+                        (
+                            SELECT
+                                Portifolio
+                            FROM
+                                LoanPaymentStatistics
+                            WHERE
+                                LoanId =(
+                                            SELECT
+                                                LoanId
+                                            FROM 
+                                                registeredLoans
+                                            WHERE
+                                                ActiveStatus = "unfinished" AND 
+                                                LoanId IN  (
+                                                            SELECT 
+                                                                LoanId 
+                                                            FROM 
+                                                                LoanDetails 
+                                                            WHERE 
+                                                                ClientID = %s
+                                                )
+                                            
+                                )
+                            ORDER BY Date DESC
+                            LIMIT 1      
+                        )
+                        
+                        
 
                 """,(self.client_id,))
                 data = self.cursor.fetchone()
@@ -3764,6 +3778,64 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialised in loan payment trigger")
         except Exception as e:
             raise Exception(f"error in loan payment trigger:{e}")
+        
+
+    def balancing(self,balancinDetails):
+        self.loanId = balancinDetails["loanId"]
+        self.balancingWith = balancinDetails["withdrawAccount"]
+        self.BalancingAmount = balancinDetails["amount"]
+        self.previousportifolio = balancinDetails["previousPortifolio"]
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO LoanBalancing(
+                        LoanId,
+                        PortifolioB4Balancing
+                        BalancingAmount,
+                        AccountBalancedWith                
+                    ) VALUE(%s,%s,%s,%s)                    
+                """,(self.loanId,self.previousportifolio, self.BalancingAmount,self.balancingWith ))
+            else:
+                raise Exception("cursor not initialized while balancing the loan")
+        except Exception as e:
+            raise Exception(f"error while balancing the loan:{e}")
+        
+
+
+    def updatePortifolioAfterBalancingTrigger(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS updatingClientPortifolio")
+                self.cursor.execute("""
+                    DROP TRIGGER IF EXISTS updatingClientPortifolio
+                    CREATE TRIGGER updatingClientPortifolio
+                    AFTER INSERT ON LoanBalancing
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE
+                            LoanPaymentStatistics
+                        SET
+                            Portifolio = Portifolio-(COALESCE(NEW.BalancingAmount),0)
+                        WHERE
+                            LoanId = NEW.LoanId AND Date = (SELECT 
+                                                                MAX(Date)
+                                                            FROM
+                                                                LoanPaymentStatistics
+                                                            WHERE
+                                                                LoanId = NEW.LoanId
+                                                            )
+                    END 
+                                                      
+                """)
+            else:
+                raise Exception("cursor not initialised while updating Portifolio After Balancing")
+        except Exception as e:
+            raise Exception(f"error while updating Portifolio After Balancing:{e}")
+        
 
     
 
@@ -4432,11 +4504,12 @@ class AuthenticationDetails(ConnectToMySql):
 
 
 banking  = BankingDataBase()
-# banking.createAccountTable()
-# banking.create_loanApplicationTAbles()
-# banking.CreateapprovedLoans_tables()
-# banking.Create_disbursement_table()
-# banking.registeredLoans()
+banking.createAccountTable()
+banking.create_loanApplicationTAbles()
+banking.CreateapprovedLoans_tables()
+banking.Create_disbursement_table()
+banking.registeredLoans()
+banking.create_loanBalancingTable()
 banking.clientloanpaymentsAndInvestmentTable()
 
 

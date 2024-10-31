@@ -891,14 +891,12 @@ def balancing():
         elif paymenttype == "amount":
             amount = request.json.get("amount")
             data = session.get("data")
-            # paymentDetails = {"loanId":loanId,"amount":amount}
-            details = {"loanId":data["loanId"],"withdrawAccount":data["reductFrom"],"amount":amount}
-            print(details)
-            # bank = BankingDataBase()
-            # bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
-            # bank.loanPaymenttrigger()
-            # changing activate status from a default unfinshed to finshed if current portifolio is 0
-            # bank.changeLoanRegistrationStatusTrigger()
+            details = {"loanId":data["loanId"],"withdrawAccount":data["reductFrom"],"amount":amount, "previousPortifolio":data["previousPortifolio"]}
+            # inserting into balancing table and updating the latest clients portifolio value
+            bank = BankingDataBase()
+            bank.balancing(balancinDetails=details)
+            bank.updatePortifolioAfterBalancingTrigger()
+            
             return jsonify({"response":"recieved"})
 
     return render_template("balancing.html")
@@ -1112,7 +1110,6 @@ def clientProfileOnManagersPage():
     elif request.method == "GET":
         bank = BankingDataBase()
         client_id = session.get("lorded_account")
-        print(f"client on mg:{client_id}")
         requesttype = request.args.get("type")
         if requesttype == "clientDetails":
             """fetching clients personal details"""
