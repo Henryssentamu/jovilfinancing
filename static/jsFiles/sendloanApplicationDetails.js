@@ -43,7 +43,7 @@ function sendLoanApplicationDetails() {
             })
             .then(data =>{
                 loader.style.display = "none";
-                location.reload()
+                document.location.href = "/loanApplicationSucessfullySubmited"
             })
             .catch(error =>{
                 loader.style.display = "none";

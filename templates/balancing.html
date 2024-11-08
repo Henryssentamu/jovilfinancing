@@ -55,8 +55,24 @@
         <div class="loader-container" id="loader">
             <div class="spinner-loader"></div>
         </div>
+
+        <div class="card" id="investmentD" style="display: none;">
+            <div class="card-header">error while balancing</div>
+            <div class="card-body">
+                current investment is less than the client portifolio
+                therefor you can't balance it
+            </div>
+        </div>
+
+        <div class="card" id="loanSecurityD" style="display: none;">
+            <div class="card-header">error while balancing</div>
+            <div class="card-body">
+                current loan security is less than the client portifolio
+                therefor you can't balance it
+            </div>
+        </div>
         
-        <div class="row">
+        <div class="row" id="mainbody">
             <div class="col">
                 <div class="card">
                     <div class="card-header">
@@ -104,6 +120,23 @@
                         if(data["response"] === "recieved"){
                             loader.style.display = "none";
                             window.location.href = "/succefulBalancing"
+                        }
+                        else if(data["response"] === "current loan security is less"){
+                            const ele = document.getElementById("loanSecurityD")
+                            const mainb = document.getElementById("mainbody")
+                            loader.style.display = "none";
+                            ele.style.display = "flex";
+                            mainb.style.display = "none";
+
+
+                        }
+                        else if(data["response"] === "current investment is less"){
+                            const element =  document.getElementById("investmentD");
+                            const mainbody = document.getElementById("mainbody");
+                            loader.style.display = "none";
+                            element.style.display = "flex";
+                            mainbody.style.display = "none"
+
                         }
                     })
                     .catch(error =>{

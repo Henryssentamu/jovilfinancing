@@ -546,7 +546,6 @@ def underWritter():
         if requesttype == "loandetails":
             bankObj = BankingDataBase()
             data = bankObj.fetchLoanApplicationDetails()
-            # print(data)
             return jsonify(data)
     elif request.method == "POST":
         requesttype = request.json.get("type")
@@ -586,6 +585,8 @@ def disburshmentReports():
                     banking = BankingDataBase()
                     banking.insert_into_disbursement_table(loanId=loanid)
                     banking.registeredLoanTriger()
+                    banking.LoanSecurityCalaculationTriggerAfterloanRegistration()
+
                 except Exception as e:
                     raise Exception(f"error while calling insert into disursement table method :{e}")
             return jsonify({"response":"LoanConfirmed"})
@@ -729,7 +730,7 @@ def crediofficerDashboard():
             return jsonify(data)
         if requestType== "savings":
             data = Bank.fetch_ClientsInvestmentDetailsForSpecficEmployee(EmployeeId=officerId)
-            print(data)
+            
             
             return jsonify(data)
         
@@ -894,10 +895,23 @@ def balancing():
             details = {"loanId":data["loanId"],"withdrawAccount":data["reductFrom"],"amount":amount, "previousPortifolio":data["previousPortifolio"]}
             # inserting into balancing table and updating the latest clients portifolio value
             bank = BankingDataBase()
-            bank.balancing(balancinDetails=details)
-            bank.updatePortifolioAfterBalancingTrigger()
-            
-            return jsonify({"response":"recieved"})
+            if data["reductFrom"] == "loanSecurity":
+                if bank.compareLoanSecurityAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
+                    bank.balancing(balancinDetails=details)
+                    bank.updatePortifolioAfterBalancingTrigger()
+                    # bank.updateClientTotalLoanSecurityTrigerAfterBalancing()
+                    return jsonify({"response":"recieved"})
+                else:
+                    return {"response":"current loan security is less"}
+            elif data["reductFrom"] == "investment":
+                if bank.compareClientInvestmentAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
+                    bank.balancing(balancinDetails=details)
+                    bank.updatePortifolioAfterBalancingTrigger()
+                    # bank.updateClientTotalInvestmentTrigerAfterBalancing()
+                    return jsonify({"response":"recieved"})
+                else:
+                    return {"response":"current investment is less"}
+
 
     return render_template("balancing.html")
 
@@ -915,6 +929,7 @@ def Investmentpayments():
             accountNumber = session.get("client_Account_Number")
             amount = request.json.get("amount")
             banking.insert_into_ClientsInvestmentPaymentDetails(AccountNumber=accountNumber,amount=amount)
+            banking.TotalInvestmentsTrigger()
             return jsonify({"response":"recieved"})
     
     return render_template("investmentPayment.html")
@@ -1010,6 +1025,10 @@ def loanApplication():
 
     return render_template("loanApplication.html")
 
+@app.route("/loanApplicationSucessfullySubmited")
+def loanApplicationSucessfullySubmited():
+    return render_template("loanApplicationSucessfullySubmited.html")
+
 @app.route("/collectionSheet", methods =["GET"])
 def collectionSheet():
     if request.method == "GET":
@@ -1087,14 +1106,17 @@ def clientProfile():
         elif requesttype == "clientPortifolio":
             """fetching client's current portifolio"""
             portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
+            
             return jsonify({"portifolio":portifolio})
         elif requesttype == "clientLoanSecurity":
             """fetch client's loan security"""
-            loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
-            return jsonify(loan_security)
+            loan_security = bank.fetchloanSecurity(clientId=client_id)
+            # loan_security = bank.fetchloanSecurity(clientId=client_id)
+            return jsonify({"loanSecurity":loan_security})
         elif requesttype == "investments":
-            investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
-            return jsonify(investments)      
+            investments = bank.fetchClientInvestment(clientId=client_id)
+            # investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
+            return jsonify({"investment":investments})      
             
     return render_template("clientProfilePage.html")
 
@@ -1126,11 +1148,13 @@ def clientProfileOnManagersPage():
         elif requesttype == "clientLoanSecurity":
 
             """fetch client's loan security"""
-            loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
-            return jsonify(loan_security)
+            loan_security = bank.fetchloanSecurity(clientId=client_id)
+            # loan_security = bank.fetchClientLoanSecurityDetails(clientId=client_id)
+            return jsonify({"totalSecurity":loan_security})
         elif requesttype == "investments":
-            investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
-            return jsonify(investments)      
+            investments = bank.fetchClientInvestment(clientId=client_id)
+            # investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
+            return jsonify({"investment":investments})      
             
     return render_template("clientProfileOnManagersPage.html")
 

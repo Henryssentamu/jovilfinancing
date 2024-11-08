@@ -73,13 +73,7 @@ async function fetchClientInvestment() {
             return response.json()
         })
         .then(data =>{
-            var total = 0;
-            if(data){
-                data.forEach((obj)=>{
-                    total += obj["Amount"]
-                })
-            }
-            return total
+            return data
         })
         .catch(error =>{
             console.log(error)
@@ -265,7 +259,7 @@ async function loadpaybutton() {
 
 async function loadLoanSecurity() {
     const loan_security = await fetchLoanSecurity();
-    document.getElementById("loan_security").innerHTML = loan_security["totalSecurity"]
+    document.getElementById("loan_security").innerHTML = loan_security["loanSecurity"]
     
 }
 
@@ -277,7 +271,7 @@ async function loadinvestmentAndLoanSecurityButton() {
 };
 async function loadInvestmentDetails() {
     const totalInvestment = await fetchClientInvestment();
-    document.getElementById("investment"). innerHTML = totalInvestment;
+    document.getElementById("investment"). innerHTML = totalInvestment["investment"];
     
 }
 
