@@ -103,6 +103,7 @@ def managrDashboard():
         requestType = request.args.get("type")
         if requestType == "portifolio":
             portifolio = Bank.fetch_GeneralCurrentPortifolio()
+            print(portifolio)
             return jsonify(portifolio)
         elif requestType == "principle":
             principle = Bank.fetch_GeneralCurrentPrinciple()
@@ -112,7 +113,6 @@ def managrDashboard():
             return jsonify(total_investment)
         elif requestType == "loanSecurity":
             loanSecurity = Bank.fetch_total_security()
-            print(loanSecurity)
             return loanSecurity
     
     return render_template("managerDashboard.html")
@@ -364,6 +364,7 @@ def branch():
             return jsonify(data)
         elif requestType== "savings":
             data = Bank.fetch_ClientsInvestmentDetailsForSpecficBranch(BranchId=branchId)
+
             return jsonify(data)
         elif requestType == "ForSpecificBranch":
             collectionSheetDetails = Bank.fetchCollectionSheetDetailsForAspecificBranch(branchId=branchId)
@@ -523,7 +524,6 @@ def savingCollections():
         requestType = request.args.get("type")
         if requestType == "details":
             data = bank.fetch_GeneralCurrent_ClientsInvestmentDetails()
-            print(data)
             return jsonify(data)
 
     return render_template("savingCollections.html")
@@ -535,7 +535,6 @@ def savingAtMaturity():
         requestType = request.args.get("type")
         if requestType == "savingDetails":
             data = bank.fetch_GeneralClientsInvestmentDetails()
-            print(data)
             return jsonify(data)
     return render_template("savingAcountsAtMaturity.html")
 
@@ -553,8 +552,9 @@ def underWritter():
             data = request.json.get("data")
             try:
                 banking = BankingDataBase()
-                banking.updateLoanApplicationApprovalStatus(loanApprovalDetails=data)
                 banking.loanApplicationApprovelTrigger()
+                banking.updateLoanApplicationApprovalStatus(loanApprovalDetails=data)
+                
                 
             except Exception as e:
                 raise Exception(f"eror while approving loan application in under writer's route:{e}")
@@ -575,6 +575,7 @@ def disburshmentReports():
         if requestType == "loanApprovedDetails":
             banking = BankingDataBase()
             data = banking.fetchApprovedLoandetails()
+            
             return jsonify(data)
     else:
         requestType = request.json.get("type")
@@ -583,9 +584,11 @@ def disburshmentReports():
             if loanid:
                 try:
                     banking = BankingDataBase()
-                    banking.insert_into_disbursement_table(loanId=loanid)
-                    banking.registeredLoanTriger()
                     banking.LoanSecurityCalaculationTriggerAfterloanRegistration()
+                    banking.registeredLoanTriger()
+                    banking.insert_into_disbursement_table(loanId=loanid)
+                    
+                    
 
                 except Exception as e:
                     raise Exception(f"error while calling insert into disursement table method :{e}")
@@ -873,10 +876,12 @@ def payment():
             loanId = session.get("loanId")
             paymentDetails = {"loanId":loanId,"amount":amount}
             bank = BankingDataBase()
-            bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
-            bank.loanPaymenttrigger()
-            # changing activate status from a default unfinshed to finshed if current portifolio is 0
             bank.changeLoanRegistrationStatusTrigger()
+            bank.loanPaymenttrigger()
+            bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
+            
+            # changing activate status from a default unfinshed to finshed if current portifolio is 0
+            
             return jsonify({"response":"recieved"})
 
     return render_template("payments.html")
@@ -897,9 +902,13 @@ def balancing():
             bank = BankingDataBase()
             if data["reductFrom"] == "loanSecurity":
                 if bank.compareLoanSecurityAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
-                    bank.balancing(balancinDetails=details)
+                    bank.updateClientTotalLoanSecurityTrigerAfterBalancing()
                     bank.updatePortifolioAfterBalancingTrigger()
-                    # bank.updateClientTotalLoanSecurityTrigerAfterBalancing()
+                    bank.balancing(balancinDetails=details)
+                    
+                    
+                
+                    
                     return jsonify({"response":"recieved"})
                 else:
                     return {"response":"current loan security is less"}
@@ -907,7 +916,7 @@ def balancing():
                 if bank.compareClientInvestmentAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
                     bank.balancing(balancinDetails=details)
                     bank.updatePortifolioAfterBalancingTrigger()
-                    # bank.updateClientTotalInvestmentTrigerAfterBalancing()
+                    bank.updateClientTotalInvestmentTrigerAfterBalancing()
                     return jsonify({"response":"recieved"})
                 else:
                     return {"response":"current investment is less"}

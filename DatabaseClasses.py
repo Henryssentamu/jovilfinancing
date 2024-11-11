@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from pickle import TRUE
 import mysql.connector as sql
 
 
@@ -2296,6 +2297,54 @@ class BankingDataBase(ConnectToMySql):
 
             self.close_connection()
 
+    def loanApplicationApprovelTrigger(self):
+        """
+            _this method is called in underwriter's route where loan approval is done_
+            Args:
+                _approvedLoanDetails(_dic):approved loan details
+            Return:
+                _none
+        """
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                 # Drop the trigger if it exists to avoid duplicate errors
+                self.cursor.execute("DROP TRIGGER IF EXISTS registeredLoanAfterApprovalByManager")
+                self.cursor.execute("""
+                    CREATE TRIGGER registeredLoanAfterApprovalByManager
+                    BEFORE UPDATE ON LoanDetails
+                    FOR EACH ROW
+                    BEGIN
+                        
+                        INSERT INTO approvedLoans(
+                            LoanId,
+                            ClientID,
+                            BranchId,
+                            OfficerId,
+                            LoanAmountAppliedFor,
+                            LoanAmountApproved,
+                            InterestRateInPercentage,
+                            LoanPeriodInDays                
+                        ) VALUES(
+                            OLD.LoanId,
+                            OLD.ClientID,
+                            OLD.BranchId,
+                            OLD.OfficerId,
+                            OLD.LoanAmount,
+                            NEW.LoanAmount,
+                            NEW.InterestRateInPercentage,
+                            NEW.LoanPeriodInDays
+                        );
+                    END;
+                """)
+                
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised in the trigger loan approvel status")
+        except Exception as e:
+            raise Exception(f"error while trigger loan approvel status:{e}")
+
 
     def create_loanBalancingTable(self):
         try:
@@ -2343,54 +2392,7 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while creating approved loan tables:{e}")
 
 
-    def loanApplicationApprovelTrigger(self):
-        """
-            _this method is called in underwriter's route where loan approval is done_
-            Args:
-                _approvedLoanDetails(_dic):approved loan details
-            Return:
-                _none
-        """
-        try:
-            self.reconnect_if_needed()
-            if self.cursor:
-                self.cursor.execute("USE LoanApplications")
-                 # Drop the trigger if it exists to avoid duplicate errors
-                self.cursor.execute("DROP TRIGGER IF EXISTS loanApproved")
-                self.cursor.execute("""
-                    CREATE TRIGGER loanApproved
-                    AFTER UPDATE ON LoanDetails
-                    FOR EACH ROW
-                    BEGIN
-                        IF NEW.Status = 'approved' THEN
-                            INSERT INTO approvedLoans(
-                                LoanId,
-                                ClientID,
-                                BranchId,
-                                OfficerId,
-                                LoanAmountAppliedFor,
-                                LoanAmountApproved,
-                                InterestRateInPercentage,
-                                LoanPeriodInDays                
-                            ) VALUES(
-                                OLD.LoanId,
-                                OLD.ClientID,
-                                OLD.BranchId,
-                                OLD.OfficerId,
-                                OLD.LoanAmount,
-                                NEW.LoanAmount,
-                                NEW.InterestRateInPercentage,
-                                NEW.LoanPeriodInDays
-                            );
-                        END IF;
-                    END
-                """)
-                
-                self.connection.commit()
-            else:
-                raise Exception("cursor not initialised in the trigger loan approvel status")
-        except Exception as e:
-            raise Exception(f"error while trigger loan approvel status:{e}")
+    
         
     def Create_disbursement_table(self):
         try:
@@ -2495,7 +2497,7 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("DROP TRIGGER IF EXISTS insertIntoTotalInvestment")
                 self.cursor.execute("""
                     CREATE TRIGGER insertIntoTotalInvestment
-                    AFTER INSERT ON ClientsInvestmentPaymentDetails
+                    BEFORE INSERT ON ClientsInvestmentPaymentDetails
                     FOR EACH ROW
                     BEGIN
                         INSERT INTO ClientsTotalInvestment(
@@ -3004,9 +3006,7 @@ class BankingDataBase(ConnectToMySql):
                         TotalLoanSecurity
                 """) 
                 data = self.cursor.fetchone()
-                print(data)
                 if data and data[0] !=  None:
-                    print("ty")
                     return {"totalSecurity":float(data[0])}
                 else:
                     return {"totalSecurity":0}
@@ -3247,7 +3247,6 @@ class BankingDataBase(ConnectToMySql):
                             JOIN
                                 (
                                     SELECT
-                                        DATE(Date),
                                         LoanId,
                                         Portifolio
                                     FROM
@@ -3285,6 +3284,7 @@ class BankingDataBase(ConnectToMySql):
                         ) AS Subquery;
                 """)
                 data = self.cursor.fetchone()
+                print(f"ddd:{data}")
                 if data and data[0] != None:
                     return {"totalPortifoli":float(data[0])} 
                 else:
@@ -3821,8 +3821,7 @@ class BankingDataBase(ConnectToMySql):
                     CREATE TRIGGER populateLoanStatistictTable
                     AFTER INSERT ON ClientsLOANpaymentDETAILS
                     FOR EACH ROW
-                    BEGIN
-                                    
+                    BEGIN          
                         INSERT INTO LoanPaymentStatistics(
                             LoanId,
                             Commitment,
@@ -3849,6 +3848,8 @@ class BankingDataBase(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error in loan payment trigger:{e}")
         
+    
+        
 
     def balancing(self,balancinDetails):
         self.loanId = balancinDetails["loanId"]
@@ -3860,6 +3861,7 @@ class BankingDataBase(ConnectToMySql):
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
+                    
                     INSERT INTO LoanBalancing(
                         LoanId,
                         BalancingAmount,
@@ -3871,6 +3873,7 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialized while balancing the loan")
         except Exception as e:
             raise Exception(f"error while inserting into loan  balancing table:{e}")
+
     def fetchClientAccountnumber(self,loanId):
         try:
             self.reconnect_if_needed()
@@ -3957,61 +3960,61 @@ class BankingDataBase(ConnectToMySql):
             return True
         return False
     
-    # def updateClientTotalLoanSecurityTrigerAfterBalancing(self):
-    #     try:
+    def updateClientTotalLoanSecurityTrigerAfterBalancing(self):
+        try:
             
-    #         self.reconnect_if_needed()
-    #         if self.cursor:
-    #             self.cursor.execute("USE LoanApplications")
-    #             self.cursor.execute("DROP TRIGGER IF EXISTS loanSecurity")
-    #             self.cursor.execute("""
-    #                 CREATE TRIGGER UPDATE loanSecurity
-    #                 AFTER INSERT ON LoanBalancing
-    #                 FOR EACH ROW
-    #                 BEGIN
-    #                     UPDATE
-    #                         TotalLoanSecurity 
-    #                     SET
-    #                         TotalSecurity = COALESCE(TotalSecurity,0) - NEW.BalancingAmount
-    #                     WHERE
-    #                         AccountNumber = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId);
-    #                 END;
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS UPDATE_loanSecurity")
+                self.cursor.execute("""
+                    CREATE TRIGGER UPDATE_loanSecurity
+                    AFTER INSERT ON LoanBalancing
+                    FOR EACH ROW
+                    BEGIN
+                        UPDATE
+                            TotalLoanSecurity 
+                        SET
+                            TotalSecurity = COALESCE(TotalSecurity,0) - NEW.BalancingAmount
+                        WHERE
+                            AccountNumber = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId);
+                    END;
                                                         
-    #             """)
-    #             self.connection.commit()
-    #         else:
-    #                 raise Exception("cursor not initialized while updating client loan security after  balancing ")
-    #     except Exception as e:
-    #         raise Exception(f"error while updating client loan security after balancing:{e}")
+                """)
+                self.connection.commit()
+            else:
+                    raise Exception("cursor not initialized while updating client loan security after  balancing ")
+        except Exception as e:
+            raise Exception(f"error while updating client loan security after balancing:{e}")
 
     
-    # def updateClientTotalInvestmentTrigerAfterBalancing(self):
-    #     try:
+    def updateClientTotalInvestmentTrigerAfterBalancing(self):
+        try:
             
-    #         self.reconnect_if_needed()
-    #         if self.cursor:
-    #             self.cursor.execute("USE LoanApplications")
-    #             self.cursor.execute("DROP TRIGGER IF EXISTS investmenttrigger")
-    #             self.cursor.execute("""
-    #                 CREATE TRIGGER UPDATE investmenttrigger
-    #                 AFTER INSERT ON LoanBalancing
-    #                 FOR EACH ROW
-    #                 BEGIN
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS investmenttrigger")
+                self.cursor.execute("""
+                    CREATE TRIGGER UPDATE investmenttrigger
+                    AFTER INSERT ON LoanBalancing
+                    FOR EACH ROW
+                    BEGIN
                                       
-    #                     UPDATE
-    #                        ClientsTotalInvestment 
-    #                     SET
-    #                         TotalCurrentInvestment  = COALESCE(TotalCurrentInvestment,0) - NEW.BalancingAmount
-    #                     WHERE
-    #                         ClientId = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId)
-    #                 END;
+                        UPDATE
+                           ClientsTotalInvestment 
+                        SET
+                            TotalCurrentInvestment  = COALESCE(TotalCurrentInvestment,0) - NEW.BalancingAmount
+                        WHERE
+                            ClientId = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId)
+                    END;
                                                         
-    #             """)
-    #             self.connection.commit()
-    #         else:
-    #                 raise Exception("cursor not initialized while updating client total investment after  balancing ")
-    #     except Exception as e:
-    #         raise Exception(f"error while updating client total investment after balancing:{e}")
+                """)
+                self.connection.commit()
+            else:
+                    raise Exception("cursor not initialized while updating client total investment after  balancing ")
+        except Exception as e:
+            raise Exception(f"error while updating client total investment after balancing:{e}")
 
         
 
@@ -4034,22 +4037,21 @@ class BankingDataBase(ConnectToMySql):
                             Balance,
                             Portifolio            
                         )
-                        VALUES(
-                            SELECT
-                                NEW.LoanId AS LoanId,
-                                db.DailCommitmentAmount AS Commitment,
-                                NEW.BalancingAmount AS Paid,
-                                db.DailCommitmentAmount - NEW.BalancingAmount AS Balance,
-                                db.Portifolio - (SELECT COALESCE(SUM(Amount),0) FROM ClientsLOANpaymentDETAILS WHERE LoanId = NEW.LoanId ) AS Portifolio 
-                            FROM
-                                LoanRepaymentScheduleDetails as db
-                            WHERE
-                                db.LoanId = NEW.LoanId;
-                                    
-                        )
+                        SELECT
+                            NEW.LoanId AS LoanId,
+                            db.DailCommitmentAmount AS Commitment,
+                            NEW.BalancingAmount AS Paid,
+                            db.DailCommitmentAmount - NEW.BalancingAmount AS Balance,
+                            db.Portifolio - (SELECT COALESCE(SUM(Amount),0) FROM ClientsLOANpaymentDETAILS WHERE LoanId = NEW.LoanId ) AS Portifolio 
+                        FROM
+                            LoanRepaymentScheduleDetails as db
+                        WHERE
+                            db.LoanId = NEW.LoanId;
+                    
                     END; 
                                                       
                 """)
+                self.connection.commit()
             else:
                 raise Exception("cursor not initialised while updating Portifolio After Balancing")
         except Exception as e:
@@ -4108,7 +4110,7 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("DROP TRIGGER IF EXISTS registeredLoan")
                 self.cursor.execute("""
                     CREATE TRIGGER registeredLoan
-                    AFTER INSERT ON DisbursementDetails
+                    BEFORE INSERT ON DisbursementDetails
                     FOR EACH ROW 
                     BEGIN
                         
@@ -4148,7 +4150,7 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("DROP TRIGGER IF EXISTS loanSecurityCalaculationTrigger")
                 self.cursor.execute("""
                     CREATE TRIGGER loanSecurityCalaculationTrigger
-                    AFTER INSERT ON DisbursementDetails
+                    AFTER INSERT ON LoanRepaymentScheduleDetails
                     FOR EACH ROW 
                     BEGIN
                         INSERT INTO TotalLoanSecurity (AccountNumber, TotalSecurity)
@@ -4178,7 +4180,7 @@ class BankingDataBase(ConnectToMySql):
                 """)
                 self.cursor.execute("""                    
                     CREATE TRIGGER changeLoanRegistrationStatus
-                    AFTER INSERT ON LoanPaymentStatistics
+                    BEFORE INSERT ON LoanPaymentStatistics
                     FOR EACH ROW
                     BEGIN
                         IF  NEW.Portifolio = 0 THEN
@@ -4550,9 +4552,10 @@ class BankingDataBase(ConnectToMySql):
                     JOIN AccountsVault.BankAccount AS B ON B.AccountNumber = A.ClientID
                     JOIN NisaBranches.Branches AS C ON C.BranchId = A.BranchId
                     JOIN employeeDatabase.employeeDetails AS E ON E.EmployeeId = A.OfficerId
-                    LEFT JOIN LoanApplications.DisbursementDetails AS O ON O.LoanId = A.LoanId
                     WHERE
-                        O.LoanId IS NULL
+                        NOT EXISTS (SELECT LoanId FROM DisbursementDetails AS D  WHERE A.LoanId = D.LoanId )
+
+                    
                 """)
                 details = self.cursor.fetchall()
                 return [{
@@ -4764,6 +4767,8 @@ banking.Create_disbursement_table()
 banking.registeredLoans()
 banking.create_loanBalancingTable()
 banking.clientloanpaymentsAndInvestmentTable()
+
+
 
 
 # auth = AuthenticationDetails()
