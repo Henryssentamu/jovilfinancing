@@ -2494,10 +2494,11 @@ class BankingDataBase(ConnectToMySql):
         try:
             self.reconnect_if_needed()
             if self.cursor:
+                self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("DROP TRIGGER IF EXISTS insertIntoTotalInvestment")
                 self.cursor.execute("""
                     CREATE TRIGGER insertIntoTotalInvestment
-                    BEFORE INSERT ON ClientsInvestmentPaymentDetails
+                    AFTER INSERT ON ClientsInvestmentPaymentDetails
                     FOR EACH ROW
                     BEGIN
                         INSERT INTO ClientsTotalInvestment(
@@ -2748,55 +2749,16 @@ class BankingDataBase(ConnectToMySql):
                 current_date = current_date.strftime("%Y-%m-%d")
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
-                    SELECT
-                        SUM(Amount) AS TotalSavings
-                    FROM
-                        (
                             SELECT
-                                DATE(A.Date),
-                                A.ClientId,
-                                C.FirstName,
-                                C.SirName,
-                                A.Amount,
-                                B.BranchId,
-                                M.BranchName
+                                SUM(Amount)
                             FROM
-                                ClientsInvestmentPaymentDetails AS A
-                            JOIN
-                                (
-                                    SELECT
-                                        AccountNumber,
-                                        FirstName,
-                                        SirName
-                                    FROM
-                                        AccountsVault.BankAccount                   
-                                ) AS C ON C.AccountNumber = A.ClientId
-                            JOIN
-                                (
-                                    SELECT
-                                        AccountNumber,
-                                        BranchId
-                                    FROM
-                                        AccountsVault.branchDetails
-                                    
-                                ) AS B ON B.AccountNumber = A.ClientId
-                            JOIN
-                                (
-                                    SELECT
-                                        BranchId,
-                                        BranchName
-                                    FROM
-                                        NisaBranches.Branches             
-                                ) AS M ON M.BranchId = B.BranchId
+                                ClientsInvestmentPaymentDetails
                             WHERE
-                                DATE(A.Date) = %s           
-                        ) AS subquery;
-                    
+                                DATE(Date) = %s
                                   
                 """,(current_date,))
                 data = self.cursor.fetchone()
-                
-                if data[0] != None:
+                if data and data[0] != None:
                     return {"total":float(data[0])}
                 else:
                     return {"total":0}
@@ -3208,7 +3170,10 @@ class BankingDataBase(ConnectToMySql):
 
                 """,(self.employeeId,self.employeeId))
                 data = self.cursor.fetchone()
-                return {"totalPortifoli":data[0]}
+                if data and data[0] != None:
+                    return {"totalPortifoli":data[0]}
+                else:
+                    return {"totalPortifoli":0}
             else:
                 raise Exception("cursor not initialised in fetch LoanPaymentStatistics")
         except Exception as e:
@@ -3220,71 +3185,48 @@ class BankingDataBase(ConnectToMySql):
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
+               
                 self.cursor.execute("""
-                    SELECT
-                        SUM(Portifolio) AS TotalPortifolio
-                    FROM(
-                            SELECT
-                                A.LoanId,
-                                B.Portifolio,
-                                C.ClientID,
-                                C.BranchId,
-                                D.FirstName,
-                                D.SirName,
-                                E.PhoneNumber,
-                                F.BranchName
-                            FROM
-                                registeredLoans AS A
-                            JOIN
-                                (
-                                    SELECT
-                                        LoanId,
-                                        ClientID,
-                                        BranchId
-                                    FROM
-                                        LoanDetails              
-                                )AS C ON C.LoanId = A.LoanId
-                            JOIN
-                                (
-                                    SELECT
-                                        LoanId,
-                                        Portifolio
-                                    FROM
-                                        LoanPaymentStatistics
+                    with notMadeAnyPaymentYet as (
+                        SELECT
+                            COALESCE(SUM(A.Portifolio),0) AS total_notYetmadePayment
+                        FROM
+                            LoanRepaymentScheduleDetails AS A
+                        WHERE
+                            A.LoanId  IN (
+                                        SELECT
+                                            LoanId
+                                        FROM 
+                                            registeredLoans
+                                        WHERE
+                                            ActiveStatus = "unfinished"
+                                    ) AND NOT EXISTS(
+                                        SELECT
+                                            LoanId
+                                        FROM
+                                            ClientsLOANpaymentDETAILS AS B
+                                        WHERE
+                                            A.LoanId = B.LoanId
+                                    )          
+                    )
                                     
-                                ) AS B ON B.LoanId = A.LoanId
-                            JOIN
-                                (
-                                    SELECT
-                                        AccountNumber,
-                                        FirstName,
-                                        SirName
-                                    FROM
-                                        AccountsVault.BankAccount               
-                                ) AS D ON D.AccountNumber = C.ClientID
-                            JOIN
-                                (
-                                    SELECT
-                                        AccountNumber,
-                                        PhoneNumber
-                                    FROM
-                                        AccountsVault.ContactDetails               
-                                ) AS E ON E.AccountNumber = C.ClientID
-                            JOIN
-                                (
-                                    SELECT
-                                        BranchId,
-                                        BranchName
-                                    FROM
-                                        NisaBranches.Branches         
-                                )AS F ON F.BranchId = C.BranchId
-                            
-                            WHERE
-                                A.ActiveStatus = "unfinished"           
-                        ) AS Subquery;
+
+                    SELECT
+                        (SELECT total_notYetmadePayment FROM notMadeAnyPaymentYet ) +
+                        SUM(Portifolio)
+                    FROM
+                        (
+                            SELECT
+                                LoanId,
+                                Date,
+                                Portifolio,
+                                ROW_NUMBER() OVER (PARTITION BY LoanId ORDER BY Date DESC)  AS rn
+                            FROM
+                                LoanPaymentStatistics             
+                        ) AS latest_portifolio
+                    WHERE rn = 1
                 """)
                 data = self.cursor.fetchone()
-                print(f"ddd:{data}")
                 if data and data[0] != None:
                     return {"totalPortifoli":float(data[0])} 
                 else:
@@ -3514,7 +3456,10 @@ class BankingDataBase(ConnectToMySql):
                             ActiveStatus = "unfinished"
                 """)
                 data = self.cursor.fetchone()
-                return {"TOtalprinciple":data[0]}
+                if data and data[0] != None:
+                    return {"TOtalprinciple":data[0]}
+                else:
+                    return {"TOtalprinciple":0}
             else:
                 raise Exception("cursor not initialised in fetching current principle")
 
@@ -3855,13 +3800,12 @@ class BankingDataBase(ConnectToMySql):
         self.loanId = balancinDetails["loanId"]
         self.balancingWith = balancinDetails["withdrawAccount"]
         self.BalancingAmount = balancinDetails["amount"]
-        self.previousportifolio = balancinDetails["previousPortifolio"]
+        
         try:
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
                 self.cursor.execute("""
-                    
                     INSERT INTO LoanBalancing(
                         LoanId,
                         BalancingAmount,
@@ -3869,6 +3813,7 @@ class BankingDataBase(ConnectToMySql):
                     ) VALUES(%s,%s,%s)                    
                 """,(self.loanId,self.BalancingAmount,self.balancingWith ))
                 self.connection.commit()
+                return True
             else:
                 raise Exception("cursor not initialized while balancing the loan")
         except Exception as e:
@@ -3960,57 +3905,46 @@ class BankingDataBase(ConnectToMySql):
             return True
         return False
     
-    def updateClientTotalLoanSecurityTrigerAfterBalancing(self):
+    def updateClientTotalLoanSecurityTrigerAfterBalancing(self, amount,loanId):
         try:
             
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
-                self.cursor.execute("DROP TRIGGER IF EXISTS UPDATE_loanSecurity")
                 self.cursor.execute("""
-                    CREATE TRIGGER UPDATE_loanSecurity
-                    AFTER INSERT ON LoanBalancing
-                    FOR EACH ROW
-                    BEGIN
-                        UPDATE
-                            TotalLoanSecurity 
-                        SET
-                            TotalSecurity = COALESCE(TotalSecurity,0) - NEW.BalancingAmount
-                        WHERE
-                            AccountNumber = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId);
-                    END;
+                    UPDATE
+                        TotalLoanSecurity 
+                    SET
+                        TotalSecurity = COALESCE(TotalSecurity,0) - %s
+                    WHERE
+                        AccountNumber = (SELECT ClientID FROM LoanDetails WHERE LoanId = %s)
                                                         
-                """)
+                """,(amount,loanId))
                 self.connection.commit()
+                return True
             else:
                     raise Exception("cursor not initialized while updating client loan security after  balancing ")
         except Exception as e:
             raise Exception(f"error while updating client loan security after balancing:{e}")
 
     
-    def updateClientTotalInvestmentTrigerAfterBalancing(self):
+    def updateClientTotalInvestmentTrigerAfterBalancing(self, loanId, amount):
         try:
             
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
-                self.cursor.execute("DROP TRIGGER IF EXISTS investmenttrigger")
                 self.cursor.execute("""
-                    CREATE TRIGGER UPDATE investmenttrigger
-                    AFTER INSERT ON LoanBalancing
-                    FOR EACH ROW
-                    BEGIN
-                                      
-                        UPDATE
-                           ClientsTotalInvestment 
-                        SET
-                            TotalCurrentInvestment  = COALESCE(TotalCurrentInvestment,0) - NEW.BalancingAmount
-                        WHERE
-                            ClientId = (SELECT ClientID FROM LoanDetails WHERE LoanId = NEW.LoanId)
-                    END;
+                    UPDATE
+                        ClientsTotalInvestment 
+                    SET
+                        TotalCurrentInvestment  = COALESCE(TotalCurrentInvestment,0) - %s
+                    WHERE
+                        ClientId = (SELECT ClientID FROM LoanDetails WHERE LoanId = %s)
                                                         
-                """)
+                """,(amount,loanId))
                 self.connection.commit()
+                return True
             else:
                     raise Exception("cursor not initialized while updating client total investment after  balancing ")
         except Exception as e:
@@ -4019,39 +3953,20 @@ class BankingDataBase(ConnectToMySql):
         
 
 
-    def updatePortifolioAfterBalancingTrigger(self):
+    def updatePortifolioAfterBalancingTrigger(self, loanId, amount):
         try:
             self.reconnect_if_needed()
             if self.cursor:
                 self.cursor.execute("USE LoanApplications")
-                self.cursor.execute("DROP TRIGGER IF EXISTS updatingClientPortifolio")
                 self.cursor.execute("""
-                    CREATE TRIGGER updatingClientPortifolio
-                    AFTER INSERT ON LoanBalancing
-                    FOR EACH ROW
-                    BEGIN
-                        INSERT INTO LoanPaymentStatistics(
+                    INSERT INTO ClientsLOANpaymentDETAILS(
                             LoanId,
-                            Commitment,
-                            Paid,
-                            Balance,
-                            Portifolio            
+                            Amount            
                         )
-                        SELECT
-                            NEW.LoanId AS LoanId,
-                            db.DailCommitmentAmount AS Commitment,
-                            NEW.BalancingAmount AS Paid,
-                            db.DailCommitmentAmount - NEW.BalancingAmount AS Balance,
-                            db.Portifolio - (SELECT COALESCE(SUM(Amount),0) FROM ClientsLOANpaymentDETAILS WHERE LoanId = NEW.LoanId ) AS Portifolio 
-                        FROM
-                            LoanRepaymentScheduleDetails as db
-                        WHERE
-                            db.LoanId = NEW.LoanId;
-                    
-                    END; 
-                                                      
-                """)
+                    VALUES(%s,%s)                                   
+                """,(loanId,amount))
                 self.connection.commit()
+                return True
             else:
                 raise Exception("cursor not initialised while updating Portifolio After Balancing")
         except Exception as e:
@@ -4451,7 +4366,36 @@ class BankingDataBase(ConnectToMySql):
         except Exception as e:
             raise Exception(f"error while fetching client debted loan account details in GeneralDebtedLoanAccountDetail method :{e}")
         
-
+    def fetchTotalgeneralCreditCollections(self):
+        """
+            This method fetches total general credit collections
+            _Arg:branchid,(str)
+        """
+        current_date = datetime.now()
+        current_date = current_date.strftime("%Y-%m-%d")
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        SUM(Amount)
+                    FROM
+                        ClientsLOANpaymentDETAILS
+                    WHERE
+                        DATE(Date) = %s
+                         
+                """,(current_date,))
+                data = self.cursor.fetchone()
+                if data and data[0] != None:
+                    return {"AmountPaid":float(data[0])}
+                else:
+                    return {"AmountPaid":0}
+            else:
+                raise Exception("cursor not initialised while fetching total general credit collections")
+        except Exception as e:
+            raise Exception(f"error while fetching total general credit collections in GeneralDebtedLoanAccountDetail method :{e}")
+        
 
 
 

@@ -103,7 +103,6 @@ def managrDashboard():
         requestType = request.args.get("type")
         if requestType == "portifolio":
             portifolio = Bank.fetch_GeneralCurrentPortifolio()
-            print(portifolio)
             return jsonify(portifolio)
         elif requestType == "principle":
             principle = Bank.fetch_GeneralCurrentPrinciple()
@@ -113,7 +112,14 @@ def managrDashboard():
             return jsonify(total_investment)
         elif requestType == "loanSecurity":
             loanSecurity = Bank.fetch_total_security()
-            return loanSecurity
+            return jsonify(loanSecurity)
+        elif requestType == "loanpaymentDetails":
+            debtedLoanAccounts = Bank.fetchTotalgeneralCreditCollections()
+            return jsonify(debtedLoanAccounts)
+        elif requestType == "totalClientinvestments":
+            investments = Bank.fetch_GeneralCurrentClientsInvestmentTotal()
+            return jsonify(investments)
+    
     
     return render_template("managerDashboard.html")
 
@@ -897,26 +903,27 @@ def balancing():
         elif paymenttype == "amount":
             amount = request.json.get("amount")
             data = session.get("data")
-            details = {"loanId":data["loanId"],"withdrawAccount":data["reductFrom"],"amount":amount, "previousPortifolio":data["previousPortifolio"]}
+            loanID = data["loanId"]
+            details = {"loanId":loanID,"withdrawAccount":data["reductFrom"],"amount":amount}
+            
             # inserting into balancing table and updating the latest clients portifolio value
             bank = BankingDataBase()
             if data["reductFrom"] == "loanSecurity":
-                if bank.compareLoanSecurityAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
-                    bank.updateClientTotalLoanSecurityTrigerAfterBalancing()
-                    bank.updatePortifolioAfterBalancingTrigger()
-                    bank.balancing(balancinDetails=details)
-                    
-                    
                 
+                if bank.compareLoanSecurityAndBalancingFigure(loanid=loanID,balancingAmount=amount):
+                    if bank.balancing(balancinDetails=details):
+                        if bank.updatePortifolioAfterBalancingTrigger(loanId=loanID,amount=amount):
+                            bank.updateClientTotalLoanSecurityTrigerAfterBalancing(amount=amount,loanId=loanID)
                     
                     return jsonify({"response":"recieved"})
                 else:
                     return {"response":"current loan security is less"}
             elif data["reductFrom"] == "investment":
-                if bank.compareClientInvestmentAndBalancingFigure(loanid=data["loanId"],balancingAmount=amount):
-                    bank.balancing(balancinDetails=details)
-                    bank.updatePortifolioAfterBalancingTrigger()
-                    bank.updateClientTotalInvestmentTrigerAfterBalancing()
+                if bank.compareClientInvestmentAndBalancingFigure(loanid=loanID,balancingAmount=amount):
+                    if bank.balancing(balancinDetails=details):
+                        if bank.updatePortifolioAfterBalancingTrigger(loanId=loanID,amount=amount):
+                            bank.updateClientTotalInvestmentTrigerAfterBalancing(loanId=loanID,amount=amount)
+                    
                     return jsonify({"response":"recieved"})
                 else:
                     return {"response":"current investment is less"}
@@ -937,8 +944,9 @@ def Investmentpayments():
         elif postType == "amount":
             accountNumber = session.get("client_Account_Number")
             amount = request.json.get("amount")
-            banking.insert_into_ClientsInvestmentPaymentDetails(AccountNumber=accountNumber,amount=amount)
             banking.TotalInvestmentsTrigger()
+            banking.insert_into_ClientsInvestmentPaymentDetails(AccountNumber=accountNumber,amount=amount)
+            
             return jsonify({"response":"recieved"})
     
     return render_template("investmentPayment.html")
