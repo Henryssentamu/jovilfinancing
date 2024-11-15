@@ -2,6 +2,7 @@
 from datetime import datetime
 from pickle import TRUE
 import mysql.connector as sql
+from generateIds import GenerateIds
 
 
 
@@ -739,6 +740,78 @@ class Deptments(ConnectToMySql):
             raise Exception(f"error while fetching deptment details:{e}")
         finally:
             self.close_connection()
+
+
+
+class ManagersDatabase(ConnectToMySql):
+    def __init__(self):
+        super().__init__()
+        self.workStatus = "Activate"
+    def creat_database(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("CREATE DATABASE IF NOT EXISTS ManagersDatabase")
+                self.cursor.execute("""
+                    USE  ManagersDatabase;
+                    CREATE TABLE IF NOT EXISTS ManagersDetails (
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        EmployeeId VARCHAR(100) PRIMARY KEY,
+                        Mac VARCHAR(500) UNIQUE NOT NULL,
+                        WorkStatus VARCHAR(100)
+                    )  
+                """)
+            except Exception as e:
+                raise Exception(f"error while manager database:{e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initialised while creating ManagersDatabase")
+        
+    
+        
+    def insert_into_database(self, managerDatils):
+        self.reconnect_if_needed()
+        self.EmployeeId = managerDatils["employeeId"]
+        self.Mac = managerDatils["mac"]
+        if self.cursor:
+            try:
+                self.cursor.execute("USE ManagersDatabase")
+                self.cursor.execute("""
+                    INSERT INTO ManagersDetails(
+                        EmployeeId,
+                        Mac,
+                        WorkStatus                
+                    )VALUES(%s,%s,%s)
+                """,(self.EmployeeId, self.Mac,self.workStatus))
+                self.connection.commit()
+            except Exception as e:
+                raise Exception(f"error while inserting into ManagersDetails: {e}")
+            finally:
+                self.close_connection()
+        else:
+            raise Exception("cursor not initialised while inserting into ManagersDatabase")
+        
+    def existingMAC(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE ManagersDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        Mac               
+                    FROM
+                        ManagersDetails
+                """)
+                data = self.cursor.fetchall()
+                if data:
+                   return {obj[0]for obj in data}
+                else:
+                    return {obj for obj in data}
+            except Exception as e:
+                raise Exception(f"error while fetching existing mac:{e}")
+        else:
+            raise Exception("cursor not initialised while fetching existing mac")
 
 
 
@@ -4682,6 +4755,34 @@ class AuthenticationDetails(ConnectToMySql):
         finally:
             self.close_connection()
     
+    def is_amanager(self, employeeId,mac):
+        self.workStatus = "Activate"
+        self.reconnect_if_needed()
+        if self.cursor:
+            try:
+                self.cursor.execute("USE ManagersDatabase")
+                self.cursor.execute("""
+                    SELECT
+                        EmployeeId,
+                        Mac,
+                        WorkStatus
+                    FROM
+                        ManagersDetails
+                    WHERE
+                        EmployeeId = %s AND Mac = %s AND WorkStatus = %s  
+                """,(employeeId,mac,self.workStatus))
+                data = self.cursor.fetchone()
+                if data and data[0] != None:
+                    return TRUE
+                else:
+                    return False
+
+            except Exception as e:
+                raise Exception(f"error while checking if employee is a manager:{e}")
+        else:
+            raise Exception("cursor not intialised while hecking if employee is a manager")
+            
+    
 
 
 
@@ -4711,6 +4812,16 @@ banking.Create_disbursement_table()
 banking.registeredLoans()
 banking.create_loanBalancingTable()
 banking.clientloanpaymentsAndInvestmentTable()
+
+# creating a manager section
+
+# idobj = GenerateIds()
+# manager = ManagersDatabase()
+# manager.creat_database()
+# existingmac = manager.existingMAC()
+# mac = idobj.managerAuthenticationCode(existingMac=existingmac)
+# managerDetails = {"employeeId":"NE16854","mac":mac}
+# manager.insert_into_database(managerDatils=managerDetails)
 
 
 

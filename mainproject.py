@@ -8,7 +8,7 @@ from enviromentkeys import secret_key
 import mysql.connector as sql
 import io
 import os
-from DatabaseClasses import AuthenticationDetails, BankingDataBase, Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts
+from DatabaseClasses import AuthenticationDetails, BankingDataBase, Branches, ConnectToMySql, Deptments, EmployeeDatabase, ExistingIds, RegisterClient, ExistingAccounts,ManagersDatabase
 from generateAccountNumber import GenerateAccountNumber
 from loginmodule import Authenticate
 from generateIds import GenerateIds
@@ -62,6 +62,11 @@ def load_user(user_id):
 class LoginClass(FlaskForm):
     employeeId = StringField(label="EmployeeId",validators=[DataRequired(), Length(min=4, max=25)])
     password = PasswordField(label="password",validators=[DataRequired(),Length(min=3,max=30)])
+    mac = PasswordField(label="MAC",validators=[DataRequired(message="provide your MAC"),Length(min=5,max=30)])
+    submit = SubmitField('login')
+class LoginClassEmployees(FlaskForm):
+    employeeId = StringField(label="EmployeeId",validators=[DataRequired(), Length(min=4, max=25)])
+    password = PasswordField(label="password",validators=[DataRequired(),Length(min=3,max=30)])
     submit = SubmitField('login')
 
 
@@ -79,14 +84,18 @@ def loginManager():
         if form.validate_on_submit():
             employee_id = form.employeeId.data
             password = form.password.data
+            mac = form.mac.data
             auth = AuthenticationDetails()
             is_employee = auth.is_authenticatedEmployee(EmployeeId=employee_id,password=password)
             if is_employee:
-                employee = User(employee_id)
-                login_status = login_user(employee)
-                if login_status:
-                    session["logged_in_manager"] = employee_id
-                    return redirect(url_for('managrDashboard'))
+                if auth.is_amanager(employeeId=employee_id,mac=mac):
+                    employee = User(employee_id)
+                    login_status = login_user(employee)
+                    if login_status:
+                        session["logged_in_manager"] = employee_id
+                        return redirect(url_for('managrDashboard'))
+                else:
+                    return redirect(url_for('wrongCredentials'))
             else:
                 return redirect(url_for('wrongCredentials'))
 
@@ -682,7 +691,7 @@ def authenticationSetting():
 
 @app.route("/loginEmployess", methods=["GET","POST"])
 def loginEmployess():
-    form = LoginClass()
+    form = LoginClassEmployees()
     if request.method == "POST":
         if form.validate_on_submit():
             employee_id = form.employeeId.data

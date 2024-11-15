@@ -7,7 +7,9 @@ class GenerateIds:
         self.EmployeePrefix = "NE"
         self.DeptPrefix = "ND"
         self.loanIDprefix = "NL"
+        self.macPrefix = "GM"
         self.IdLength = 5
+        self.macLength = 10
 
     def branchId(self,existingBranchIDs):
         """_this methode is called whenever a new branch is created_
@@ -21,6 +23,25 @@ class GenerateIds:
             return id
         else:
             return self.branchId(self,existingBranchIDs)
+        
+    def managerAuthenticationCode(self,existingMac):
+        """_this methode is called whenever a new manager is created_
+            Args:
+                existingMac (_set_): _set of existing MAC_
+        """
+        if not isinstance(existingMac, set):
+            raise TypeError("existingMac must be a set of existing MAC addresses.")
+        
+        self.existingMAC = existingMac
+        number = str(secrets.randbelow(10 ** self.macLength)).zfill(self.macLength)
+        id = f"{self.macPrefix}{number}"
+
+        if id not in self.existingMAC:
+            return id
+        else:
+            return self.managerAuthenticationCode(self,existingMac)
+
+
 
     def employeeId(self,existingEmployeeIDs):
         """_this methode is called whenever a new employee is registered_
