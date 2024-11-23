@@ -19,12 +19,12 @@
     ],
     "screenshots": [
     {
-      "src": "static/screenshots/briefcase-solid (1).svg",
+      "src": "static/screenshots/mobileview1.png",
       "sizes": "1280x720",
       "type": "image/png"
     },
     {
-      "src": "static/screenshots/briefcase-solid (1).svg",
+      "src": "static/screenshots/desktopview.png",
       "sizes": "1280x720",
       "type": "image/png"
     }
