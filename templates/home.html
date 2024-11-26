@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Microfinance Bank</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="static/style.css">
-    <link rel="manifest" href="../static/manifest.json">
+    <!-- <link rel="manifest" href="../static/manifest.json"> -->
 
     
     
@@ -16,14 +16,30 @@
     <header class="bg-light py-3">
         <div class="container d-flex justify-content-between align-items-center">
             <h1 class="logo">NISA Financing</h1>
-            <nav>
+            <!-- <nav>
                 <a href="{{url_for('crediofficerDashboard')}}" class="mr-3">Home</a>
                 <a href="#" class="mr-3">Services</a>
                 <a href="#">Contact</a>
-            </nav>
+            </nav> -->
             <div>
-                <a href="#" class="btn btn-outline-primary mr-2">Login</a>
-                <a href="#" class="btn btn-primary">Signup</a>
+                <a data-bs-target="#loginoptions" data-bs-toggle="modal" class="btn btn-outline-primary mr-2">Login</a>
+                <div class="modal" id="loginoptions">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Login Options</h5>
+                                <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <a href="{{url_for('crediofficerDashboard')}}" class="btn btn-outline-success">Credit Officer</a>
+                                <a href="{{url_for('managrDashboard')}}" class="btn btn-outline-info">Manager</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                </div>
             </div>
         </div>
     </header>
@@ -31,8 +47,8 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container text-center">
-            <h1>Empowering Your Financial Future</h1>
-            <p>Offering Loans, Savings, and Financial Services to help you grow</p>
+            <!-- <h1>Empowering Your Financial Future</h1> -->
+            <!-- <p>Offering Loans, Savings, and Financial Services to help you grow</p> -->
             <a href="#" class="btn btn-primary btn-lg">Get Started</a>
         </div>
     </section>
@@ -44,25 +60,100 @@
             <div class="row">
                 <div class="col-md-4">
                     <i class="service-icon fas fa-hand-holding-usd"></i>
-                    <h4>Loans</h4>
-                    <p>Affordable loan solutions tailored to your needs.</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="service-icon fas fa-piggy-bank"></i>
-                    <h4>Savings</h4>
-                    <p>Secure and flexible savings plans.</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="service-icon fas fa-briefcase"></i>
-                    <h4>Business Financing</h4>
-                    <p>Empowering small businesses with accessible financing options.</p>
+                    <h4>1. Loans</h4>
+                    <p>Discover affordable loan solutions tailored to meet your financial needs. We offer a variety of loan options to suit different repayment schedules and preferences, ensuring flexibility and reliability..</p>
+                    <div class="loan-types">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h4>Daily Loans</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Interest Rate:</strong> 20%</p>
+                                <p><strong>Requirements:</strong></p>
+                                <ul>
+                                    <li>10% loan security (collateral).</li>
+                                    <li>Recommendation letter from the LC1 chairman of your working area.</li>
+                                    <li>A guarantor.</li>
+                                </ul>
+                            </div>
+                        </div>
+                
+                        <div class="card mb-4">
+                            <div class="card-header bg-success text-white">
+                                <h4>Weekly Loans</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Interest Rate:</strong> 17%</p>
+                                <p><strong>Requirements:</strong></p>
+                                <ul>
+                                    <li>15% loan security & business assets (fixed) as collateral.</li>
+                                    <li>Recommendation letter from the LC1 chairman of your working area.</li>
+                                    <li>A guarantor.</li>
+                                </ul>
+                            </div>
+                        </div>
+                
+                        <div class="card mb-4">
+                            <div class="card-header bg-warning text-white">
+                                <h4>Monthly Loans</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Interest Rate:</strong> 15%</p>
+                                <p><strong>Requirements:</strong></p>
+                                <ul>
+                                    <li>Land title, agreement, car, or buildings as collateral.</li>
+                                    <li>Recommendation letter from the LC1 chairman of your residence.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+
+<!-- yuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu -->
+            <div class="col-md-4">
+                <i class="service-icon fas fa-piggy-bank"></i>
+                <h2 class="text-center mb-4">2. Savings</h2>
+                <p class="text-center">
+                    Secure and flexible savings plans designed to help you grow your wealth with peace of mind.  
+                </p>
+            
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>Savings Plan Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Our savings plans are tailored to ensure flexibility while offering competitive returns on your investments.
+                        </p>
+                        <h5 class="mt-3">Interest Rates and Conditions:</h5>
+                        <ul>
+                            <li>
+                                At **maturity** (when the client has invested for a full year), the total investment earns 
+                                <strong>20% simple interest.</strong>
+                            </li>
+                            <li>
+                                Clients can request to withdraw their investments at any point as long as they have invested for at least 
+                                <strong>6 months.</strong>
+                            </li>
+                            <li>
+                                Investments withdrawn before maturity (less than 1 year) earn <strong>no interest.</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-md-4">
+                <i class="service-icon fas fa-briefcase"></i>
+                <h4>Business Financing</h4>
+                <p>Empowering small businesses with accessible financing options.</p>
+            </div> -->
         </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials bg-light py-5">
+    <!-- <section class="testimonials bg-light py-5">
         <div class="container text-center">
             <h2 class="mb-5">What Our Clients Say</h2>
             <blockquote class="blockquote">
@@ -70,12 +161,12 @@
                 <footer class="blockquote-footer">John Doe, Business Owner</footer>
             </blockquote>
         </div>
-    </section>
+    </section> -->
 
     <!-- Footer Section -->
     <footer>
-        <p>&copy; 2024 Microfinance Bank | All rights reserved.</p>
-        <p>123 Bank Street, Finance City | +1 234 567 890</p>
+        <p>&copy; 2024 Nisa Financing | All rights reserved.</p>
+        <p>123 Kanjokya Street, Kanjokya house | +256 755981066</p>
         <div>
             <a href="#" class="mr-3">Terms & Conditions</a>
             <a href="#">Privacy Policy</a>
@@ -83,7 +174,8 @@
     </footer>
 
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    <script src="../static/jsFiles/workerRegistra.js"></script>
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="../static/jsFiles/workerRegistra.js"></script> -->
     
     </script>
 </body>
