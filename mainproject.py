@@ -14,6 +14,23 @@ from wtforms import StringField,PasswordField,SubmitField
 from wtforms.validators import DataRequired,Length
 
 
+
+# [Unit]
+# Description=gunicorn daemon for nisa app
+# After=network.target
+
+# [Service]
+# User=root
+# Group=root
+# WorkingDirectory=/home/nisaserver/jovilFinancing
+# ExecStart=/home/nisaserver/jovilFinancing/venvjovil/bin/gunicorn --workers 3 --bind unix:/home/nisaserver/jovilFinancing/gunicorn.sock wsgi:app
+
+# [Install]
+# WantedBy=multi-user.target
+
+
+
+
 from flask_login import LoginManager, UserMixin, logout_user, login_required,login_user,login_remembered, current_user
 
 
@@ -1121,6 +1138,7 @@ def clientProfile():
         if requesttype == "clientDetails":
             """fetching clients personal details"""
             clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
+            
             return clientDetails
         elif requesttype == "clientCreditdetails":
             """fetching clients credit details"""
