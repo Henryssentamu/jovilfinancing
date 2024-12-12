@@ -201,12 +201,12 @@ function generatepersonalHtml(data) {
                     <div class="col">
                         <div class="card mb-3">
                             <div class="card-header">
-                                <div>contact info</div>
+                                <div>Permanent info</div>
                             </div>
                             <div class="card-body">
                                 <div>  <strong>PhoneNumber: </strong> <span>${obj["PhoneNumber"]}</span></div>
-                                <div>  <strong>Current Address: </strong>   <span> ${obj["CurrentAddress"]} </span>  </div>
-                                <div>   <strong>Divission/City:</strong> ${obj["CityDivision"]} <span></span> </div>
+                                <div>  <strong>Village: </strong>   <span> ${obj["Village"]} </span>  </div>
+                                <div>   <strong>Parish:</strong> ${obj["Parish"]} <span></span> </div>
                                 <div>   <strong>District:</strong> <span>${obj["District"]} </span> </div>
                             </div>
                         </div>
@@ -218,9 +218,7 @@ function generatepersonalHtml(data) {
                                 <div>Occupation Details </div>
                             </div>
                             <div class="card-body">
-                                <div> <strong>Occupation:</strong> <span> vendor </span> </div>
-                                <div> <strong>working Area:</strong>   <span>kalerwe markete</span> </div>
-                                <div> <strong>Zone</strong>  <span>Dembe market </span> </div>
+                                
                             </div>
                         </div>
                     </div>

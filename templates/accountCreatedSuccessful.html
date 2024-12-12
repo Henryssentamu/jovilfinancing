@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Opened Successfully</title>
+    <link href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+        .card-body {
+            padding: 2rem;
+        }
+        .text-success svg {
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center mt-5">
+        <div class="card shadow-lg mx-auto" style="max-width: 500px; background-color: #ffffff;">
+            <div class="card-body">
+                <div class="text-success mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                        <path d="M15.854 8a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0zM14.03 8A6.5 6.5 0 1 0 8 14.03 6.5 6.5 0 0 0 14.03 8zM10.97 5.03a.75.75 0 1 1-1.06 1.06L7.25 8.75l-1.72-1.72a.75.75 0 0 1 1.06-1.06l1.34 1.34 2.72-2.72a.75.75 0 0 1 1.06 0z"/>
+                    </svg>
+                </div>
+                <h1 class="h4">Account Successfully Created!</h1>
+                <p class="text-muted">To access the client’s account number, view their profile through the Client Center.<br>Navigate to "All Clients" and select the client’s name.</p>
+                <div class="d-flex justify-content-center gap-2 mt-4">
+                    <a href="{{url_for('crediofficerDashboard')}}" class="btn btn-primary">Go to Dashboard</a>
+                    <a href="{{url_for('registerClient')}}" class="btn btn-outline-secondary">Create Another Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

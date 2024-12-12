@@ -13,6 +13,8 @@ function getRegistrationDetails(){
     formdata.append("phonenumber",  document.getElementById("contact").value)
     formdata.append("address", document.getElementById("address").value)
     formdata.append("city", document.getElementById("city").value)
+    formdata.append("scounty", document.getElementById("scounty").value)
+    formdata.append("county", document.getElementById("county").value)
     formdata.append("state", document.getElementById("state").value)
     formdata.append("nextOfKinFirstName", document.getElementById("nextofKinfirstName").value)
     formdata.append("nextOfKinSirName", document.getElementById("nextofKinsirName").value)
@@ -44,7 +46,7 @@ function sendInputToServer() {
         })
         .then(data =>{
             loader.style.display = "none";
-            location.reload()
+            location.href="/accountCreatedSuccessful";
             
         })
         .catch(error =>{

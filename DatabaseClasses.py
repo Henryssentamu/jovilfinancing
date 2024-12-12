@@ -1299,8 +1299,10 @@ class BankingDataBase(ConnectToMySql):
                         CREATE TABLE IF NOT EXISTS ContactDetails(
                             Date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             AccountNumber VARCHAR(500),
-                            CurrentAddress VARCHAR(300),
-                            CityDivision VARCHAR(300),
+                            Village VARCHAR(300),
+                            Parish VARCHAR(300),
+                            SubCounty VARCHAR(300),
+                            County VARCHAR(300),
                             District VARCHAR(300),
                             PhoneNumber VARCHAR(100),
                             FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE  
@@ -1360,8 +1362,10 @@ class BankingDataBase(ConnectToMySql):
         self.DateOfBirth = accountObject["DateOfBirth"]
         self.Religion = accountObject["Religion"]
         self.Gender = accountObject["Gender"]
-        self.CurrentAddress = accountObject["CurrentAddress"]
-        self.CityDivision = accountObject["CityDivision"]
+        self.Village = accountObject["Village"]
+        self.Parish = accountObject["Parish"]
+        self.SCounty = accountObject["SCounty"]
+        self.county = accountObject["county"]
         self.District = accountObject["District"]
         self.PhoneNumber = accountObject["PhoneNumber"]
        
@@ -1411,12 +1415,14 @@ class BankingDataBase(ConnectToMySql):
                 self.cursor.execute("""
                     INSERT INTO ContactDetails(
                         AccountNumber,
-                        CurrentAddress,
-                        CityDivision,
+                        Village,
+                        Parish,
+                        SubCounty,
+                        County,
                         District,
                         PhoneNumber                
-                    ) VALUES(%s,%s,%s,%s,%s)
-                """,(self.AccountNumber,self.CurrentAddress,self.CityDivision, self.District,self.PhoneNumber))
+                    ) VALUES(%s,%s,%s,%s,%s,%s,%s)
+                """,(self.AccountNumber,self.Village,self.Parish,self.SCounty,self.county, self.District,self.PhoneNumber))
                 self.cursor.execute("""
                     INSERT INTO NextOfKinDetails(
                         AccountNumber,
@@ -1475,8 +1481,10 @@ class BankingDataBase(ConnectToMySql):
                         P.DateOfBirth,
                         P.Religion,
                         P.Gender,
-                        C.CurrentAddress,
-                        C.CityDivision,
+                        C.Village,
+                        C.Parish,
+                        C.SubCounty,
+                        C.County,
                         C.District,
                         C.PhoneNumber,
                         N.FirstName,
@@ -1505,20 +1513,22 @@ class BankingDataBase(ConnectToMySql):
                                 "DateOfBirth":obj[4],
                                 "Religion":obj[5],
                                 "Gender":obj[6],
-                                "CurrentAddress":obj[7],
-                                "CityDivision":obj[8],
-                                "District":obj[9],
-                                "PhoneNumber":obj[10],
+                                "Village":obj[7],
+                                "Parish":obj[8],
+                                "SubCounty":obj[9],
+                                "County":obj[10],
+                                "District":obj[11],
+                                "PhoneNumber":obj[12],
                                 "nextOfKinDetails":{
-                                    "FirstName":obj[11],
-                                    "SirName":obj[12],
-                                    "PhoneNumber":obj[13],
-                                    "Location":obj[14]
+                                    "FirstName":obj[13],
+                                    "SirName":obj[14],
+                                    "PhoneNumber":obj[15],
+                                    "Location":obj[16]
                                 },
-                                "AccountOwnerPic":obj[15],
+                                "AccountOwnerPic":obj[17],
                                 "branchDetails":{
-                                    "BranchId":obj[16],
-                                    "officerId":obj[17]
+                                    "BranchId":obj[18],
+                                    "officerId":obj[19]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1550,8 +1560,10 @@ class BankingDataBase(ConnectToMySql):
                         P.DateOfBirth,
                         P.Religion,
                         P.Gender,
-                        C.CurrentAddress,
-                        C.CityDivision,
+                        C.Village,
+                        C.Parish,
+                        C.SubCounty,
+                        C.County,
                         C.District,
                         C.PhoneNumber,
                         N.FirstName,
@@ -1583,20 +1595,22 @@ class BankingDataBase(ConnectToMySql):
                                 "DateOfBirth":obj[4],
                                 "Religion":obj[5],
                                 "Gender":obj[6],
-                                "CurrentAddress":obj[7],
-                                "CityDivision":obj[8],
-                                "District":obj[9],
-                                "PhoneNumber":obj[10],
+                                "Village":obj[7],
+                                "Parish":obj[8],
+                                "Subcounty":obj[9],
+                                "County":obj[10],
+                                "District":obj[11],
+                                "PhoneNumber":obj[12],
                                 "nextOfKinDetails":{
-                                    "FirstName":obj[11],
-                                    "SirName":obj[12],
-                                    "PhoneNumber":obj[13],
-                                    "Location":obj[14]
+                                    "FirstName":obj[13],
+                                    "SirName":obj[14],
+                                    "PhoneNumber":obj[15],
+                                    "Location":obj[16]
                                 },
-                                "AccountOwnerPic":obj[15],
+                                "AccountOwnerPic":obj[17],
                                 "branchDetails":{
-                                    "BranchId":obj[16],
-                                    "officerId":obj[17]
+                                    "BranchId":obj[18],
+                                    "officerId":obj[19]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1629,8 +1643,10 @@ class BankingDataBase(ConnectToMySql):
                         P.DateOfBirth,
                         P.Religion,
                         P.Gender,
-                        C.CurrentAddress,
-                        C.CityDivision,
+                        C.Village,
+                        C.Parish,
+                        C.SubCounty,
+                        C.County,
                         C.District,
                         C.PhoneNumber,
                         N.FirstName,
@@ -1662,20 +1678,22 @@ class BankingDataBase(ConnectToMySql):
                                 "DateOfBirth":obj[4],
                                 "Religion":obj[5],
                                 "Gender":obj[6],
-                                "CurrentAddress":obj[7],
-                                "CityDivision":obj[8],
-                                "District":obj[9],
-                                "PhoneNumber":obj[10],
+                                "Village":obj[7],
+                                "Parish":obj[8],
+                                "Subcounty":obj[9],
+                                "County":obj[10],
+                                "District":obj[11],
+                                "PhoneNumber":obj[12],
                                 "nextOfKinDetails":{
-                                    "FirstName":obj[11],
-                                    "SirName":obj[12],
-                                    "PhoneNumber":obj[13],
-                                    "Location":obj[14]
+                                    "FirstName":obj[13],
+                                    "SirName":obj[14],
+                                    "PhoneNumber":obj[15],
+                                    "Location":obj[16]
                                 },
-                                "AccountOwnerPic":obj[15],
+                                "AccountOwnerPic":obj[17],
                                 "branchDetails":{
-                                    "BranchId":obj[16],
-                                    "officerId":obj[17]
+                                    "BranchId":obj[18],
+                                    "officerId":obj[19]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1709,8 +1727,10 @@ class BankingDataBase(ConnectToMySql):
                         P.DateOfBirth,
                         P.Religion,
                         P.Gender,
-                        C.CurrentAddress,
-                        C.CityDivision,
+                        C.Village,
+                        C.Parish,
+                        C.SubCounty,
+                        C.County,
                         C.District,
                         C.PhoneNumber,
                         N.FirstName,
@@ -1742,20 +1762,22 @@ class BankingDataBase(ConnectToMySql):
                                 "DateOfBirth":obj[4],
                                 "Religion":obj[5],
                                 "Gender":obj[6],
-                                "CurrentAddress":obj[7],
-                                "CityDivision":obj[8],
-                                "District":obj[9],
-                                "PhoneNumber":obj[10],
+                                "Village":obj[7],
+                                "Parish":obj[8],
+                                "Subcounty":obj[9],
+                                "County":obj[10],
+                                "District":obj[11],
+                                "PhoneNumber":obj[12],
                                 "nextOfKinDetails":{
-                                    "FirstName":obj[11],
-                                    "SirName":obj[12],
-                                    "PhoneNumber":obj[13],
-                                    "Location":obj[14]
+                                    "FirstName":obj[13],
+                                    "SirName":obj[14],
+                                    "PhoneNumber":obj[15],
+                                    "Location":obj[16]
                                 },
-                                "AccountOwnerPic":obj[15],
+                                "AccountOwnerPic":obj[17],
                                 "branchDetails":{
-                                    "BranchId":obj[16],
-                                    "officerId":obj[17]
+                                    "BranchId":obj[18],
+                                    "officerId":obj[19]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -2036,8 +2058,10 @@ class BankingDataBase(ConnectToMySql):
                         P.DateOfBirth,
                         P.Religion,
                         P.Gender,
-                        C.CurrentAddress,
-                        C.CityDivision,
+                        C.Village,
+                        C.Parish,
+                        C.SubCounty,
+                        C.County,
                         C.District,
                         C.PhoneNumber,
                         N.FirstName,
@@ -2072,21 +2096,23 @@ class BankingDataBase(ConnectToMySql):
                                 "DateOfBirth":obj[4],
                                 "Religion":obj[5],
                                 "Gender":obj[6],
-                                "CurrentAddress":obj[7],
-                                "CityDivision":obj[8],
-                                "District":obj[9],
-                                "PhoneNumber":obj[10],
+                                "Village":obj[7],
+                                "Parish":obj[8],
+                                "Subcounty":obj[9],
+                                "County":obj[10],
+                                "District":obj[11],
+                                "PhoneNumber":obj[12],
                                 "nextOfKinDetails":{
-                                    "FirstName":obj[11],
-                                    "SirName":obj[12],
-                                    "PhoneNumber":obj[13],
-                                    "Location":obj[14]
+                                    "FirstName":obj[13],
+                                    "SirName":obj[14],
+                                    "PhoneNumber":obj[15],
+                                    "Location":obj[16]
                                 },
-                                "AccountOwnerPic":obj[15],
+                                "AccountOwnerPic":obj[17],
                                 "branchDetails":{
-                                    "BranchId":obj[16],
-                                    "Branchname":obj[18],
-                                    "officerId":obj[17]
+                                    "BranchId":obj[18],
+                                    "Branchname":obj[19],
+                                    "officerId":obj[20]
                                 }
                             } for obj in data]
             except Exception as e:

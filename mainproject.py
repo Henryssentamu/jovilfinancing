@@ -801,6 +801,8 @@ def registerClient():
                 phonenumber = request.form.get("phonenumber")
                 address = request.form.get("address")
                 city = request.form.get("city")
+                scounty = request.form.get("scounty")
+                county = request.form.get("county")
                 state = request.form.get("state")
                 
                 # next of kin details
@@ -834,8 +836,10 @@ def registerClient():
                     "Gender":gender,
                     "Religion":religion,
                     "NinNumber":ninNumber,
-                    "CurrentAddress":address,
-                    "CityDivision":city,
+                    "Village":address,
+                    "Parish":city,
+                    "SCounty":scounty,
+                    "county":county,
                     "District":state,
                     "OwnerPic":ownerpic_relative_file_path,
                     "NationalIdPic":ownernatioanlID_relative_file_path,
@@ -866,6 +870,10 @@ def registerClient():
         
     
     return render_template("registerClient.html")
+
+@app.route("/accountCreatedSuccessful")
+def accountCreatedSuccessful():
+    return render_template("accountCreatedSuccessful.html")
 
 
 
