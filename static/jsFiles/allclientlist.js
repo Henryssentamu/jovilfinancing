@@ -25,6 +25,7 @@ async function getclientlist() {
 
 
 function generateHtml(data){
+    const number = data.length;
     let html = ""
     data.forEach((clientObject,index) =>{
         html += `
@@ -33,13 +34,13 @@ function generateHtml(data){
                 <td>
                     <a class="clientLink" data-client-id="${clientObject["AccountNumber"]}" style="cursor: pointer;" >${clientObject["FirstName"]} <span style="margin-left:3px"> ${clientObject["SirName"]}</span> </a>
                 </td>
-                <td> ${clientObject["PhoneNumber"]}</td>
+                <td> ${clientObject["CurrentAddressDetails"]["PhoneNumber"]}</td>
                 <td> ${clientObject["Gender"]}</td>
             </tr>
         `
 
     })
-    return html
+    return {"html":html,"total":number}
 }
 
 async function sendClientIdToserver(){
@@ -80,9 +81,11 @@ async function sendClientIdToserver(){
 
 async function loadhtml() {
     const data = await getclientlist();
-    const html =   await generateHtml(data);
+    const Datadetails =   await generateHtml(data);
     document.getElementById("employeeDetails")
-        .innerHTML = html;
+        .innerHTML = Datadetails["html"];
+    document.getElementById("totalNumber")
+        .innerHTML = Datadetails["total"]
     sendClientIdToserver();
     
 }

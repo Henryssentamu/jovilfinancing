@@ -1108,6 +1108,7 @@ def allClientList():
             try:
                 clientObject = BankingDataBase()
                 data = clientObject.fetchAllClientAccountDetailsForSpecificEmployee(employeeId=officer_id)
+                
                 return jsonify(data)
             except Exception as e:
                 raise Exception(f"error while calling fetchEmployeeDetails method in allclient route:{e}")
