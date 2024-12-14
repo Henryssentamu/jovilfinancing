@@ -244,6 +244,11 @@ function generatepersonalHtml(data) {
                             <div class="col">Name</div>
                             <div class="col">${obj["FirstName"]} <span> </span> ${obj["SirName"]} </div>
                         </div>
+                        <div class="row bg-success text-white">
+                            <div class="col"> Account Number</div>
+                            <div onclick="copyToClipboard('${obj["AccountNumber"]}')"  style="cursor: pointer;" title="Click to copy" class="col"> ${obj["AccountNumber"]}</div>
+                        
+                        </div>
                         
     
                     </div>
@@ -287,6 +292,14 @@ function generatepersonalHtml(data) {
     return html
 
     
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard:', text);
+    }).catch(err => {
+        alert('Failed to copy to clipboard:', err);
+    });
 }
 
 async function loadCredit() {
