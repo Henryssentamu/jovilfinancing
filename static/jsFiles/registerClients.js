@@ -16,6 +16,11 @@ function getRegistrationDetails(){
     formdata.append("scounty", document.getElementById("scounty").value)
     formdata.append("county", document.getElementById("county").value)
     formdata.append("state", document.getElementById("state").value)
+    // current address details
+    formdata.append("CurrentVillage", document.getElementById("CurrentVillage").value)
+    formdata.append("CurrentDivision", document.getElementById("currentDivions").value)
+    formdata.append("CurrentDistrict", document.getElementById("currentDistrict").value)
+
     formdata.append("nextOfKinFirstName", document.getElementById("nextofKinfirstName").value)
     formdata.append("nextOfKinSirName", document.getElementById("nextofKinsirName").value)
     formdata.append("nextOfKinPhone", document.getElementById("nextofKinPhone").value)

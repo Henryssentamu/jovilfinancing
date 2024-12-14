@@ -24,6 +24,12 @@
             background-color: #007bff;
             color: #ffffff;
         }
+        .subHeadings{
+            padding: 10px;
+            font-size: larger;
+            font-weight: bolder;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
 
         /* General Loader Styles */
         .loader-container {
@@ -122,7 +128,7 @@
 
                 <!-- Address Information -->
                 <div class="form-row">
-                    <p>Provide details as they're On Nationa Id</p>
+                    <p class="subHeadings">Provide details as they're On Nation Id</p>
                     <div class="form-group col-md-6">
                         <label for="address">Village</label>
                         <input type="text" class="form-control" id="address" name="address" required>
@@ -147,9 +153,25 @@
                         <input type="text" class="form-control" id="state" name="state" required>
                     </div>
                 </div>
+                <div class="form-row">
+                    <p class="subHeadings">Client's Current Address </p>
+                    <div class="form-group col-md-3">
+                        <label for="state"> Village / Zone </label>
+                        <input type="text" class="form-control" id="CurrentVillage" name="cvillage" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="state">Divission </label>
+                        <input type="text" class="form-control" id="currentDivions" name="cdivision" required>
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="state">District </label>
+                        <input type="text" class="form-control" id="currentDistrict" name="cDistrict" required>
+                    </div>
+                </div>
 
                 <!-- Security Information -->
                 <div class="form-row">
+                    <div class="subHeadings">Provide Next of Kin Details</div>
                     <div class="form-group col-md-6">
                         <label for="nextofKin">Next of kin (First Name)</label>
                         <input type="text" class="form-control" id="nextofKinfirstName" name="nextofKin" required>
@@ -174,6 +196,7 @@
                 </div>
 
                 <div class="form-row">
+                    <div class="subHeadings">Client's Image Section</div>
                     <div class="form-group col-md-6">
                         <label for="img"> Upload Client's Image</label>
                         <input type="file" id="ownerPic" class="form-controk btn-outline-light"  accept="image/*" required>

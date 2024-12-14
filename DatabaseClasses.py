@@ -1296,13 +1296,23 @@ class BankingDataBase(ConnectToMySql):
                         )
                     """)
                     self.cursor.execute("""
-                        CREATE TABLE IF NOT EXISTS ContactDetails(
+                        CREATE TABLE IF NOT EXISTS PermanentContactDetails(
                             Date DATETIME DEFAULT CURRENT_TIMESTAMP,
                             AccountNumber VARCHAR(500),
                             Village VARCHAR(300),
                             Parish VARCHAR(300),
                             SubCounty VARCHAR(300),
                             County VARCHAR(300),
+                            District VARCHAR(300),
+                            FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE  
+                        )    
+                    """)
+                    self.cursor.execute("""
+                        CREATE TABLE IF NOT EXISTS CurrentContactDetails(
+                            Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            AccountNumber VARCHAR(500),
+                            Village VARCHAR(300),
+                            Division VARCHAR(300),
                             District VARCHAR(300),
                             PhoneNumber VARCHAR(100),
                             FOREIGN KEY(AccountNumber) REFERENCES BankAccount(AccountNumber) ON DELETE CASCADE  
@@ -1368,6 +1378,9 @@ class BankingDataBase(ConnectToMySql):
         self.county = accountObject["county"]
         self.District = accountObject["District"]
         self.PhoneNumber = accountObject["PhoneNumber"]
+        self.CurrentVillage = accountObject["CurrentVillage"]
+        self.CurrentDivision = accountObject["CurrentDivision"]
+        self.CurrentDistrict = accountObject["CurrentDistrict"]
        
         # next of kin details
         self.nextOfKinDetails = accountObject["NextKinDetails"]
@@ -1413,16 +1426,25 @@ class BankingDataBase(ConnectToMySql):
                     ) VALUES (%s,%s,%s,%s)
                 """,(self.AccountNumber, self.DateOfBirth,self.Religion,self.Gender))
                 self.cursor.execute("""
-                    INSERT INTO ContactDetails(
+                    INSERT INTO PermanentContactDetails(
                         AccountNumber,
                         Village,
                         Parish,
                         SubCounty,
                         County,
+                        District                
+                    ) VALUES(%s,%s,%s,%s,%s,%s)
+                """,(self.AccountNumber,self.Village,self.Parish,self.SCounty,self.county, self.District))
+
+                self.cursor.execute("""
+                    INSERT INTO CurrentContactDetails(
+                        AccountNumber,
+                        Village,
+                        Division,
                         District,
                         PhoneNumber                
-                    ) VALUES(%s,%s,%s,%s,%s,%s,%s)
-                """,(self.AccountNumber,self.Village,self.Parish,self.SCounty,self.county, self.District,self.PhoneNumber))
+                    ) VALUES(%s,%s,%s,%s,%s)
+                """,(self.AccountNumber, self.CurrentVillage, self.CurrentDivision, self.CurrentDistrict, self.PhoneNumber))
                 self.cursor.execute("""
                     INSERT INTO NextOfKinDetails(
                         AccountNumber,
@@ -1486,11 +1508,14 @@ class BankingDataBase(ConnectToMySql):
                         C.SubCounty,
                         C.County,
                         C.District,
-                        C.PhoneNumber,
                         N.FirstName,
                         N.SirName,
                         N.PhoneNumber,
                         N.Location,
+                        M.Village,
+                        M.Division,
+                        M.District,
+                        M.PhoneNumber,
                         T.Photo ownerpic,
                         D.BranchId,
                         D.OfficerId
@@ -1498,7 +1523,8 @@ class BankingDataBase(ConnectToMySql):
                         BankAccount AS B
                     JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
                     JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
-                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN PermanentContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN CurrentContactDetails AS M ON M.AccountNumber = B.AccountNumber
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber 
@@ -1518,17 +1544,22 @@ class BankingDataBase(ConnectToMySql):
                                 "SubCounty":obj[9],
                                 "County":obj[10],
                                 "District":obj[11],
-                                "PhoneNumber":obj[12],
-                                "nextOfKinDetails":{
-                                    "FirstName":obj[13],
-                                    "SirName":obj[14],
-                                    "PhoneNumber":obj[15],
-                                    "Location":obj[16]
+                                "CurrentAddressDetails":{
+                                    "Village":obj[16],
+                                    "Division":obj[17],
+                                    "Districk":obj[18],
+                                    "PhoneNumber":obj[19]
                                 },
-                                "AccountOwnerPic":obj[17],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[12],
+                                    "SirName":obj[13],
+                                    "PhoneNumber":obj[14],
+                                    "Location":obj[15]
+                                },
+                                "AccountOwnerPic":obj[20],
                                 "branchDetails":{
-                                    "BranchId":obj[18],
-                                    "officerId":obj[19]
+                                    "BranchId":obj[21],
+                                    "officerId":obj[22]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1565,11 +1596,14 @@ class BankingDataBase(ConnectToMySql):
                         C.SubCounty,
                         C.County,
                         C.District,
-                        C.PhoneNumber,
                         N.FirstName,
                         N.SirName,
                         N.PhoneNumber,
                         N.Location,
+                        M.Village,
+                        M.Division,
+                        M.District,
+                        M.PhoneNumber,
                         T.Photo ownerpic,
                         D.BranchId,
                         D.OfficerId
@@ -1577,7 +1611,8 @@ class BankingDataBase(ConnectToMySql):
                         BankAccount AS B
                     JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
                     JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
-                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN PermanentContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN CurrentContactDetails AS M ON M.AccountNumber = B.AccountNumber
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
@@ -1600,17 +1635,22 @@ class BankingDataBase(ConnectToMySql):
                                 "Subcounty":obj[9],
                                 "County":obj[10],
                                 "District":obj[11],
-                                "PhoneNumber":obj[12],
-                                "nextOfKinDetails":{
-                                    "FirstName":obj[13],
-                                    "SirName":obj[14],
-                                    "PhoneNumber":obj[15],
-                                    "Location":obj[16]
+                                "CurrentAddressDetails":{
+                                    "Village":obj[16],
+                                    "Division":obj[17],
+                                    "Districk":obj[18],
+                                    "PhoneNumber":obj[19]
                                 },
-                                "AccountOwnerPic":obj[17],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[12],
+                                    "SirName":obj[13],
+                                    "PhoneNumber":obj[14],
+                                    "Location":obj[15]
+                                },
+                                "AccountOwnerPic":obj[20],
                                 "branchDetails":{
-                                    "BranchId":obj[18],
-                                    "officerId":obj[19]
+                                    "BranchId":obj[21],
+                                    "officerId":obj[22]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1648,11 +1688,14 @@ class BankingDataBase(ConnectToMySql):
                         C.SubCounty,
                         C.County,
                         C.District,
-                        C.PhoneNumber,
                         N.FirstName,
                         N.SirName,
                         N.PhoneNumber,
                         N.Location,
+                        M.Village,
+                        M.Division,
+                        M.District,
+                        M.PhoneNumber,
                         T.Photo ownerpic,
                         D.BranchId,
                         D.OfficerId
@@ -1660,7 +1703,8 @@ class BankingDataBase(ConnectToMySql):
                         BankAccount AS B
                     JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
                     JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
-                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN PermanentContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN CurrentContactDetails AS M ON M.AccountNumber = B.AccountNumber
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
@@ -1683,17 +1727,22 @@ class BankingDataBase(ConnectToMySql):
                                 "Subcounty":obj[9],
                                 "County":obj[10],
                                 "District":obj[11],
-                                "PhoneNumber":obj[12],
-                                "nextOfKinDetails":{
-                                    "FirstName":obj[13],
-                                    "SirName":obj[14],
-                                    "PhoneNumber":obj[15],
-                                    "Location":obj[16]
+                                "CurrentAddressDetails":{
+                                    "Village":obj[16],
+                                    "Division":obj[17],
+                                    "Districk":obj[18],
+                                    "PhoneNumber":obj[19]
                                 },
-                                "AccountOwnerPic":obj[17],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[12],
+                                    "SirName":obj[13],
+                                    "PhoneNumber":obj[14],
+                                    "Location":obj[15]
+                                },
+                                "AccountOwnerPic":obj[20],
                                 "branchDetails":{
-                                    "BranchId":obj[18],
-                                    "officerId":obj[19]
+                                    "BranchId":obj[21],
+                                    "officerId":obj[22]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -1732,11 +1781,14 @@ class BankingDataBase(ConnectToMySql):
                         C.SubCounty,
                         C.County,
                         C.District,
-                        C.PhoneNumber,
                         N.FirstName,
                         N.SirName,
                         N.PhoneNumber,
                         N.Location,
+                        M.Village,
+                        M.Division,
+                        M.District,
+                        M.PhoneNumber,
                         T.Photo ownerpic,
                         D.BranchId,
                         D.OfficerId
@@ -1744,7 +1796,8 @@ class BankingDataBase(ConnectToMySql):
                         BankAccount AS B
                     JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
                     JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
-                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN PermanentContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN CurrentContactDetails AS M ON M.AccountNumber = B.AccountNumber
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
@@ -1767,17 +1820,22 @@ class BankingDataBase(ConnectToMySql):
                                 "Subcounty":obj[9],
                                 "County":obj[10],
                                 "District":obj[11],
-                                "PhoneNumber":obj[12],
-                                "nextOfKinDetails":{
-                                    "FirstName":obj[13],
-                                    "SirName":obj[14],
-                                    "PhoneNumber":obj[15],
-                                    "Location":obj[16]
+                                "CurrentAddressDetails":{
+                                    "Village":obj[16],
+                                    "Division":obj[17],
+                                    "Districk":obj[18],
+                                    "PhoneNumber":obj[19]
                                 },
-                                "AccountOwnerPic":obj[17],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[12],
+                                    "SirName":obj[13],
+                                    "PhoneNumber":obj[14],
+                                    "Location":obj[15]
+                                },
+                                "AccountOwnerPic":obj[20],
                                 "branchDetails":{
-                                    "BranchId":obj[18],
-                                    "officerId":obj[19]
+                                    "BranchId":obj[21],
+                                    "officerId":obj[22]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -2063,11 +2121,14 @@ class BankingDataBase(ConnectToMySql):
                         C.SubCounty,
                         C.County,
                         C.District,
-                        C.PhoneNumber,
                         N.FirstName,
                         N.SirName,
                         N.PhoneNumber,
                         N.Location,
+                        M.Village,
+                        M.Division,
+                        M.District,
+                        M.PhoneNumber,
                         T.Photo ownerpic,
                         D.BranchId,
                         D.OfficerId,
@@ -2077,7 +2138,8 @@ class BankingDataBase(ConnectToMySql):
                         BankAccount AS B
                     JOIN AccountSocialDetails AS S ON S.AccountNumber = B.AccountNumber
                     JOIN AccountPersonalDetails AS P ON P.AccountNumber = B.AccountNumber
-                    JOIN ContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN PermanentContactDetails AS C ON C.AccountNumber = B.AccountNumber
+                    JOIN CurrentContactDetails AS M ON M.AccountNumber = B.AccountNumber
                     JOIN NextOfKinDetails AS N ON N.AccountNumber = B.AccountNumber
                     JOIN accountOwnerPicture AS T ON T.AccountNumber = B.AccountNumber
                     JOIN branchDetails AS D ON D.AccountNumber = B.AccountNumber
@@ -2101,18 +2163,23 @@ class BankingDataBase(ConnectToMySql):
                                 "Subcounty":obj[9],
                                 "County":obj[10],
                                 "District":obj[11],
-                                "PhoneNumber":obj[12],
-                                "nextOfKinDetails":{
-                                    "FirstName":obj[13],
-                                    "SirName":obj[14],
-                                    "PhoneNumber":obj[15],
-                                    "Location":obj[16]
+                                "CurrentAddressDetails":{
+                                    "Village":obj[16],
+                                    "Division":obj[17],
+                                    "Districk":obj[18],
+                                    "PhoneNumber":obj[19]
                                 },
-                                "AccountOwnerPic":obj[17],
+                                "nextOfKinDetails":{
+                                    "FirstName":obj[12],
+                                    "SirName":obj[13],
+                                    "PhoneNumber":obj[14],
+                                    "Location":obj[15]
+                                },
+                                "AccountOwnerPic":obj[20],
                                 "branchDetails":{
-                                    "BranchId":obj[18],
-                                    "Branchname":obj[19],
-                                    "officerId":obj[20]
+                                    "BranchId":obj[21],
+                                    "Branchname":obj[22],
+                                    "officerId":obj[23]
                                 }
                             } for obj in data]
             except Exception as e:
@@ -2233,7 +2300,7 @@ class BankingDataBase(ConnectToMySql):
             try:
                 self.cursor.execute("USE AccountsVault")
                 update_query = """
-                        UPDATE ContactDetails
+                        UPDATE PermanentContactDetails
                         SET PhoneNumber = %s
                         WHERE AccountNumber = %s
                     """

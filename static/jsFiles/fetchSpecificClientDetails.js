@@ -190,7 +190,11 @@ function generatepersonalHtml(data) {
                         </div>
                         <div class="row bg-success text-white">
                             <div class="col"> Account Number</div>
-                            <div class="col"> ${obj["AccountNumber"]}</div>
+                            <div onclick="copyToClipboard('${obj["AccountNumber"]}')"  style="cursor: pointer;" title="Click to copy" class="col"> ${obj["AccountNumber"]}</div>
+                            
+                            
+                            
+                            
                         
                         </div>
                         
@@ -201,12 +205,12 @@ function generatepersonalHtml(data) {
                     <div class="col">
                         <div class="card mb-3">
                             <div class="card-header">
-                                <div>Permanent info</div>
+                                <div>Permanent Address info</div>
                             </div>
                             <div class="card-body">
-                                <div>  <strong>PhoneNumber: </strong> <span>${obj["PhoneNumber"]}</span></div>
                                 <div>  <strong>Village: </strong>   <span> ${obj["Village"]} </span>  </div>
                                 <div>   <strong>Parish:</strong> ${obj["Parish"]} <span></span> </div>
+                                <div>   <strong>County:</strong> <span>${obj["County"]} </span> </div>
                                 <div>   <strong>District:</strong> <span>${obj["District"]} </span> </div>
                             </div>
                         </div>
@@ -215,10 +219,13 @@ function generatepersonalHtml(data) {
                     <div class="col">
                         <div class="card">
                             <div class="card-header">
-                                <div>Occupation Details </div>
+                                <div>Current Address Details </div>
                             </div>
                             <div class="card-body">
-                                
+                                <div>  <strong>Village: </strong> <span>${obj["CurrentAddressDetails"]["Village"]}</span></div>
+                                <div>  <strong>Division: </strong> <span>${obj["CurrentAddressDetails"]["Division"]}</span></div> 
+                                <div>  <strong>District: </strong> <span>${obj["CurrentAddressDetails"]["Districk"]}</span></div>
+                                <div>  <strong>PhoneNumber: </strong> <span>${obj["CurrentAddressDetails"]["PhoneNumber"]}</span></div>  
                             </div>
                         </div>
                     </div>
@@ -234,6 +241,14 @@ function generatepersonalHtml(data) {
     return html
 
     
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard:', text);
+    }).catch(err => {
+        alert('Failed to copy to clipboard:', err);
+    });
 }
 
 async function loadCredit() {

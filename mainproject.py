@@ -804,6 +804,10 @@ def registerClient():
                 scounty = request.form.get("scounty")
                 county = request.form.get("county")
                 state = request.form.get("state")
+                # current address details
+                CurrentVillage = request.form.get("CurrentVillage")
+                CurrentDivision = request.form.get("CurrentDivision")
+                CurrentDistrict = request.form.get("CurrentDistrict")
                 
                 # next of kin details
                 nextOfKinFirstName = request.form.get("nextOfKinFirstName")
@@ -843,6 +847,9 @@ def registerClient():
                     "District":state,
                     "OwnerPic":ownerpic_relative_file_path,
                     "NationalIdPic":ownernatioanlID_relative_file_path,
+                    "CurrentVillage":CurrentVillage,
+                    "CurrentDivision":CurrentDivision,
+                    "CurrentDistrict":CurrentDistrict,
 
                     "NextKinDetails": {
                     "nextOfKinFirstName":nextOfKinFirstName,
@@ -1146,6 +1153,7 @@ def clientProfile():
         if requesttype == "clientDetails":
             """fetching clients personal details"""
             clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
+            
             
             return clientDetails
         elif requesttype == "clientCreditdetails":
