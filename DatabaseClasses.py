@@ -2344,7 +2344,7 @@ class BankingDataBase(ConnectToMySql):
                         ClientCurrentaddress VARCHAR(500),
                         DivisionCity VARCHAR(500),
                         District VARCHAR(500),
-                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId)
+                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId) ON DELETE CASCADE
                     )
                 """)
 
@@ -2358,7 +2358,7 @@ class BankingDataBase(ConnectToMySql):
                         BusinessLocation VARCHAR(500),  
                         Contact VARCHAR(500),
                         BusinessImages VARCHAR(1000),
-                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId)
+                        FOREIGN KEY(LoanId) REFERENCES LoanDetails(LoanId) ON DELETE CASCADE
                     )
                 """)
 
