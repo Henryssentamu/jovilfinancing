@@ -4094,6 +4094,28 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while updating client loan security after balancing:{e}")
 
     
+    def updateClientTotalLoanSecurityAfterWithdraw(self, amount,accountNumber):
+        try:
+            
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    UPDATE
+                        TotalLoanSecurity 
+                    SET
+                        TotalSecurity = COALESCE(TotalSecurity,0) - %s
+                    WHERE
+                        AccountNumber = %s
+                                                        
+                """,(amount,accountNumber))
+                self.connection.commit()
+                return True
+            else:
+                    raise Exception("cursor not initialized while updating client loan security after  withdraw")
+        except Exception as e:
+            raise Exception(f"error while updating client loan security after withdraw:{e}")
+
     def updateClientTotalInvestmentTrigerAfterBalancing(self, loanId, amount):
         try:
             
@@ -4115,6 +4137,28 @@ class BankingDataBase(ConnectToMySql):
                     raise Exception("cursor not initialized while updating client total investment after  balancing ")
         except Exception as e:
             raise Exception(f"error while updating client total investment after balancing:{e}")
+
+    def updateClientTotalInvestmentTrigerAfterWithdraw(self,accountNumber, amount):
+        try:
+            
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    UPDATE
+                        ClientsTotalInvestment 
+                    SET
+                        TotalCurrentInvestment  = COALESCE(TotalCurrentInvestment,0) - %s
+                    WHERE
+                        ClientId = %s
+                                                        
+                """,(amount,accountNumber))
+                self.connection.commit()
+                return True
+            else:
+                    raise Exception("cursor not initialized while updating client total investment after  withdraw ")
+        except Exception as e:
+            raise Exception(f"error while updating client total investment after withdraw :{e}")
 
         
 
@@ -4756,6 +4800,71 @@ class BankingDataBase(ConnectToMySql):
         finally:
             self.close_connection()
 
+    def withdraws(self):
+        self.reconnect_if_needed()
+        if self.cursor:
+            self.cursor.execute("USE LoanApplications")
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS LoanSecurityWithdraws(
+                    Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    AccountNumber VARCHAR(500),
+                    Amount DECIMAL(30,2)         
+                )
+            """)
+            self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS InvestmentWithdraws(
+                    Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    AccountNumber VARCHAR(500),
+                    Amount DECIMAL(30,2)               
+                )
+            """)
+
+    def insertIntoLoanSecurityWithDraws(self, accountNumber,amount):
+        """
+            arg: accountNumber,amount
+            return: success 
+        
+        """
+        self.accountNumber = accountNumber
+        self.amount = amount
+        self.reconnect_if_needed
+        if self.cursor:
+            self.cursor.execute("USE LoanApplications")
+            try:
+                self.cursor.execute("""
+                    INSERT INTO LoanSecurityWithdraws(AccountNumber,Amount) VALUES(%s,%s)
+                """,self.accountNumber,self.amount)
+                self.connection.commit()
+            except Exception as e:
+                raise Exception(f"error while inserting into LoanSecurityWithdraws:{e}")
+            finally:
+                self.close_connection()
+                return "success"
+        raise "mysql server not connected"
+    def insertInvestmentWithDraws(self, accountNumber,amount):
+        """
+            arg: accountNumber,amount
+            return: success 
+        
+        """
+        self.accountNumber = accountNumber
+        self.amount = amount
+        self.reconnect_if_needed
+        if self.cursor:
+            try:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO InvestmentWithdraws(AccountNumber,Amount) VALUES(%s,%s)
+                """,self.accountNumber,self.amount)
+                self.connection.commit()
+            except Exception as e:
+                raise Exception(f"error while inserting into InvestmentWithdraws:{e}")
+            finally:
+                self.close_connection()
+                return "success"
+        raise "mysql server not connected in inserting into InvestmentWithdraws"
+        
+
 
 
 class AuthenticationDetails(ConnectToMySql):
@@ -4905,6 +5014,7 @@ banking.Create_disbursement_table()
 banking.registeredLoans()
 banking.create_loanBalancingTable()
 banking.clientloanpaymentsAndInvestmentTable()
+banking.withdraws()
 
 # creating a manager section
 

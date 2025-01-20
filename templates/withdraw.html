@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> With Draw</title>
+    <link rel="stylesheet" href="../static/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        /* General Loader Styles */
+        .loader-container {
+            display: none; /* Hide loader initially */
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Above all content */
+        }
+
+        /* Spinner Loader */
+        .spinner-loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark text-info" >
+        <div class="container">
+            <a href="{{url_for('managrDashboard')}}" class="nav-bland">Back</a>
+            <div class="navbar-nav">
+                <li  class="nav-item"><a href="{{url_for('managrDashboard')}}" class="nav-bland">Home</a></li>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+         <!-- Loader Container -->
+        <div class="loader-container" id="loader">
+            <div class="spinner-loader"></div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        WithDraw
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"> Client's Account Number</span>
+                            <input type="text" id="account" class="form-control" aria-label="Account number">
+                           
+                        </div>
+                        
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"> Amount(Ugx)</span>
+                            <input type="text" id="money" class="form-control" aria-label="Amount (to the nearest dollar)">
+                            <span class="input-group-text">.00</span>
+                        </div>
+                        <button id="sendbutton" type="button" class="btn btn-success w-100 ">Send</button>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>    
+        function sendFiger(){  
+            let loader =  document.getElementById("loader");
+            
+            document.getElementById("sendbutton")
+                .addEventListener("click",()=>{
+                    const amount = document.getElementById("money").value;
+                    const accountNumber = document.getElementById("account").value;
+                    loader.style.display = "flex"
+                   
+
+                    fetch("/MakeWithdraw",{
+                        method:"POST",
+                        headers:{
+                            "Content-type":"application/json"
+                        },
+                        body:JSON.stringify({"type": "amount","amount":amount,"accountNumber":accountNumber})
+                    })
+                    .then(response =>{
+                        if(!response.ok){
+                            throw new Error("server erroe while sending amount on payment route")
+                        }
+                        return response.json()
+                    })
+                    .then(data =>{
+                        if(data["response"] === "recieved"){
+                            loader.style.display = "none";
+                            window.location.href = "/succefulWithdraw"
+                        }
+                    })
+                    .catch(error =>{
+                        loader.style.display = "none";
+                        
+                    })
+                })
+
+        }
+
+        sendFiger();
+    </script>
+</body>
+</html>

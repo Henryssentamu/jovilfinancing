@@ -24,6 +24,20 @@
             font-size: 16px;
             margin-top: -10px;
         }
+        .modal-withdraw {
+            z-index: 1060 !important; /* Higher than the default backdrop */
+        }
+        .modal-backdrop {
+            z-index: 1055 !important; /* Below the modal */
+        }
+
+        body, html {
+            position: static !important;
+            overflow: visible !important;
+        }
+
+
+
      </style>
 </head>
 <body>
@@ -73,7 +87,7 @@
                             <a class="nav-link text-white py-2 btn btn-primary" href="{{url_for('savingsgeneral')}}"> Savings</a>
                         </div>
                         <div>
-                            <!-- <a class="nav-link text-white py-2 btn btn-primary" href="#"> Expenditures</a> -->
+                            <button data-bs-toggle="modal" data-bs-target="#withdraws" class="nav-link text-white px-2 py-2 btn btn-primary"> Widthdraw</button>
                         </div>
                         <!-- <div>
                             <a class="nav-link text-white py-2 btn btn-primary" href="{{url_for('recievableReports')}}"> Recivables Reports</a>
@@ -87,6 +101,21 @@
                         </div>
                     </ul>
 
+                </div>
+            </div>
+        </div>
+        <!-- withdraw modal  -->
+        <div class="modal fade modal-withdraw" id="withdraws"  >
+            <div class="modal-dialog modal-dialog-centered" >
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title">Withdraw Options</div>
+                        <div class="btn-close" data-bs-dismiss="modal" data-bs-target="#withdraws"> </div>
+                    </div>
+                    <div class="modal-body">
+                        <a id="loansecuritybtn" class="btn btn-secondary">Loan Security</a>
+                        <a id="investmentbtn" class="btn btn-secondary">Investments</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,15 +140,15 @@
                     </div>
                 </div>
                 <div class="col">
-                    <button  data-bs-toggle="modal" data-bs-target="#logoutmodal" class="btn btn-secondary text-green ">
-                        <img src="../static/icons/gear-wide.svg" alt="">
-                        Henry.ss 
+                    <button  data-bs-toggle="modal" data-bs-target="#logoutmodal" class="btn btn-secondary text-white ">
+                        <img src="../static/icons/gear-wide.svg" alt="setting icon">
+                        Logout 
                     </button>
-
-                    <div class="modal  fade" id="logoutmodal" >
+                    <div class="modal  fade modal-withdraw " id="logoutmodal" >
                         <div class="modal-dialog">
                             <div class="modal-content">
-                                <div class="modal-header">You'r about to logout
+                                <div class="modal-header">
+                                    <div class="modal-title">logging out</div>
                                     <button class="btn-close" data-bs-dismiss="modal"  data-bs-target="#logoutmodal"></button>
                                 </div>
                                 <div class="modal-body">
@@ -128,6 +157,7 @@
                             </div>
                         </div>
                     </div>
+                    
                 </div>
                 
             </div>
@@ -301,8 +331,8 @@
                 </div>
             </div> -->
             <!-- row of clients with biggest portifolio -->
+            
             <div class="row mt-4 text-black height-100% width-100%">
-
                 <div class="col">
                     <div class="card border-0 p-3" style="min-height: 200px;">
                         <div class="row">
@@ -326,6 +356,47 @@
 
     <script src="../static/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../static/jsFiles/managersDashboard.js"></script>
+
+    <script>
+        function sendSelectedAccountDetailss(selectedAccount) {
+            fetch("/MakeWithdraw",{
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({"type":"accountType","data":selectedAccount})
+                })
+                .then(
+                    response =>{
+                        if(!response.ok){
+                            throw new Error("withdraw account wasnt sent")
+                        }
+                        return response.json()
+                    }
+                )
+                .then(data =>{
+                    if (data){
+                        window.location.href = "/MakeWithdraw"
+                    }
+                })
+                .catch(error =>{
+                    console.log(error)
+                })
+        }
+        
+        document.getElementById("loansecuritybtn")
+            .addEventListener("click",(event)=>{
+                event.preventDefault();
+                sendSelectedAccountDetailss("LoanSecurity") 
+
+            })
+
+        document.getElementById("investmentbtn")
+        .addEventListener("click",(event)=>{
+            event.preventDefault();
+            sendSelectedAccountDetailss("Investment") 
+
+        })
+        
+    </script>
     <!-- <script src="../static/jsFiles/workerRegistra.js"></script> -->
     
 </body>

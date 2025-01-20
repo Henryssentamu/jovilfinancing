@@ -989,6 +989,39 @@ def Investmentpayments():
     
     return render_template("investmentPayment.html")
 
+
+@app.route("/MakeWithdraw", methods=["GET", "POST"])
+def WithdrawMethode():
+    if request.method == "POST":
+        paymenttype = request.json.get("type")
+        if paymenttype == "accountType":
+            session["AccountType"] = request.json.get("data")
+            return jsonify({"response":"recieved"})
+        elif paymenttype == "amount":
+            amount = request.json.get("amount")
+            accountNumber = request.json.get("accountNumber")
+            accountType = session.get("AccountType")
+            bank = BankingDataBase()
+            if accountType and accountType == "LoanSecurity":
+                response = bank.insertIntoLoanSecurityWithDraws(accountNumber=accountNumber,amount=amount)
+                if response and response == "success":
+                    # updating total loan security after successful withdraws
+                    bank.updateClientTotalLoanSecurityAfterWithdraw(amount=amount,accountNumber=accountNumber)
+            elif accountType and accountType == "Investment":
+                response = bank.insertInvestmentWithDraws(accountNumber=accountNumber,amount=amount)
+                if response and response =="success":
+                    # updating total loan security after successful withdraws
+                    bank.updateClientTotalInvestmentTrigerAfterWithdraw(accountNumber=accountNumber,amount=amount)
+            
+            
+            return jsonify({"response":"recieved"})
+
+    return render_template("withdraw.html")
+
+@app.route("/succefulWithdraw")
+def succefulWithdraw():
+    return render_template("successfulWithdraw.html")
+
 @app.route("/succefulpayments")
 def successfulpayment():
     return render_template("successfulPayment.html")
