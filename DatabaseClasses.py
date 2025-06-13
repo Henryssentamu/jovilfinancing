@@ -5006,28 +5006,28 @@ class AuthenticationDetails(ConnectToMySql):
 # dept.createDatabase()
 
 
-banking  = BankingDataBase()
-banking.createAccountTable()
-banking.create_loanApplicationTAbles()
-banking.CreateapprovedLoans_tables()
-banking.Create_disbursement_table()
-banking.registeredLoans()
-banking.create_loanBalancingTable()
-banking.clientloanpaymentsAndInvestmentTable()
-banking.withdraws()
+# banking  = BankingDataBase()
+# banking.createAccountTable()
+# banking.create_loanApplicationTAbles()
+# banking.CreateapprovedLoans_tables()
+# banking.Create_disbursement_table()
+# banking.registeredLoans()
+# banking.create_loanBalancingTable()
+# banking.clientloanpaymentsAndInvestmentTable()
+# banking.withdraws()
 
-# creating a manager section
+# # creating a manager section
 
 # idobj = GenerateIds()
 # manager = ManagersDatabase()
 # manager.creat_database()
 # existingmac = manager.existingMAC()
 # mac = idobj.managerAuthenticationCode(existingMac=existingmac)
-# managerDetails = {"employeeId":"NE16854","mac":mac}
+# managerDetails = {"employeeId":"NE30748","mac":mac}
 # manager.insert_into_database(managerDatils=managerDetails)
 
 
 
 
-# auth = AuthenticationDetails()
-# auth.employeeLoginCridentials()
+auth = AuthenticationDetails()
+auth.employeeLoginCridentials()

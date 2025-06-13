@@ -1261,6 +1261,9 @@ def clientpaymentDetails():
             
             return jsonify(data)
     return render_template("clientPaymentDetails.html")
+@app.route("/recieptsdetails")
+def reciept():
+    return render_template("reciepts.html")
 
 @app.route("/clientOverdueAndPenalties")
 def clientOverdueAndPenalties():
