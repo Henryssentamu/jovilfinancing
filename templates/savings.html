@@ -158,6 +158,32 @@
       background-color: white;
       z-index: 2;
     }
+    
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+
+    #receiptContent, #receiptContent * {
+      visibility: visible;
+    }
+
+    #receiptContent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 58mm;
+      padding: 0;
+      margin: 0;
+    }
+
+    @page {
+      size: 58mm 210mm;
+      margin: 0;
+    }
+  }
+</style>
+
   </style>
 </head>
 <body>
@@ -231,25 +257,39 @@
     }
 
     function showReceipt(data) {
-      const receiptHtml = `
-        <div class="border p-2" style="width: 260px; margin:auto; font-size: 12px;">
-          <div class="text-center fw-bold">Mkubwa Financing</div>
-          <div class="text-center fw-bold">Savings</div>
-          <hr>
-          <p><strong>Date:</strong> ${data.date}</p>
-          <p><strong>Amount Saved:</strong> UGX ${data.Amount}</p>
-          <hr>
-          <div class="text-center small">Thank you for your payment!</div>
-        </div>
-      `;
+    //   const receiptHtml = `
+    //     <div class="border p-2" style="width: 260px; margin:auto; font-size: 12px;">
+    //       <div class="text-center fw-bold">Mkubwa Financing</div>
+    //       <div class="text-center fw-bold">Savings</div>
+    //       <hr>
+    //       <p><strong>Date:</strong> ${data.date}</p>
+    //       <p><strong>Amount Saved:</strong> UGX ${data.Amount}</p>
+    //       <hr>
+    //       <div class="text-center small">Thank you for your payment!</div>
+    //     </div>
+    //   `;
+    const receiptHtml = `
+  <div class="receipt-body" style="width: 58mm; margin: auto; font-size: 11px; padding: 2mm; border: 1px solid #000;">
+    <div class="text-center fw-bold">Mkubwa Financing</div>
+    <div class="text-center fw-bold">Savings</div>
+    <hr>
+    <p><strong>Date:</strong> ${data.date}</p>
+    <p><strong>Amount Saved:</strong> UGX ${data.Amount}</p>
+    <hr>
+    <div class="text-center small">Thank you for your payment!</div>
+  </div>
+`;
+
+
       document.getElementById("receiptContent").innerHTML = receiptHtml;
       const modal = new bootstrap.Modal(document.getElementById("receiptModal"));
       modal.show();
     }
 
     function printReceipt() {
-      window.print();
-    }
+    window.print();
+}
+
 
     async function generateHtml() {
       const savingData = await fetchInvestmentDetails();
@@ -267,6 +307,7 @@
             <button class='btn btn-sm btn-secondary' onClick='showReceipt(${JSON.stringify(obj)})'>Receipt</button>
           </td>
         </tr>
+        
       `).join("");
 
       tbody.innerHTML = html;

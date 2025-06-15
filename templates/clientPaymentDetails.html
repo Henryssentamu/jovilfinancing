@@ -176,22 +176,30 @@
         }
 
         @media print {
-            body * {
-                visibility: hidden;
-            }
+    body * {
+      visibility: hidden;
+    }
 
-            #receiptContent, #receiptContent * {
-                visibility: visible;
-            }
+    #receiptContent, #receiptContent * {
+      visibility: visible;
+    }
 
-            #receiptContent {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                font-size: 12px;
-            }
-        }
+    #receiptContent {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 58mm;
+      padding: 0;
+      margin: 0;
+    }
+
+    @page {
+      size: 58mm 210mm;
+      margin: 0;
+    }
+  }
+
+         
     </style>
 </head>
 <body>
@@ -325,20 +333,35 @@
             
             const date = new Date(payment.date).toLocaleString();
             const refNo = `AUTO-${Math.floor(100000 + Math.random() * 900000)}`;
+            // const receiptHtml = `
+            //     <div class="border p-2" style="width: 260px; margin:auto; font-size: 12px;">
+            //         <div class="text-center fw-bold">Jovil Financing</div>
+            //         <hr>
+            //         <p><strong>Date:</strong> ${payment.date}</p>
+            //         <p><strong>Amount Paid:</strong> UGX ${payment.Paid}</p>
+            //         <p><strong>Commitment:</strong> UGX ${payment.Commitment}</p>
+            //         <p><strong>Balance On Commitment:</strong> UGX ${payment.Balance}</p>
+            //         <p><strong>Your Loan Balance:</strong> UGX ${payment.Portifolio}</p>
+            //         <p><strong>Ref No:</strong> ${refNo}</p>
+            //         <hr>
+            //         <div class="text-center small">Thank you for your payment!</div>
+            //     </div>
+            // `;
+
             const receiptHtml = `
-                <div class="border p-2" style="width: 260px; margin:auto; font-size: 12px;">
-                    <div class="text-center fw-bold">Jovil Financing</div>
+                <div class="receipt-body" style="width: 58mm; margin: auto; font-size: 11px; padding: 2mm; border: 1px solid #000;">
+                    <div class="text-center fw-bold">Mkubwa Financing</div>
+                    <div class="text-center fw-bold">Savings</div>
                     <hr>
                     <p><strong>Date:</strong> ${payment.date}</p>
                     <p><strong>Amount Paid:</strong> UGX ${payment.Paid}</p>
                     <p><strong>Commitment:</strong> UGX ${payment.Commitment}</p>
                     <p><strong>Balance On Commitment:</strong> UGX ${payment.Balance}</p>
-                    <p><strong>Your Loan Balance:</strong> UGX ${payment.Portifolio}</p>
-                    <p><strong>Ref No:</strong> ${refNo}</p>
+                    <p><strong>Your Loan Balance:</strong> UGX ${payment.Portifolio}</p>    
                     <hr>
                     <div class="text-center small">Thank you for your payment!</div>
                 </div>
-            `;
+                `;
             document.getElementById("receiptContent").innerHTML = receiptHtml;
             const modal = new bootstrap.Modal(document.getElementById("receiptModal"));
             modal.show();
