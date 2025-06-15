@@ -285,6 +285,7 @@
             let html = "";
             data.forEach((obj, index) => {
                 const jsonString = encodeURIComponent(JSON.stringify(obj));
+                console.log(obj)
                 html += `
                     <tr>
                         <td>${index + 1}</td>

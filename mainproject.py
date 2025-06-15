@@ -1202,13 +1202,16 @@ def clientProfile():
         elif requesttype == "clientLoanSecurity":
             """fetch client's loan security"""
             loan_security = bank.fetchloanSecurity(clientId=client_id)
-            # loan_security = bank.fetchloanSecurity(clientId=client_id)
+            # loan_security_s = bank.fetchloanSecurity(clientId=client_id)
+            
             return jsonify({"loanSecurity":loan_security})
         elif requesttype == "investments":
             investments = bank.fetchClientInvestment(clientId=client_id)
-            # investments = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
-            return jsonify({"investment":investments})      
-            
+            return jsonify({"investment":investments})
+        elif requesttype == "clientInvistmentdetails":
+            investment_s = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
+            # print(investment_s)
+            return jsonify(investment_s)  
     return render_template("clientProfilePage.html")
 
 
