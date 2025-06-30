@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime,time
 from pickle import TRUE
 import mysql.connector as sql
 from generateIds import GenerateIds
@@ -2463,6 +2463,28 @@ class BankingDataBase(ConnectToMySql):
 
             self.close_connection()
 
+    def updateLoanApplicationToDeletedBYUnderWriter(self, loanId):
+        self.deleted = "Deleted"
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    UPDATE LoanDetails
+                    SET
+                        Status =%s
+                    WHERE LoanId = %s
+                """, (self.deleted,loanId))
+                self.connection.commit()
+            else:
+                raise Exception("cursor not initialised while deleting the loan")
+        except Exception as e:
+            raise Exception(f"error while updating loan status to deleted:{e}")
+        finally:
+
+            self.close_connection()
+
+
     def loanApplicationApprovelTrigger(self):
         """
             _this method is called in underwriter's route where loan approval is done_
@@ -2631,12 +2653,37 @@ class BankingDataBase(ConnectToMySql):
                         Portifolio DECIMAL(30,2)               
                     )
                 """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS PenaltiesAndOverDues(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId  VARCHAR(500),
+                        Commitment DECIMAL(30, 2),
+                        Paid DECIMAL(30,2),
+                        OverDue DECIMAL(30, 2),
+                        Penalty DECIMAL(30,2) 
+                                    
+                    )
+
+                """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS TotalPenaltiesAndOverDues(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId  VARCHAR(500) PRIMARY KEY,
+                        TotalOverDue DECIMAL(30, 2),
+                        TotalPenalty DECIMAL(30,2) 
+                                    
+                    )
+
+                """)
             else:
                 raise Exception("cursor not initialised while creating client loan payment table")
         except Exception as e:
             raise Exception(f"error while creating client loan payment table:{e}")
         finally:
             self.close_connection()
+
+    
+
 
     def insert_into_ClientsInvestmentPaymentDetails(self,AccountNumber,amount):
         try:
@@ -3193,7 +3240,46 @@ class BankingDataBase(ConnectToMySql):
 
 
 
-
+    def fetch_clients_current_penalties_overdue(self,clientId):
+        self.client_id = clientId
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        TotalOverDue,
+                        TotalPenalty
+                    FROM
+                        TotalPenaltiesAndOverDues
+                    WHERE
+                        LoanId IN (
+                                    SELECT
+                                        LoanId
+                                    FROM 
+                                        registeredLoans
+                                    WHERE
+                                        ActiveStatus = "unfinished" AND 
+                                        LoanId IN  (
+                                                    SELECT 
+                                                        LoanId 
+                                                    FROM 
+                                                        LoanDetails 
+                                                    WHERE 
+                                                        ClientID = %s
+                                                ) 
+                                    
+                                )
+                                    
+                                    
+                """,(self.client_id,))
+        
+                results = self.cursor.fetchone()
+                return {'overdue':float(results[0]), 'penalty':float(results[1])}
+        except Exception as e:
+            raise Exception(f"error while fetching clients current penalties and overdues:{e}")
+        finally:
+            self.close_connection()
 
 
     
@@ -4863,6 +4949,243 @@ class BankingDataBase(ConnectToMySql):
                 self.close_connection()
                 return "success"
         raise "mysql server not connected in inserting into InvestmentWithdraws"
+    
+
+
+class Penalties_Overdues(ConnectToMySql):
+    def __init__(self):
+        super().__init__()
+    def get_who_paid_and_how_much_they_paid(self):
+        """
+            this methode get those who have to pay and they have paid
+        """
+        today = datetime.today().date()
+        start_of_day = datetime.combine(today, time(0, 0))      # 00:00:00
+        eight_pm = datetime.combine(today, time(20, 0)) 
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+
+                self.cursor.execute("""
+                    SELECT
+                        C.LoanId,
+                        C.Amount
+                        
+                    FROM
+                        ClientsLOANpaymentDETAILS AS C
+                    WHERE
+                        C.Date BETWEEN %s AND %s
+                        AND C.LoanId IN (
+                            SELECT A.LoanId
+                            FROM registeredLoans AS A
+                            WHERE A.ActiveStatus = 'unfinished'
+                        )
+                """,(start_of_day, eight_pm))
+                data = self.cursor.fetchall()
+                paid_and_how_much = [{"LoanId": item[0], 'amount':item[1]} for item in data]
+                made_loan_payments = {data[0] for data in data}
+                return {'paid':made_loan_payments,'Details':paid_and_how_much}
+            raise ValueError("error while fetching loan payments in penalties and overdue class")
+
+        except Exception as e:
+            raise Exception(f"cursor failed to connect in getting payment detaild under penalties and overdue :{e}")
+        finally:
+            self.close_connection()
+    def get_who_suposed_to_pay_and_what_they_have_to_pay(self):
+        """this method get those who have to pay and what they have to pay regardless"""
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT 
+                        A.LoanId,
+                        M.Commitment
+                    FROM registeredLoans AS A
+                    JOIN LoanPaymentStatistics AS M              
+                    WHERE A.ActiveStatus = 'unfinished' AND A.LoanId = M.LoanId
+                """)
+                data = self.cursor.fetchall()
+                who_and_how_much_to_pay = [{'loanId':data[0],'amount':float(data[1])} for data in data]
+                who_have_to_pay = {item[0] for  item in data}
+                return {'pay':who_have_to_pay,'details':who_and_how_much_to_pay}
+            raise ValueError("error while getting who have to pay in penalties and overdue class")
+        except Exception as e:
+            return Exception(f"cursor failed to connect in getting those who have to pay under penalties and overdue class:{e}")
+        finally:
+            self.close_connection()
+
+    def get_who_havent_paid(self, suposed_to_pay, those_who_have_paid):
+        return suposed_to_pay.difference(those_who_have_paid)
+    def make_zero_payments(self):
+        try:
+            payment_exceptation_details = self.get_who_suposed_to_pay_and_what_they_have_to_pay()
+            suposed_to_pay = payment_exceptation_details['pay']
+            actual_payments_made = self.get_who_paid_and_how_much_they_paid()
+            who_paid  = actual_payments_made['paid']
+            who_is_to_pay_with_zero = self.get_who_havent_paid(suposed_to_pay=suposed_to_pay,those_who_have_paid=who_paid)
+            # making payments
+            bank = BankingDataBase()
+            bank.changeLoanRegistrationStatusTrigger()
+            bank.loanPaymenttrigger()
+            for loan in who_is_to_pay_with_zero:
+                bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails={"loanId":loan,"amount":0})
+            return True
+        except Exception as e:
+            raise Exception(f"error while making zero payments in make zero payments under penalties and overdue class:{e}")
+    
+
+    def get_todays_payments_details(self):
+        """
+            this methode fetches updated payment details
+        """
+        today = datetime.today().date()
+        start_of_day = datetime.combine(today, time(0, 0))      # 00:00:00
+        eight_pm = datetime.combine(today, time(20, 0)) 
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+
+                self.cursor.execute("""
+                    SELECT
+                        C.LoanId,
+                        C.Amount,
+                        M.Commitment
+                        
+                    FROM
+                        ClientsLOANpaymentDETAILS AS C
+                    JOIN (
+                            SELECT LoanId, Commitment
+                            FROM LoanPaymentStatistics
+                            WHERE Date IN (
+                                SELECT MAX(Date)
+                                FROM LoanPaymentStatistics
+                                GROUP BY LoanId
+                            )
+                        ) AS M ON M.LoanId = C.LoanId
+                    WHERE
+                        C.Date BETWEEN %s AND %s
+                        AND C.LoanId IN (
+                            SELECT A.LoanId
+                            FROM registeredLoans AS A
+                            WHERE A.ActiveStatus = 'unfinished'
+                        )
+                """,(start_of_day, eight_pm))
+                data = self.cursor.fetchall()
+                return [{'loanId':loan[0],'paid':float(loan[1] or 0 ),'commitment':float(loan[2] or 0)} for loan in data]
+            raise ValueError("error while fetching updated loan payments in penalties and overdue class")
+
+        except Exception as e:
+            raise Exception(f"cursor failed to connect in get todays payments under penalties and overdue :{e}")
+        finally:
+            self.close_connection()
+    def calculate_overdue_and_penalties(self):
+        overdue_penalt_obj = []
+
+        current_payment_details = self.get_todays_payments_details()
+        for payment in current_payment_details:
+            loanId = payment['loanId']
+            amount_paid = payment['paid']
+            commitment = payment['commitment']
+            if amount_paid >= commitment:
+                penalty = 0
+                overdue = 0
+                overdue_penalt_obj.append(
+                {
+                    'LoanId':loanId,
+                    'Paid':amount_paid,
+                    'Commitment':commitment,
+                    'OverDue':overdue,
+                    'Penalty':penalty
+
+                    }
+                )
+            elif amount_paid < commitment:
+                overdue = commitment - amount_paid
+                penalty =  overdue * 0.1
+                overdue_penalt_obj.append(
+                {
+                    'LoanId':loanId,
+                    'Paid':amount_paid,
+                    'Commitment':commitment,
+                    'OverDue':overdue,
+                    'Penalty':penalty
+
+                    }
+                ) 
+        return overdue_penalt_obj
+    
+    def total_penalties_and_oversdues_triger(self):
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("DROP TRIGGER IF EXISTS insertIntoPenaltiesAndOverdues")
+                self.cursor.execute("""
+                    CREATE TRIGGER insertIntoPenaltiesAndOverdues
+                    AFTER INSERT ON PenaltiesAndOverDues
+                    FOR EACH ROW
+                    BEGIN
+                        INSERT INTO TotalPenaltiesAndOverDues(
+                            LoanId,
+                            TotalOverDue,
+                            TotalPenalty           
+                        )
+                        VALUES(
+                            NEW.LoanId,
+                            NEW.OverDue,
+                            NEW.Penalty           
+                        )
+                        ON DUPLICATE KEY UPDATE
+                            TotalOverDue = COALESCE(TotalOverDue,0) + NEW.OverDue,
+                            TotalPenalty  = COALESCE(TotalPenalty ,0) + NEW.Penalty;
+                    END;
+                        
+                """)
+            else:
+                raise Exception("cursor not initialised in the total insertIntoPenaltiesAndOverdues trigger")
+        except Exception as e:
+            raise Exception(f"error while firing insertIntoPenaltiesAndOverdues trigger:{e}")
+        finally:
+            self.close_connection()
+
+    
+    def insert_penalties_and_overdues(self):
+        if self.make_zero_payments():
+            data_sets = self.calculate_overdue_and_penalties()
+            if data_sets:
+                try:
+                    self.reconnect_if_needed()
+                    if self.cursor:
+                        
+                        values = [
+                            (
+                                obj['LoanId'],
+                                obj['Commitment'],
+                                obj['Paid'],
+                                obj['OverDue'],
+                                obj['Penalty']
+                            ) for obj in data_sets
+                        ]
+                        self.cursor.execute("USE LoanApplications")
+                        self.cursor.executemany("""
+                            INSERT INTO PenaltiesAndOverDues (
+                                LoanId,
+                                Commitment,
+                                Paid,
+                                OverDue,
+                                Penalty
+                            ) VALUES (%s, %s, %s, %s, %s)
+                        """, values)
+                        self.connection.commit()
+                except Exception as e:
+                    raise Exception(f"Cursor failed in insert_penalties_and_overdues: {e}")
+                finally:
+                    self.close_connection()
+        return ValueError("error in making automatic penalties and overdue insertations")
+
         
 
 
@@ -5007,6 +5330,7 @@ class AuthenticationDetails(ConnectToMySql):
 
 
 # banking  = BankingDataBase()
+# print(banking.penalties_overdue_trigger())
 # banking.createAccountTable()
 # banking.create_loanApplicationTAbles()
 # banking.CreateapprovedLoans_tables()
@@ -5025,6 +5349,13 @@ class AuthenticationDetails(ConnectToMySql):
 # mac = idobj.managerAuthenticationCode(existingMac=existingmac)
 # managerDetails = {"employeeId":"NE30748","mac":mac}
 # manager.insert_into_database(managerDatils=managerDetails)
+
+
+# penalties and overdue
+
+# obj = Penalties_Overdues()
+# d = obj.calculate_overdue_and_penalties()
+
 
 
 

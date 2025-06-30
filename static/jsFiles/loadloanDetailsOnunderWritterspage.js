@@ -70,6 +70,9 @@ function generatehtml(data){
                     <div class="d-flex justify-content-end mt-3">
                         <button class="btn btn-primary me-2" onclick="approveLoan(${index})">Approve</button>
                     </div>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-danger me-2" onclick="deleted_loan(${index})">Delete Loan Application</button>
+                    </div>
                 </div>
             </div>
         `

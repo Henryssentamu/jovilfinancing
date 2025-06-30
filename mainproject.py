@@ -13,6 +13,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,PasswordField,SubmitField
 from wtforms.validators import DataRequired,Length
 
+from penalty_scheduler import start_scheduler
+import threading
+
 
 
 # [Unit]
@@ -60,6 +63,12 @@ UPLOAD_CLIENT_BUSINESS_PICTURES = os.path.join("static", "clientBusinessPictures
 app.config["UPLOAD_CLIENT_BUSINESS_PICTURES"] = UPLOAD_CLIENT_BUSINESS_PICTURES
 if not os.path.exists(UPLOAD_CLIENT_BUSINESS_PICTURES):
     os.makedirs(UPLOAD_CLIENT_BUSINESS_PICTURES)
+
+
+
+
+scheduler_thread = threading.Thread(target=start_scheduler, daemon=True)
+scheduler_thread.start()
 
 
 class User(UserMixin):
@@ -575,6 +584,7 @@ def underWritter():
             bankObj = BankingDataBase()
             data = bankObj.fetchLoanApplicationDetails()
             return jsonify(data)
+        
     elif request.method == "POST":
         requesttype = request.json.get("type")
         if requesttype == "approvedloan":
@@ -583,11 +593,17 @@ def underWritter():
                 banking = BankingDataBase()
                 banking.loanApplicationApprovelTrigger()
                 banking.updateLoanApplicationApprovalStatus(loanApprovalDetails=data)
-                
-                
             except Exception as e:
                 raise Exception(f"eror while approving loan application in under writer's route:{e}")
             return jsonify({"response":"loan approved"})
+        elif requesttype == "deleted_loan":
+            loanId = request.json.get('data')
+            try:
+                banking = BankingDataBase()
+                banking.updateLoanApplicationToDeletedBYUnderWriter(loanId=loanId)
+            except Exception as e:
+                raise Exception(f"error while deleting loan application:{e}")
+            return jsonify({"response":"loan deleted"})
 
     
     return render_template("underWritter.html")
@@ -919,6 +935,7 @@ def payment():
             amount = request.json.get("amount")
             loanId = session.get("loanId")
             paymentDetails = {"loanId":loanId,"amount":amount}
+            # print(paymentDetails)
             bank = BankingDataBase()
             bank.changeLoanRegistrationStatusTrigger()
             bank.loanPaymenttrigger()
@@ -1184,6 +1201,7 @@ def clientProfile():
         bank = BankingDataBase()
         client_id = session.get("lorded_account")
         requesttype = request.args.get("type")
+        
         if requesttype == "clientDetails":
             """fetching clients personal details"""
             clientDetails = bank.fetchSpecificClientAccountDetails(clientId=client_id)
@@ -1197,6 +1215,8 @@ def clientProfile():
         elif requesttype == "clientPortifolio":
             """fetching client's current portifolio"""
             portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
+            penalt_overdue = bank.fetch_clients_current_penalties_overdue(clientId=client_id)
+            print(penalt_overdue)
             
             return jsonify({"portifolio":portifolio})
         elif requesttype == "clientLoanSecurity":
