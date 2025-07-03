@@ -48,6 +48,8 @@ async function fetchClientPortifolio() {
     
 }
 
+
+
 async function fetchLoanSecurity() {
     return fetch("/clientProfile?type=clientLoanSecurity")
         .then(response =>{
@@ -253,11 +255,19 @@ function copyToClipboard(text) {
 
 async function loadCredit() {
     const creditData = await fetchCreditdetails();
-    const portifolio = await fetchClientPortifolio();
+    const portifolioData = await fetchClientPortifolio();
+    // const PenaltyAndOverdue = await fetchClientPenaltiesAndOverdue();
+    // const penalty = PenaltyAndOverdue['penalty']
+    // const overdue = PenaltyAndOverdue['overdue']
+    const portifolio = portifolioData["portifolio"]
+    // #tofixed is to make it have only 2 decimal places
+    // console.log(penalty)
+    
+
     
     const creditHtml = generateCreditdetails(data = creditData);
     document.getElementById("credit-body").innerHTML = creditHtml;
-    document.getElementById("current-portifolio").innerHTML = portifolio["portifolio"];
+    document.getElementById("current-portifolio").innerHTML = portifolio;
 }
 
 

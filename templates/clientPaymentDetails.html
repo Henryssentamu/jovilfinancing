@@ -243,8 +243,9 @@
                                 <th>Date Of Payment</th>
                                 <th>Commitment</th>
                                 <th>Paid</th>
-                                <th>Overdue(+) / Prepaid(-)</th>
-                                <th>Current Portfolio / Balance</th>
+                                <th>Overdue</th>
+                                <th>Penalty</th>
+                                <th>Portifolio</th>
                                 <th>Receipt</th>
                             </tr>
                         </thead>
@@ -288,20 +289,44 @@
                     return [];
                 });
         }
+        
 
-        function generateHtml(data) {
+        async function fetchClientPenaltiesAndOverdue() {
+            return await fetch("/clientpaymentDetails?type=clientpenaltiesOverdue")
+            .then(response =>{
+                if (!response.ok){
+                    throw new Error("server error while fetching client credit details")
+                }
+                return response.json()
+            })
+            .then(data =>{
+                return data
+            })
+            .catch(error =>{
+                console.log(error)
+            })
+            
+        }
+
+        function generateHtml(data, list_of_portifolio) {
             let html = "";
+            const portifolio_list = list_of_portifolio;
             data.forEach((obj, index) => {
                 const jsonString = encodeURIComponent(JSON.stringify(obj));
-                console.log(obj)
+                console.log("Index:", index);
+                console.log("Portfolio:", portifolio_list[index]);
+                console.log("Penalty:", obj["Penalty"]);
+                let current_portifolio = portifolio_list[index] + obj["Penalty"]
+                console.log(current_portifolio)
                 html += `
                     <tr>
                         <td>${index + 1}</td>
-                        <td>${obj["date"]}</td>
+                        <td>${obj["Date"]}</td>
                         <td>${obj["Commitment"]}</td>
                         <td>${obj["Paid"]}</td>
-                        <td>${obj["Balance"]}</td>
-                        <td>${obj["Portifolio"]}</td>
+                        <td>${obj["Overdue"]}</td>
+                        <td>${obj["Penalty"]}</td>
+                        <td> ${current_portifolio}</td>
                         <td>
                             <button class="btn btn-sm btn-secondary" onclick="showReceipt('${jsonString}')">Receipt</button>
                         </td>
@@ -317,7 +342,12 @@
 
         async function loadHml() {
             const data = await fetchPaymentdetails();
-            const ghtml = generateHtml(data);
+            let portfolio_lists = []
+            data.forEach((payment_obj) =>{
+                portfolio_lists.push(payment_obj['Portifolio'])
+            })
+            const penalties_overdue = await fetchClientPenaltiesAndOverdue()
+            const ghtml = generateHtml(penalties_overdue,portfolio_lists);
             const stat = statistics(data);
             const lastPayment = data.slice(-1)[0] || {};
 
@@ -332,32 +362,17 @@
             const payment = JSON.parse(decodeURIComponent(paymentStr));
             
             const date = new Date(payment.date).toLocaleString();
-            const refNo = `AUTO-${Math.floor(100000 + Math.random() * 900000)}`;
-            // const receiptHtml = `
-            //     <div class="border p-2" style="width: 260px; margin:auto; font-size: 12px;">
-            //         <div class="text-center fw-bold">Jovil Financing</div>
-            //         <hr>
-            //         <p><strong>Date:</strong> ${payment.date}</p>
-            //         <p><strong>Amount Paid:</strong> UGX ${payment.Paid}</p>
-            //         <p><strong>Commitment:</strong> UGX ${payment.Commitment}</p>
-            //         <p><strong>Balance On Commitment:</strong> UGX ${payment.Balance}</p>
-            //         <p><strong>Your Loan Balance:</strong> UGX ${payment.Portifolio}</p>
-            //         <p><strong>Ref No:</strong> ${refNo}</p>
-            //         <hr>
-            //         <div class="text-center small">Thank you for your payment!</div>
-            //     </div>
-            // `;
-
+            
             const receiptHtml = `
                 <div class="receipt-body" style="width: 58mm; margin: auto; font-size: 11px; padding: 2mm; border: 1px solid #000;">
                     <div class="text-center fw-bold">Mkubwa Financing</div>
                     <div class="text-center fw-bold">Savings</div>
                     <hr>
-                    <p><strong>Date:</strong> ${payment.date}</p>
+                    <p><strong>Date:</strong> ${payment.Date}</p>
                     <p><strong>Amount Paid:</strong> UGX ${payment.Paid}</p>
                     <p><strong>Commitment:</strong> UGX ${payment.Commitment}</p>
-                    <p><strong>Balance On Commitment:</strong> UGX ${payment.Balance}</p>
-                    <p><strong>Your Loan Balance:</strong> UGX ${payment.Portifolio}</p>    
+                    <p><strong>Over Due:</strong> UGX ${payment.Overdue}</p>
+                    <p><strong>Penalties:</strong> UGX ${payment.Penalty}</p>    
                     <hr>
                     <div class="text-center small">Thank you for your payment!</div>
                 </div>

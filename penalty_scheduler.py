@@ -4,12 +4,11 @@ from DatabaseClasses import Penalties_Overdues
 
 def run_penalty_overdue_job():
     obj = Penalties_Overdues()
-    obj.total_penalties_and_oversdues_triger()
-    obj.insert_penalties_and_overdues()
+    obj.make_zero_payments()
     print("Penalty and overdue job run successfully.")
 
 def start_scheduler():
-    schedule.every().day.at("16:10").do(run_penalty_overdue_job)
+    schedule.every().day.at("14:52").do(run_penalty_overdue_job)
 
     while True:
         schedule.run_pending()

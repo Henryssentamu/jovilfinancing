@@ -935,15 +935,21 @@ def payment():
             amount = request.json.get("amount")
             loanId = session.get("loanId")
             paymentDetails = {"loanId":loanId,"amount":amount}
-            # print(paymentDetails)
+            
+            
             bank = BankingDataBase()
+            # changing activate status from a default unfinshed to finshed if current portifolio is 0
             bank.changeLoanRegistrationStatusTrigger()
             bank.loanPaymenttrigger()
             bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
-            
-            # changing activate status from a default unfinshed to finshed if current portifolio is 0
-            
-            return jsonify({"response":"recieved"})
+            # penalt_overdue
+            commitment = bank.get_current_Cleints_loan_Commitment_details(loan_id=loanId)
+            payment_details_for_penalty_overdue = {"loanId":loanId, "paid":amount,"commitment":commitment}
+            overde_penalty_data = bank.calculate_clients_overdue_and_penalties(payment_details=payment_details_for_penalty_overdue)
+            if overde_penalty_data:
+                bank.total_penalties_and_oversdues_triger()
+                bank.insert_clients_penalties_and_overdues(overdue_penalties=overde_penalty_data)
+                return jsonify({"response":"recieved"})
 
     return render_template("payments.html")
 
@@ -1215,10 +1221,11 @@ def clientProfile():
         elif requesttype == "clientPortifolio":
             """fetching client's current portifolio"""
             portifolio = bank.fetch_clientsCurrentPortifolio(clientId=client_id)
-            penalt_overdue = bank.fetch_clients_current_penalties_overdue(clientId=client_id)
-            print(penalt_overdue)
-            
             return jsonify({"portifolio":portifolio})
+        elif requesttype == "clientpenaltiesOverdue":
+            penalt_overdue = bank.fetch_clients_current_penalties_overdue(clientId=client_id)
+            # print(penalt_overdue)
+            return jsonify(penalt_overdue)
         elif requesttype == "clientLoanSecurity":
             """fetch client's loan security"""
             loan_security = bank.fetchloanSecurity(clientId=client_id)
@@ -1278,11 +1285,17 @@ def clientpaymentDetails():
     if request.method == "GET":
         clientId = session.get("lorded_account")
         requesttype = request.args.get("type")
+        bank = BankingDataBase()
         if requesttype == "payementDetails":
-            bank = BankingDataBase()
             data = bank.fetchClientCurrentLoanPaymentDetails(clientId=clientId)
-            
+            # print(data)
             return jsonify(data)
+        elif requesttype == "clientpenaltiesOverdue":
+            penalties_overdue = bank.fetch_clients_penaltyoverdueDetails(clientId=clientId)
+            print(penalties_overdue)
+            
+            
+            return jsonify(penalties_overdue)
     return render_template("clientPaymentDetails.html")
 @app.route("/recieptsdetails")
 def reciept():
