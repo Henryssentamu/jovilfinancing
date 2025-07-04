@@ -954,6 +954,45 @@ def payment():
     return render_template("payments.html")
 
 
+
+@app.route("/payPenalty", methods=["GET", "POST"])
+def penaltypayment():
+    if request.method == "POST":
+        paymenttype = request.json.get("type")
+        if paymenttype == "penaltyPayment":
+            session["loanId"] = request.json.get("loanId")
+            
+            return jsonify({"response":"recieved"})
+        elif paymenttype == "amount":
+            amount = request.json.get("amount")
+            loanId = session.get("loanId")
+            paymentDetails = {"loanId":loanId,"amount":amount}
+    
+            
+            
+            bank = BankingDataBase()
+            respmose  = bank.insert_into_ClientsPenaltyPayments(paymentsdata=paymentDetails)
+            if respmose:
+                bank.total_PenaltyPayments_triger(paymentsdata=paymentDetails)
+                print("doneeee")
+                return jsonify({"response":"recieved"})
+
+            # # changing activate status from a default unfinshed to finshed if current portifolio is 0
+            # bank.changeLoanRegistrationStatusTrigger()
+            # bank.loanPaymenttrigger()
+            # bank.insert_into_ClientsLOANpaymentDETAILS(paymentDetails=paymentDetails)
+            # # penalt_overdue
+            # commitment = bank.get_current_Cleints_loan_Commitment_details(loan_id=loanId)
+            # payment_details_for_penalty_overdue = {"loanId":loanId, "paid":amount,"commitment":commitment}
+            # overde_penalty_data = bank.calculate_clients_overdue_and_penalties(payment_details=payment_details_for_penalty_overdue)
+            # if overde_penalty_data:
+            #     bank.total_penalties_and_oversdues_triger()
+            #     bank.insert_clients_penalties_and_overdues(overdue_penalties=overde_penalty_data)
+            
+
+    return render_template("penaltyPayment.html")
+
+
 @app.route("/balancing", methods=["GET", "POST"])
 def balancing():
     if request.method == "POST":
@@ -1237,8 +1276,12 @@ def clientProfile():
             return jsonify({"investment":investments})
         elif requesttype == "clientInvistmentdetails":
             investment_s = bank.fetch_ClientsInvestmentDetails(AccountNumber=client_id)
-            # print(investment_s)
-            return jsonify(investment_s)  
+        
+            return jsonify(investment_s)
+        elif requesttype == "clientTotalpenaltiesOverdue":
+            total_penalty_overdue = bank.fetch_clients_Total_penaltyoverdueDetails(clientId=client_id)
+            
+            return jsonify(total_penalty_overdue)
     return render_template("clientProfilePage.html")
 
 
@@ -1288,14 +1331,21 @@ def clientpaymentDetails():
         bank = BankingDataBase()
         if requesttype == "payementDetails":
             data = bank.fetchClientCurrentLoanPaymentDetails(clientId=clientId)
-            # print(data)
             return jsonify(data)
         elif requesttype == "clientpenaltiesOverdue":
             penalties_overdue = bank.fetch_clients_penaltyoverdueDetails(clientId=clientId)
-            print(penalties_overdue)
-            
-            
             return jsonify(penalties_overdue)
+        elif requesttype == "clientTotalpenaltiesOverdue":
+            total_penalty_overdue = bank.fetch_clients_Total_penaltyoverdueDetails(clientId=clientId)
+            return jsonify(total_penalty_overdue)
+        elif requesttype == "penaltypaid":
+            total_penalty_paid = bank.fetch_total_loan_penalty_payments(clientid=clientId)
+            print(total_penalty_paid)
+            return jsonify(total_penalty_paid)
+            
+            
+            
+            
     return render_template("clientPaymentDetails.html")
 @app.route("/recieptsdetails")
 def reciept():

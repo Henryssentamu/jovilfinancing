@@ -109,9 +109,38 @@ function sendLoanIdForPayment(id){
 
 }
 
+function sendLoanIdForPenaltyPayment(id){ 
+    fetch("/payPenalty",{
+        method:"POST",
+        headers:{
+            "Content-type":"application/json"
+        },
+        body:JSON.stringify({"type": "penaltyPayment","loanId":id})
+    })
+    .then(response =>{
+        if(!response.ok){
+            throw new Error("server erroe while sending loan id on payment route")
+        }
+        return response.json()
+    })
+    .then(data =>{
+        if(data["response"] === "recieved"){
+            window.location.href = "/payPenalty"
+        }
+    })
+    .catch(error =>{
+        console.log(error)
+    })
+
+
+}
+
 function generatePaybutton(data){
     return `
-        <a class="btn btn-success" onclick="sendLoanIdForPayment('${data["loanId"]}')">Make loan payment</a>
+        <div>
+            <a class="btn btn-success" onclick="sendLoanIdForPayment('${data["loanId"]}')">Make loan payment</a>
+            <a class="btn btn-outline-success" onclick="sendLoanIdForPenaltyPayment('${data["loanId"]}')">Pay Penalties</a>
+        </div>
     `
 
 }
@@ -152,6 +181,23 @@ function sendClientAccountNumberForInvestment(accountnumber){
 
 
 }
+
+async function fetchClientTotalPenaltiesAndOverdue() {
+            return await fetch("/clientProfile?type=clientTotalpenaltiesOverdue")
+            .then(response =>{
+                if (!response.ok){
+                    throw new Error("server error while fetching client credit details")
+                }
+                return response.json()
+            })
+            .then(data =>{
+                return data
+            })
+            .catch(error =>{
+                console.log(error)
+            })
+            
+        }
 
 function generateCreditdetails(data) {
     let html = "";
@@ -256,10 +302,10 @@ function copyToClipboard(text) {
 async function loadCredit() {
     const creditData = await fetchCreditdetails();
     const portifolioData = await fetchClientPortifolio();
-    // const PenaltyAndOverdue = await fetchClientPenaltiesAndOverdue();
-    // const penalty = PenaltyAndOverdue['penalty']
-    // const overdue = PenaltyAndOverdue['overdue']
-    const portifolio = portifolioData["portifolio"]
+    const portifolio_overdue = await fetchClientTotalPenaltiesAndOverdue()
+    
+    
+    const portifolio = parseFloat(portifolioData["portifolio"]) + parseFloat(portifolio_overdue['TotalPenalty'])
     // #tofixed is to make it have only 2 decimal places
     // console.log(penalty)
     
@@ -287,7 +333,10 @@ async function loadpaybutton() {
 
 async function loadLoanSecurity() {
     const loan_security = await fetchLoanSecurity();
+    const penalty_overdue = await fetchClientTotalPenaltiesAndOverdue()
     document.getElementById("loan_security").innerHTML = loan_security["loanSecurity"]
+    document.getElementById("penalty").innerHTML = penalty_overdue["TotalPenalty"]
+    document.getElementById("overdue").innerHTML = penalty_overdue["TotalOverDue"]
     
 }
 

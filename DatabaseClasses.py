@@ -2675,6 +2675,15 @@ class BankingDataBase(ConnectToMySql):
                     )
 
                 """)
+                self.cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS PenaltyPayments(
+                        Date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        LoanId  VARCHAR(500),
+                        Amount DECIMAL(30,2) 
+                                    
+                    )
+
+                """)
             else:
                 raise Exception("cursor not initialised while creating client loan payment table")
         except Exception as e:
@@ -2683,7 +2692,48 @@ class BankingDataBase(ConnectToMySql):
             self.close_connection()
 
     
+    def insert_into_ClientsPenaltyPayments(self, paymentsdata):
+        LoanId = paymentsdata['loanId']
+        amount = paymentsdata['amount']
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    INSERT INTO PenaltyPayments(
+                        LoanId,
+                        Amount               
+                    )VALUES(%s,%s)
+                """,(LoanId,amount))
+                self.connection.commit()
+                return True
+            else:
+                raise Exception("cursor not initialised while inserting into penalty payments  table")
+        except Exception as e:
+            raise Exception(f"error while inserting into  penalty payment  table:{e}")
+        finally:
+            self.close_connection()
 
+    def total_PenaltyPayments_triger(self, paymentsdata):
+        LoanId = paymentsdata['loanId']
+        amount = paymentsdata['amount']
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    UPDATE  TotalPenaltiesAndOverDues
+                    SET TotalPenalty = TotalPenalty - %s
+                    WHERE LoanId = %s
+                """,(amount,LoanId))
+                self.connection.commit()
+                return True
+            else:
+                raise Exception("cursor not initialised while updating total penalty payments  table")
+        except Exception as e:
+            raise Exception(f"error while updating total penalty  table:{e}")
+        finally:
+            self.close_connection()
 
     def insert_into_ClientsInvestmentPaymentDetails(self,AccountNumber,amount):
         try:
@@ -2731,8 +2781,75 @@ class BankingDataBase(ConnectToMySql):
                 raise Exception("cursor not initialised in the total investment trigger")
         except Exception as e:
             raise Exception(f"error while firing total investment trigger:{e}")
-        
 
+
+    def fetch_total_loan_penalty_payments(self,clientid):
+        try:
+            self.reconnect_if_needed()
+            self.cursor.execute("USE LoanApplications")
+            self.cursor.execute("""
+                select
+                    COALESCE(SUM(Amount),0)
+                from
+                    PenaltyPayments
+                where
+                    LoanId IN (
+                                SELECT
+                                    LoanId
+                                FROM 
+                                    registeredLoans
+                                WHERE
+                                    ActiveStatus = "unfinished" AND 
+                                    LoanId IN  (
+                                                SELECT 
+                                                    LoanId 
+                                                FROM 
+                                                    LoanDetails 
+                                                WHERE 
+                                                    ClientID = %s
+                                            ) 
+                                
+                            )        
+                    
+            """,(clientid,))
+            data = self.cursor.fetchone()
+            return {'amount':float(data[0])}
+        except Exception as e:
+            return Exception(f"cursor failed to reconnect while fetching clients penalty payment detials:{e}")
+    def fetch_loan_penalty_payments(self,clientid):
+        try:
+            self.reconnect_if_needed()
+            self.cursor.execute("USE LoanApplications")
+            self.cursor.execute("""
+                select
+                    Amount
+                from
+                    PenaltyPayments
+                where
+                    LoanId IN (
+                                SELECT
+                                    LoanId
+                                FROM 
+                                    registeredLoans
+                                WHERE
+                                    ActiveStatus = "unfinished" AND 
+                                    LoanId IN  (
+                                                SELECT 
+                                                    LoanId 
+                                                FROM 
+                                                    LoanDetails 
+                                                WHERE 
+                                                    ClientID = %s
+                                            ) 
+                                
+                            )        
+                    
+            """,(clientid,))
+            data = self.cursor.fetchall()
+            return data
+        except Exception as e:
+            return Exception(f"cursor failed to reconnect while fetching clients penalty payment detials:{e}")
+        
     def fetch_ClientsInvestmentDetails(self,AccountNumber):
         try:
             self.reconnect_if_needed()
@@ -3333,6 +3450,48 @@ class BankingDataBase(ConnectToMySql):
             raise Exception(f"error while fetching clients current penalties and overdues:{e}")
         finally:
             self.close_connection()
+
+    def fetch_clients_Total_penaltyoverdueDetails(self,clientId):
+        self.client_id = clientId
+        try:
+            self.reconnect_if_needed()
+            if self.cursor:
+                self.cursor.execute("USE LoanApplications")
+                self.cursor.execute("""
+                    SELECT
+                        TotalOverDue,
+                        TotalPenalty
+                    FROM
+                        TotalPenaltiesAndOverDues
+                    WHERE
+                        LoanId IN (
+                                    SELECT
+                                        LoanId
+                                    FROM 
+                                        registeredLoans
+                                    WHERE
+                                        ActiveStatus = "unfinished" AND 
+                                        LoanId IN  (
+                                                    SELECT 
+                                                        LoanId 
+                                                    FROM 
+                                                        LoanDetails 
+                                                    WHERE 
+                                                        ClientID = %s
+                                                ) 
+                                    
+                                )
+                                    
+                                    
+                """,(self.client_id,))
+        
+                results = self.cursor.fetchone()
+                return {'TotalOverDue':float(results[0]),'TotalPenalty':float(results[1])}
+        except Exception as e:
+            raise Exception(f"error while fetching clients current penalties and overdues:{e}")
+        finally:
+            self.close_connection()
+
 
 
     
@@ -5586,7 +5745,7 @@ class AuthenticationDetails(ConnectToMySql):
 # dept.createDatabase()
 
 
-# banking  = BankingDataBase()
+banking  = BankingDataBase()
 # print(banking.penalties_overdue_trigger())
 # banking.createAccountTable()
 # banking.create_loanApplicationTAbles()
@@ -5594,7 +5753,7 @@ class AuthenticationDetails(ConnectToMySql):
 # banking.Create_disbursement_table()
 # banking.registeredLoans()
 # banking.create_loanBalancingTable()
-# banking.clientloanpaymentsAndInvestmentTable()
+banking.clientloanpaymentsAndInvestmentTable()
 # banking.withdraws()
 
 # # creating a manager section

@@ -214,16 +214,17 @@
                     <table class="table text-white">
                         <thead>
                             <tr>
-                                <th class="me-5"><span class="text-success">Cumulative Principle Paid (Ugx)</span></th>
-                                <th class="me-5"><span class="text-info">Balance</span></th>
-                                <th class="me-5"><span class="text-success">Loan Term Covered (Days)</span></th>
+                                <th class="me-5"><span class="text-success">Principle Paid (Ugx)</span></th>
+                                <th class="me-5"><span class="text-info">Current Portifolio</span></th>
+                                <th class="me-5"><span class="text-info">Penalties Paid</span></th>
+                
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td class="text-success">Ugx <span class="text-success" id="cumlt_value"> </span></td>
                                 <td class="text-info">Ugx <span class="text-info" id="balance"></span></td>
-                                <td><span class="text-success" id="time_covered"> </span> <span class="text-success"> Days</span></td>
+                                <td>Ugx <span class="text-success" id="penaltyPaid"> </span> <span class="text-success"></span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -307,17 +308,53 @@
             })
             
         }
+        async function fetchClientTotalPenaltiesAndOverdue() {
+            return await fetch("/clientpaymentDetails?type=clientTotalpenaltiesOverdue")
+            .then(response =>{
+                if (!response.ok){
+                    throw new Error("server error while fetching client credit details")
+                }
+                return response.json()
+            })
+            .then(data =>{
+                return data
+            })
+            .catch(error =>{
+                console.log(error)
+            })
+            
+        }
 
-        function generateHtml(data, list_of_portifolio) {
+        async function fetchTotalPenaltyPaid() {
+            return await fetch("/clientpaymentDetails?type=penaltypaid")
+            .then(response =>{
+                if (!response.ok){
+                    throw new Error("server error while fetching client credit details")
+                }
+                return response.json()
+            })
+            .then(data =>{
+                return data
+            })
+            .catch(error =>{
+                console.log(error)
+            })
+            
+        }
+
+        function generateHtml(data, list_of_portifolio,total_penalties_paid) {
             let html = "";
             const portifolio_list = list_of_portifolio;
+            var total_penalty = 0
+           
             data.forEach((obj, index) => {
-                const jsonString = encodeURIComponent(JSON.stringify(obj));
-                console.log("Index:", index);
-                console.log("Portfolio:", portifolio_list[index]);
-                console.log("Penalty:", obj["Penalty"]);
-                let current_portifolio = portifolio_list[index] + obj["Penalty"]
-                console.log(current_portifolio)
+                
+                total_penalty += parseFloat(obj['Penalty'])
+                let current_portifolio = parseFloat(portifolio_list[index]) + total_penalty
+                const jsonString = encodeURIComponent(JSON.stringify(
+                    {'Date':obj['Date'],'Paid':obj['Paid'],'Commitment':obj['Commitment'],'Overdue':obj['Overdue'],'Penalty':obj['Penalty'],'portifolio':current_portifolio, 'penalty_paid':total_penalties_paid}
+                ));
+                
                 html += `
                     <tr>
                         <td>${index + 1}</td>
@@ -346,22 +383,27 @@
             data.forEach((payment_obj) =>{
                 portfolio_lists.push(payment_obj['Portifolio'])
             })
-            const penalties_overdue = await fetchClientPenaltiesAndOverdue()
-            const ghtml = generateHtml(penalties_overdue,portfolio_lists);
+            const penalties_overdue = await fetchClientPenaltiesAndOverdue();
+            const total_penalty_OverDue = await fetchClientTotalPenaltiesAndOverdue();
+            const total_penalties_paid = await fetchTotalPenaltyPaid()
+            const ghtml = generateHtml(penalties_overdue,portfolio_lists,total_penalties_paid);
             const stat = statistics(data);
             const lastPayment = data.slice(-1)[0] || {};
 
             document.getElementById("generated_content").innerHTML = ghtml;
             document.getElementById("cumlt_value").innerHTML = stat;
-            document.getElementById("time_covered").innerHTML = data.length;
-            document.getElementById("balance").innerHTML = lastPayment["Portifolio"] || 0;
+            // document.getElementById("time_covered").innerHTML = data.length;
+            document.getElementById("balance").innerHTML = lastPayment["Portifolio"] + parseFloat(total_penalty_OverDue['TotalPenalty'])|| 0;
+            document.getElementById("penaltyPaid").innerHTML = total_penalties_paid['amount']
         }
 
         function showReceipt(paymentStr) {
+           
             
             const payment = JSON.parse(decodeURIComponent(paymentStr));
             
             const date = new Date(payment.date).toLocaleString();
+            console.log(payment.penalty_paid.amount)
             
             const receiptHtml = `
                 <div class="receipt-body" style="width: 58mm; margin: auto; font-size: 11px; padding: 2mm; border: 1px solid #000;">
@@ -372,7 +414,8 @@
                     <p><strong>Amount Paid:</strong> UGX ${payment.Paid}</p>
                     <p><strong>Commitment:</strong> UGX ${payment.Commitment}</p>
                     <p><strong>Over Due:</strong> UGX ${payment.Overdue}</p>
-                    <p><strong>Penalties:</strong> UGX ${payment.Penalty}</p>    
+                    <p><strong>Penalties:</strong> UGX ${payment.Penalty}</p>
+                    <p><strong>Your Balance:</strong> UGX ${payment.portifolio - payment.penalty_paid.amount}</p>    
                     <hr>
                     <div class="text-center small">Thank you for your payment!</div>
                 </div>

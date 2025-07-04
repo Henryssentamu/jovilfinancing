@@ -8,7 +8,7 @@ def run_penalty_overdue_job():
     print("Penalty and overdue job run successfully.")
 
 def start_scheduler():
-    schedule.every().day.at("14:52").do(run_penalty_overdue_job)
+    schedule.every().day.at("10:48").do(run_penalty_overdue_job)
 
     while True:
         schedule.run_pending()
